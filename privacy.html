@@ -5,54 +5,193 @@
   <title>Privacy Policy – Fret Freedom</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-  body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; max-width: 900px; margin: 40px auto; padding: 0 16px; line-height: 1.6; }
-  header { margin-bottom: 24px; }
-  nav a { margin-right: 14px; color: #0b63ff; text-decoration: none; }
-  nav a:hover { text-decoration: underline; }
-  .hero { padding: 16px; border: 1px solid #e5e7eb; border-radius: 10px; background: #fafafa; }
-  .cta { display: inline-block; padding: 10px 16px; border: 1px solid #0b63ff; border-radius: 8px; text-decoration: none; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
-  .card { border: 1px solid #e5e7eb; border-radius: 10px; padding: 16px; }
-  footer { margin-top: 40px; color: #666; font-size: 0.95rem; }
+:root{
+  --brand: #0B63FF; /* adjust to match your exact brand blue */
+  --brand-ink: #0A0F1C;
+  --bg: #ffffff;
+  --muted: #667085;
+  --card: #f7f9ff;
+  --border: #e5e7eb;
+  --radius: 16px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: var(--brand-ink); background: var(--bg); line-height:1.65;
+}
+.wrapper{max-width:1000px;margin:0 auto;padding:24px}
+.topbar{position:sticky; top:0; background:#fff; border-bottom:1px solid var(--border); z-index:10;}
+.nav{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 24px; max-width:1000px; margin:0 auto;}
+.brand{font-weight:800; letter-spacing:.2px; font-size:20px; color:var(--brand); text-decoration:none;}
+.links a{display:inline-block; padding:8px 12px; border-radius:12px; text-decoration:none; color:var(--brand-ink);}
+.links a:hover{background:#f2f6ff}
+.hero{margin-top:16px; background:var(--card); border:1px solid var(--border); border-radius: var(--radius); padding:28px;}
+.hero h1{font-size:42px; line-height:1.15; margin:0 0 10px}
+.hero p.lead{font-size:18px; color:var(--muted); margin:0 0 12px}
+.badges{display:flex; gap:8px; flex-wrap:wrap; margin:16px 0 6px}
+.badge{background:#eef3ff; color:#193277; border:1px solid #dbe6ff; padding:6px 10px; border-radius:999px; font-size:13px}
+.section{margin:28px 0}
+.grid{display:grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap:16px}
+.card{background:#fff; border:1px solid var(--border); border-radius: var(--radius); padding:18px; box-shadow: 0 1px 0 rgba(2,8,20,0.04), 0 1px 2px rgba(2,8,20,0.06);}
+.card h3{margin:0 0 6px}
+.cta-line{margin-top:12px; font-weight:600; color:#193277; background:#f8fbff; padding:10px 14px; border:1px dashed #cfe0ff; border-radius:12px;}
+.footer{margin:40px 0 20px; color:var(--muted); font-size:14px; text-align:center}
+.button{display:inline-block; padding:10px 14px; border-radius:12px; text-decoration:none; color:white; background: var(--brand); border:1px solid #0547bd;}
+ul{margin:10px 0 0 18px}
+label input, label textarea, input, textarea{width:100%; border:1px solid var(--border); border-radius:12px; padding:10px; font:inherit}
 </style>
 </head>
 <body>
-<header>
-  <h1>Privacy Policy</h1>
-  
-  <nav>
-    <a href="index.html">Home</a>
-    <a href="privacy.html">Privacy Policy</a>
-    <a href="tos.html">Terms of Service</a>
-    <a href="support.html">Support</a>
-  </nav>
 
-</header>
+<div class="topbar">
+  <div class="nav">
+    <a class="brand" href="index.html">Fret Freedom</a>
+    <div class="links">
+      <a href="privacy.html">Privacy</a>
+      <a href="tos.html">Terms</a>
+      <a href="support.html">Support</a>
+    </div>
+  </div>
+</div>
 
-<main>
-  <p>This page explains how FretTracks Labs LLC collects, uses, and protects your information in the Fret Freedom app and on this website.</p>
+<div class="wrapper">
+  <section class="card">
+    
+<h1>FretTracks Privacy Policy</h1>
+<p><em>Last Updated: August 21, 2025</em></p>
+<h2>1. Introduction</h2>
+<p>FretTracks ("we," "our," or "us") respects your privacy and is committed to protecting your personal information. This Privacy Policy explains how we collect, use, and safeguard your information when you use the FretTracks mobile application ("App").</p>
+<h2>2. Information We Collect</h2>
+<h3>2.1 Account Information</h3>
+<ul>
+<li><strong>Email Address (Optional):</strong> If you choose to provide an email address, we use it solely for account management and service-related communications.</li>
+<li><strong>User ID:</strong> A unique identifier created for your account to manage your subscription and app preferences.</li>
+</ul>
+<h3>2.2 Usage Analytics</h3>
+<ul>
+<li><strong>App Usage Data:</strong> Anonymous usage statistics about which features, backing tracks, and scales are accessed to improve our service.</li>
+<li><strong>Performance Data:</strong> Anonymous technical data about app performance and crashes to maintain and improve the App.</li>
+<li><strong>Device Information:</strong> Basic device information (iOS version, device model) for compatibility and support purposes.</li>
+</ul>
+<h3>2.3 Subscription Information</h3>
+<ul>
+<li><strong>Purchase Data:</strong> Subscription status and purchase information processed through Apple's App Store (we do not store payment card information).</li>
+</ul>
+<h2>3. How We Use Your Information</h2>
+<h3>3.1 Service Provision</h3>
+<ul>
+<li>Manage your account and subscription</li>
+<li>Provide access to App features and content</li>
+<li>Sync your preferences across devices</li>
+</ul>
+<h3>3.2 Communication</h3>
+<ul>
+<li>Send account-related notifications (subscription status, renewals, etc.)</li>
+<li>Provide customer support when requested</li>
+<li>Send service updates and important App information</li>
+</ul>
+<h3>3.3 App Improvement</h3>
+<ul>
+<li>Analyze anonymous usage patterns to improve content and features</li>
+<li>Monitor app performance and fix technical issues</li>
+<li>Develop new features based on user preferences</li>
+</ul>
+<h2>4. Email Communications and Consent</h2>
+<h3>4.1 Types of Emails</h3>
+<p>With your consent, we may send you:</p>
+<ul>
+<li>Account and subscription management emails</li>
+<li>App updates and new feature announcements</li>
+<li>Educational content related to guitar learning</li>
+<li>Customer support responses</li>
+</ul>
+<h3>4.2 Your Consent and Rights</h3>
+<ul>
+<li><strong>Opt-in Required:</strong> We will only send marketing emails with your explicit consent.</li>
+<li><strong>Easy Unsubscribe:</strong> Every email includes an unsubscribe link.</li>
+<li><strong>Account Emails:</strong> Some account-related emails (subscription confirmations, payment issues) are necessary for service operation.</li>
+<li><strong>Your Choice:</strong> You can opt out of promotional emails while still receiving essential account communications.</li>
+</ul>
+<h3>4.3 CAN-SPAM Compliance</h3>
+<p>We comply with the CAN-SPAM Act by:</p>
+<ul>
+<li>Never using false or misleading header information</li>
+<li>Not using deceptive subject lines</li>
+<li>Clearly identifying promotional messages</li>
+<li>Including our physical address in emails</li>
+<li>Providing easy unsubscribe mechanisms</li>
+<li>Honoring opt-out requests promptly</li>
+</ul>
+<h2>5. Information Sharing and Disclosure</h2>
+<h3>5.1 Third-Party Services</h3>
+<p>We use the following third-party services that may collect information:</p>
+<ul>
+<li><strong>Apple App Store:</strong> Processes subscription payments and provides purchase data</li>
+<li><strong>Firebase (Google):</strong> Provides authentication, analytics, and app infrastructure</li>
+<li><strong>RevenueCat:</strong> Manages subscription status and billing</li>
+</ul>
+<h3>5.2 No Data Sales</h3>
+<p>We do not sell, rent, or trade your personal information to third parties for marketing purposes.</p>
+<h3>5.3 Legal Requirements</h3>
+<p>We may disclose information if required by law, court order, or to protect our rights and the safety of our users.</p>
+<h2>6. Data Storage and Security</h2>
+<h3>6.1 No User-Generated Content Storage</h3>
+<p>We do not store any personal content, files, or user-generated data on our servers.</p>
+<h3>6.2 Data Security</h3>
+<ul>
+<li>All data transmission is encrypted using industry-standard protocols</li>
+<li>We implement appropriate technical and organizational measures to protect your information</li>
+<li>Access to personal data is restricted to authorized personnel only</li>
+</ul>
+<h3>6.3 Data Retention</h3>
+<ul>
+<li><strong>Account Data:</strong> Retained while your account is active and for a reasonable period after account deletion</li>
+<li><strong>Analytics Data:</strong> Anonymous usage data may be retained indefinitely for service improvement</li>
+<li><strong>Email Data:</strong> Email addresses are deleted when you request account deletion</li>
+</ul>
+<h2>7. Your Privacy Rights</h2>
+<h3>7.1 Access and Control</h3>
+<p>You have the right to:</p>
+<ul>
+<li>Access the personal information we have about you</li>
+<li>Correct inaccurate personal information</li>
+<li>Request deletion of your account and associated data</li>
+<li>Opt out of promotional emails</li>
+<li>Data portability (where technically feasible)</li>
+</ul>
+<h3>7.2 California Privacy Rights (CCPA)</h3>
+<p>If you are a California resident, you have additional rights including:</p>
+<ul>
+<li>Right to know what personal information is collected</li>
+<li>Right to delete personal information</li>
+<li>Right to opt-out of the sale of personal information (we do not sell personal information)</li>
+<li>Right to non-discrimination for exercising privacy rights</li>
+</ul>
+<h3>7.3 How to Exercise Your Rights</h3>
+<p>To exercise any of these rights, contact us at <a href="mailto:support@frettracks.com">support@frettracks.com</a> with your request.</p>
+<h2>8. Children's Privacy</h2>
+<p>FretTracks is not intended for children under 13 years of age. We do not knowingly collect personal information from children under 13. If we discover that a child under 13 has provided us with personal information, we will delete such information immediately.</p>
+<h2>9. International Users</h2>
+<p>If you are using our App from outside the United States, please note that your information may be transferred to, stored, and processed in the United States where our servers are located.</p>
+<h2>10. Changes to This Privacy Policy</h2>
+<p>We may update this Privacy Policy from time to time. We will notify you of any changes by:</p>
+<ul>
+<li>Posting the new Privacy Policy in the App</li>
+<li>Sending an email notification (if you have provided an email address)</li>
+<li>Updating the "Last Updated" date at the top of this policy</li>
+</ul>
+<p>Your continued use of the App after any changes constitutes acceptance of the updated Privacy Policy.</p>
+<h2>11. Contact Us</h2>
+<p>If you have any questions about this Privacy Policy or our privacy practices, please contact us at:</p>
+<ul>
+<li><strong>Email:</strong> <a href="mailto:support@frettracks.com">support@frettracks.com</a></li>
+<li><strong>Address:</strong> San Diego, CA, United States</li>
+</ul>
+<p>By using FretTracks, you acknowledge that you have read and understood this Privacy Policy.</p>
 
-  <h2>What we collect</h2>
-  <ul>
-    <li>Basic app analytics to improve stability and features.</li>
-    <li>Support details you share with us if you submit the support form.</li>
-  </ul>
-
-  <h2>How we use information</h2>
-  <ul>
-    <li>To operate and improve the app.</li>
-    <li>To respond to support requests.</li>
-  </ul>
-
-  <h2>Data retention</h2>
-  <p>We keep support messages for as long as needed to resolve issues. Analytics are kept in aggregate form.</p>
-
-  <h2>Contact</h2>
-  <p>Questions about privacy? Contact us via the <a href="support.html">Support</a> page.</p>
-</main>
-
-<footer>
-  <p>© 2025 FretTracks Labs LLC</p>
-</footer>
+  </section>
+  <div class="footer">© 2025 FretTracks Labs LLC</div>
+</div>
 </body>
 </html>

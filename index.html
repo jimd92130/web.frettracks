@@ -2,75 +2,107 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Fret Freedom – Learn Scales. Play Music.</title>
+  <title>Fret Freedom – Learn scales. Play music.</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Fret Freedom helps guitarists learn scales and use them over real chord progressions with built‑in backing tracks." />
+  <meta name="description" content="Fret Freedom helps guitarists learn scales and use them over real chord progressions with integrated backing tracks." />
   <style>
-  body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; max-width: 900px; margin: 40px auto; padding: 0 16px; line-height: 1.6; }
-  header { margin-bottom: 24px; }
-  nav a { margin-right: 14px; color: #0b63ff; text-decoration: none; }
-  nav a:hover { text-decoration: underline; }
-  .hero { padding: 16px; border: 1px solid #e5e7eb; border-radius: 10px; background: #fafafa; }
-  .cta { display: inline-block; padding: 10px 16px; border: 1px solid #0b63ff; border-radius: 8px; text-decoration: none; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
-  .card { border: 1px solid #e5e7eb; border-radius: 10px; padding: 16px; }
-  footer { margin-top: 40px; color: #666; font-size: 0.95rem; }
+:root{
+  --brand: #0B63FF; /* adjust to match your exact brand blue */
+  --brand-ink: #0A0F1C;
+  --bg: #ffffff;
+  --muted: #667085;
+  --card: #f7f9ff;
+  --border: #e5e7eb;
+  --radius: 16px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: var(--brand-ink); background: var(--bg); line-height:1.65;
+}
+.wrapper{max-width:1000px;margin:0 auto;padding:24px}
+.topbar{position:sticky; top:0; background:#fff; border-bottom:1px solid var(--border); z-index:10;}
+.nav{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 24px; max-width:1000px; margin:0 auto;}
+.brand{font-weight:800; letter-spacing:.2px; font-size:20px; color:var(--brand); text-decoration:none;}
+.links a{display:inline-block; padding:8px 12px; border-radius:12px; text-decoration:none; color:var(--brand-ink);}
+.links a:hover{background:#f2f6ff}
+.hero{margin-top:16px; background:var(--card); border:1px solid var(--border); border-radius: var(--radius); padding:28px;}
+.hero h1{font-size:42px; line-height:1.15; margin:0 0 10px}
+.hero p.lead{font-size:18px; color:var(--muted); margin:0 0 12px}
+.badges{display:flex; gap:8px; flex-wrap:wrap; margin:16px 0 6px}
+.badge{background:#eef3ff; color:#193277; border:1px solid #dbe6ff; padding:6px 10px; border-radius:999px; font-size:13px}
+.section{margin:28px 0}
+.grid{display:grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap:16px}
+.card{background:#fff; border:1px solid var(--border); border-radius: var(--radius); padding:18px; box-shadow: 0 1px 0 rgba(2,8,20,0.04), 0 1px 2px rgba(2,8,20,0.06);}
+.card h3{margin:0 0 6px}
+.cta-line{margin-top:12px; font-weight:600; color:#193277; background:#f8fbff; padding:10px 14px; border:1px dashed #cfe0ff; border-radius:12px;}
+.footer{margin:40px 0 20px; color:var(--muted); font-size:14px; text-align:center}
+.button{display:inline-block; padding:10px 14px; border-radius:12px; text-decoration:none; color:white; background: var(--brand); border:1px solid #0547bd;}
+ul{margin:10px 0 0 18px}
+label input, label textarea, input, textarea{width:100%; border:1px solid var(--border); border-radius:12px; padding:10px; font:inherit}
 </style>
 </head>
 <body>
-<header>
-  <h1>Fret Freedom</h1>
-  
-  <nav>
-    <a href="index.html">Home</a>
-    <a href="privacy.html">Privacy Policy</a>
-    <a href="tos.html">Terms of Service</a>
-    <a href="support.html">Support</a>
-  </nav>
 
-</header>
-
-<section class="hero">
-  <h2>Learn scales. Play music.</h2>
-  <p>Fret Freedom bridges the gap between learning scales and using them in real songs. Pick a scale or mode, hear it, see the tab, and jam over chord progressions with high‑quality backing tracks.</p>
-  <p><strong>Focus:</strong> Ionian, Dorian, Phrygian, Lydian, Mixolydian, Aeolian, Locrian, plus Major/Minor Pentatonic and Blues.</p>
-</section>
-
-<section>
-  <h2>What you can do</h2>
-  <div class="grid">
-    <div class="card">
-      <h3>Understand the scale</h3>
-      <p>Clear scale characteristics and tabs so you know what makes each mode unique.</p>
-    </div>
-    <div class="card">
-      <h3>Play over real chords</h3>
-      <p>Chord progressions and vamps that highlight the unique sound of each scale.</p>
-    </div>
-    <div class="card">
-      <h3>Practice with tracks</h3>
-      <p>Quality backing tracks in multiple keys and tempos that loop smoothly.</p>
-    </div>
-    <div class="card">
-      <h3>Stay practical</h3>
-      <p>Straightforward guidance in plain language. No fluff. Learn fast and have fun.</p>
+<div class="topbar">
+  <div class="nav">
+    <a class="brand" href="index.html">Fret Freedom</a>
+    <div class="links">
+      <a href="privacy.html">Privacy</a>
+      <a href="tos.html">Terms</a>
+      <a href="support.html">Support</a>
     </div>
   </div>
-</section>
+</div>
 
-<section>
-  <h2>Availability</h2>
-  <p>The app is in testing and coming soon to the App Store. If you’d like to join the beta or get notified at launch, contact us on the Support page.</p>
-  <p><a class="cta" href="support.html">Contact Support / Join Beta</a></p>
-</section>
+<div class="wrapper">
+  <section class="hero">
+    <h1>Get Your Guitar Playing on Track!</h1>
+    <p class="lead">Learn the scales that matter and use them over real chord progressions with high-quality backing tracks. Stop guessing — start making music.</p>
+    <div class="badges">
+      <span class="badge">500+ Backing Tracks</span>
+      <span class="badge">100+ Guitar Scales</span>
+      <span class="badge">Mode-centric Progressions</span>
+      <span class="badge">Tabs + Audio</span>
+    </div>
+    <div class="cta-line">Start your free trial by downloading the app from the Apple App Store or Google Play.</div>
+  </section>
 
-<section>
-  <h2>About FretTracks Labs LLC</h2>
-  <p>We build tools that help guitarists move from memorizing patterns to making music. Fret Freedom is our flagship app.</p>
-</section>
+  <section class="section">
+    <div class="grid">
+      <div class="card">
+        <h3>Everything you need</h3>
+        <p>Hear the scale, see the tab, and jam over progressions that highlight the mode’s unique sound.</p>
+      </div>
+      <div class="card">
+        <h3>No more random guessing</h3>
+        <p>We explain the why — clear guidance on what makes each mode tick and how to land notes that sing.</p>
+      </div>
+      <div class="card">
+        <h3>Practice that feels musical</h3>
+        <p>Loopable tracks in multiple keys and tempos keep practice focused and fun.</p>
+      </div>
+      <div class="card">
+        <h3>Plain-language teaching</h3>
+        <p>No jargon. Just the essentials, presented simply so you can play more and think less.</p>
+      </div>
+    </div>
+  </section>
 
-<footer>
-  <p>© 2025 FretTracks Labs LLC · <a href="privacy.html">Privacy</a> · <a href="tos.html">Terms</a> · <a href="support.html">Support</a></p>
-</footer>
+  <section class="section card">
+    <h3>What’s inside</h3>
+    <ul>
+      <li>Diatonic modes: Ionian, Dorian, Phrygian, Lydian, Mixolydian, Aeolian, Locrian</li>
+      <li>Pentatonics and Blues, with mode-aware progressions</li>
+      <li>Chord progressions that showcase each scale’s flavor</li>
+      <li>Clean tab diagrams and audio examples</li>
+    </ul>
+  </section>
+
+  <div class="footer">
+    © 2025 FretTracks Labs LLC · <a href="privacy.html">Privacy</a> · <a href="tos.html">Terms</a> · <a href="support.html">Support</a>
+  </div>
+</div>
 </body>
 </html>
