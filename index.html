@@ -6,41 +6,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="Fret Freedom helps guitarists learn scales and use them over real chord progressions with integrated backing tracks." />
   <style>
-:root{
-  --brand: #0B63FF; /* adjust to match your exact brand blue */
-  --brand-ink: #0A0F1C;
-  --bg: #ffffff;
-  --muted: #667085;
-  --card: #f7f9ff;
-  --border: #e5e7eb;
-  --radius: 16px;
-}
+:root{--brand:#0B63FF;--brand-ink:#0A0F1C;--bg:#ffffff;--muted:#667085;--card:#f7f9ff;--border:#e5e7eb;--radius:16px}
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
-body{
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  color: var(--brand-ink); background: var(--bg); line-height:1.65;
-}
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--brand-ink);background:var(--bg);line-height:1.65}
 .wrapper{max-width:1000px;margin:0 auto;padding:24px}
-.topbar{position:sticky; top:0; background:#fff; border-bottom:1px solid var(--border); z-index:10;}
-.nav{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 24px; max-width:1000px; margin:0 auto;}
-.brand{font-weight:800; letter-spacing:.2px; font-size:20px; color:var(--brand); text-decoration:none;}
-.links a{display:inline-block; padding:8px 12px; border-radius:12px; text-decoration:none; color:var(--brand-ink);}
+.topbar{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--border);z-index:10}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 24px;max-width:1000px;margin:0 auto}
+.brand{font-weight:800;letter-spacing:.2px;font-size:20px;color:var(--brand);text-decoration:none}
+.links a{display:inline-block;padding:8px 12px;border-radius:12px;text-decoration:none;color:var(--brand-ink)}
 .links a:hover{background:#f2f6ff}
-.hero{margin-top:16px; background:var(--card); border:1px solid var(--border); border-radius: var(--radius); padding:28px;}
-.hero h1{font-size:42px; line-height:1.15; margin:0 0 10px}
-.hero p.lead{font-size:18px; color:var(--muted); margin:0 0 12px}
-.badges{display:flex; gap:8px; flex-wrap:wrap; margin:16px 0 6px}
-.badge{background:#eef3ff; color:#193277; border:1px solid #dbe6ff; padding:6px 10px; border-radius:999px; font-size:13px}
+.hero{margin-top:16px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:28px}
+.hero h1{font-size:42px;line-height:1.15;margin:0 0 10px}
+.hero p.lead{font-size:18px;color:var(--muted);margin:0 0 12px}
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 6px}
+.badge{background:#eef3ff;color:#193277;border:1px solid #dbe6ff;padding:6px 10px;border-radius:999px;font-size:13px}
 .section{margin:28px 0}
-.grid{display:grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap:16px}
-.card{background:#fff; border:1px solid var(--border); border-radius: var(--radius); padding:18px; box-shadow: 0 1px 0 rgba(2,8,20,0.04), 0 1px 2px rgba(2,8,20,0.06);}
-.card h3{margin:0 0 6px}
-.cta-line{margin-top:12px; font-weight:600; color:#193277; background:#f8fbff; padding:10px 14px; border:1px dashed #cfe0ff; border-radius:12px;}
-.footer{margin:40px 0 20px; color:var(--muted); font-size:14px; text-align:center}
-.button{display:inline-block; padding:10px 14px; border-radius:12px; text-decoration:none; color:white; background: var(--brand); border:1px solid #0547bd;}
-ul{margin:10px 0 0 18px}
-label input, label textarea, input, textarea{width:100%; border:1px solid var(--border); border-radius:12px; padding:10px; font:inherit}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:0 1px 0 rgba(2,8,20,.04),0 1px 2px rgba(2,8,20,.06)}
+.cta-line{margin-top:12px;font-weight:600;color:#193277;background:#f8fbff;padding:10px 14px;border:1px dashed #cfe0ff;border-radius:12px}
+.footer{margin:40px 0 20px;color:var(--muted);font-size:14px;text-align:center}
+.button{display:inline-block;padding:10px 14px;border-radius:12px;text-decoration:none;color:#fff;background:var(--brand);border:1px solid #0547bd}
+.small{color:var(--muted);font-size:14px}
 </style>
 </head>
 <body>
@@ -57,6 +44,9 @@ label input, label textarea, input, textarea{width:100%; border:1px solid var(--
 </div>
 
 <div class="wrapper">
+
+  <div id="supportBanner" class="card" style="display:none; margin-bottom:16px"></div>
+
   <section class="hero">
     <h1>Get Your Guitar Playing on Track!</h1>
     <p class="lead">Learn the scales that matter and use them over real chord progressions with high-quality backing tracks. Stop guessing — start making music.</p>
@@ -104,5 +94,17 @@ label input, label textarea, input, textarea{width:100%; border:1px solid var(--
     © 2025 FretTracks Labs LLC · <a href="privacy.html">Privacy</a> · <a href="tos.html">Terms</a> · <a href="support.html">Support</a>
   </div>
 </div>
+
+<script>
+  // If redirected from support form, show success banner here
+  if (new URLSearchParams(location.search).get('support') === 'sent') {
+    var box = document.getElementById('supportBanner');
+    box.style.display = 'block';
+    box.innerHTML = '<strong>Thanks!</strong> Your support request was sent. We usually respond within 1–2 business days.';
+    // Clean URL after display
+    history.replaceState(null, '', location.pathname);
+  }
+</script>
+
 </body>
 </html>
