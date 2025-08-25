@@ -2,109 +2,146 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Fret Freedom – Learn scales. Play music.</title>
+  <title>FretTracks – Learn scales. Play music.</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Fret Freedom helps guitarists learn scales and use them over real chord progressions with integrated backing tracks." />
+  <meta name="description" content="FretTracks helps guitarists learn scales and use them over real chord progressions with integrated backing tracks." />
   <style>
-:root{--brand:#0B63FF;--brand-ink:#0A0F1C;--bg:#ffffff;--muted:#667085;--card:#f7f9ff;--border:#e5e7eb;--radius:16px}
+:root{
+  --brand:#0B63FF;
+  --brand-dark:#0A2C6E; /* headings and accents */
+  --ink:#0A0F1C;
+  --muted:#667085;
+  --panel:#F6F8FF;
+  --panel-2:#F1F5FF;
+  --bg1:#EEF3FF;
+  --bg2:#FDFEFF;
+  --border:#E1E6F3;
+  --radius:18px;
+  --shadow:0 1px 2px rgba(9,30,66,.08), 0 2px 8px rgba(9,30,66,.06);
+}
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
-body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--brand-ink);background:var(--bg);line-height:1.65}
-.wrapper{max-width:1000px;margin:0 auto;padding:24px}
-.topbar{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--border);z-index:10}
-.nav{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 24px;max-width:1000px;margin:0 auto}
-.brand{font-weight:800;letter-spacing:.2px;font-size:20px;color:var(--brand);text-decoration:none}
-.links a{display:inline-block;padding:8px 12px;border-radius:12px;text-decoration:none;color:var(--brand-ink)}
-.links a:hover{background:#f2f6ff}
-.hero{margin-top:16px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:28px}
-.hero h1{font-size:42px;line-height:1.15;margin:0 0 10px}
-.hero p.lead{font-size:18px;color:var(--muted);margin:0 0 12px}
-.badges{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 6px}
-.badge{background:#eef3ff;color:#193277;border:1px solid #dbe6ff;padding:6px 10px;border-radius:999px;font-size:13px}
-.section{margin:28px 0}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
-.card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:0 1px 0 rgba(2,8,20,.04),0 1px 2px rgba(2,8,20,.06)}
-.cta-line{margin-top:12px;font-weight:600;color:#193277;background:#f8fbff;padding:10px 14px;border:1px dashed #cfe0ff;border-radius:12px}
-.footer{margin:40px 0 20px;color:var(--muted);font-size:14px;text-align:center}
-.button{display:inline-block;padding:10px 14px;border-radius:12px;text-decoration:none;color:#fff;background:var(--brand);border:1px solid #0547bd}
+body{
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  color:var(--ink); 
+  background: radial-gradient(1200px 600px at 20% -10%, var(--bg1), transparent) ,
+              radial-gradient(900px 500px at 120% 10%, #EAF0FF, transparent) ,
+              var(--bg2);
+  line-height:1.7;
+}
+h1,h2,h3,h4{color:var(--brand-dark); letter-spacing:.2px}
+.container{max-width:1150px;margin:0 auto;padding:28px}
+.topbar{position:sticky;top:0;background:#fffbd;z-index:20}
+.nav-wrap{background:#fff;border-bottom:1px solid var(--border);box-shadow:0 1px 0 rgba(2,8,20,.03)}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 24px;max-width:1150px;margin:0 auto}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none}
+.brand img{width:36px;height:36px;border-radius:10px;box-shadow:var(--shadow)}
+.brand .title{font-weight:800;color:var(--brand-dark);font-size:20px}
+.links a{display:inline-block;padding:8px 12px;border-radius:12px;text-decoration:none;color:var(--ink)}
+.links a:hover{background:#E9F0FF}
+.hero{
+  margin-top:18px;background:var(--panel);border:1px solid var(--border);
+  border-radius:var(--radius);padding:32px;box-shadow:var(--shadow)
+}
+.hero h1{font-size:44px;line-height:1.1;margin:0 0 12px}
+.lead{font-size:18px;color:var(--muted);margin:0 0 16px}
+.badges{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+.badge{background:#E1EAFF;border:1px solid #CFE0FF;color:#14306B;padding:6px 12px;border-radius:999px;font-size:13px}
+.callout{margin-top:14px;background:#fff;border:1px dashed #CFE0FF;padding:12px 14px;border-radius:12px;font-weight:600;color:#17326B}
+/* Feature cards grid: 3 per row on large screens */
+.grid{display:grid;gap:16px;margin:28px 0}
+@media (min-width:1024px){.grid{grid-template-columns:repeat(3,1fr)}}
+@media (min-width:700px) and (max-width:1023px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:699px){.grid{grid-template-columns:1fr}}
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+.section{margin:24px 0}
+.footer{margin:40px 0 24px;text-align:center;color:var(--muted);font-size:14px}
+/* Form */
+form{max-width:760px}
+form .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:760px){form .row{grid-template-columns:1fr}}
+input, select, textarea{
+  width:100%; padding:13px 14px; border:1px solid var(--border); border-radius:12px;
+  font-size:16px; outline:none; background:#fff;
+}
+input:focus, select:focus, textarea:focus{border-color:#93B5FF; box-shadow:0 0 0 3px rgba(11,99,255,.12)}
+label{font-weight:600; display:block; margin:6px 0 6px}
+.button{display:inline-block;padding:12px 16px;border-radius:12px;text-decoration:none;background:var(--brand);color:#fff;border:1px solid #0547bd;font-weight:700}
 .small{color:var(--muted);font-size:14px}
+.notice{display:none;margin-bottom:16px}
+.notice.show{display:block}
+.prose{max-width:850px}
+.prose p{margin:12px 0}
 </style>
 </head>
 <body>
 
 <div class="topbar">
-  <div class="nav">
-    <a class="brand" href="index.html">Fret Freedom</a>
-    <div class="links">
-      <a href="privacy.html">Privacy</a>
-      <a href="tos.html">Terms</a>
-      <a href="support.html">Support</a>
+  <div class="nav-wrap">
+    <div class="nav">
+      <a class="brand" href="index.html">
+        <img src="logo.png" alt="FretTracks logo">
+        <span class="title">FretTracks</span>
+      </a>
+      <div class="links">
+        <a href="privacy.html">Privacy</a>
+        <a href="tos.html">Terms</a>
+        <a href="support.html">Support</a>
+      </div>
     </div>
   </div>
 </div>
 
-<div class="wrapper">
+<div class="container">
 
-  <div id="supportBanner" class="card" style="display:none; margin-bottom:16px"></div>
+  <div id="supportBanner" class="card notice"></div>
 
   <section class="hero">
     <h1>Get Your Guitar Playing on Track!</h1>
-    <p class="lead">Learn the scales that matter and use them over real chord progressions with high-quality backing tracks. Stop guessing — start making music.</p>
+    <p class="lead">Learn the scales that matter and use them over real chord progressions with high‑quality backing tracks. Stop guessing — start making music.</p>
     <div class="badges">
       <span class="badge">500+ Backing Tracks</span>
       <span class="badge">100+ Guitar Scales</span>
-      <span class="badge">Mode-centric Progressions</span>
-      <span class="badge">Tabs + Audio</span>
+      <span class="badge">Mode‑centric Progressions</span>
     </div>
-    <div class="cta-line">Start your free trial by downloading the app from the Apple App Store or Google Play.</div>
+    <div class="callout">FretTracks is a <strong>mobile app</strong> (not a web app). To start your free trial, open the App Store or Google Play on your phone and search for <strong>“FretTracks”</strong>.</div>
   </section>
 
-  <section class="section">
-    <div class="grid">
-      <div class="card">
-        <h3>Everything you need</h3>
-        <p>Hear the scale, see the tab, and jam over progressions that highlight the mode’s unique sound.</p>
-      </div>
-      <div class="card">
-        <h3>No more random guessing</h3>
-        <p>We explain the why — clear guidance on what makes each mode tick and how to land notes that sing.</p>
-      </div>
-      <div class="card">
-        <h3>Practice that feels musical</h3>
-        <p>Loopable tracks in multiple keys and tempos keep practice focused and fun.</p>
-      </div>
-      <div class="card">
-        <h3>Plain-language teaching</h3>
-        <p>No jargon. Just the essentials, presented simply so you can play more and think less.</p>
-      </div>
+  <section class="grid">
+    <div class="card">
+      <h3>Everything you need</h3>
+      <p>Hear the scale, see the tab, and jam over progressions that highlight each mode’s unique sound.</p>
+    </div>
+    <div class="card">
+      <h3>No more random guessing</h3>
+      <p>We explain the why — clear guidance on what makes each mode tick and how to land notes that sing.</p>
+    </div>
+    <div class="card">
+      <h3>Practice that feels musical</h3>
+      <p>Loopable tracks in multiple keys and tempos keep practice focused and fun.</p>
     </div>
   </section>
 
-  <section class="section card">
+  <div class="card prose">
     <h3>What’s inside</h3>
     <ul>
       <li>Diatonic modes: Ionian, Dorian, Phrygian, Lydian, Mixolydian, Aeolian, Locrian</li>
-      <li>Pentatonics and Blues, with mode-aware progressions</li>
+      <li>Pentatonics and Blues, with mode‑aware progressions</li>
       <li>Chord progressions that showcase each scale’s flavor</li>
       <li>Clean tab diagrams and audio examples</li>
     </ul>
-  </section>
-
-  <div class="footer">
-    © 2025 FretTracks Labs LLC · <a href="privacy.html">Privacy</a> · <a href="tos.html">Terms</a> · <a href="support.html">Support</a>
   </div>
+
+  <div class="footer">© 2025 FretTracks Labs LLC · <a href="privacy.html">Privacy</a> · <a href="tos.html">Terms</a> · <a href="support.html">Support</a></div>
 </div>
 
 <script>
-  // If redirected from support form, show success banner here
   if (new URLSearchParams(location.search).get('support') === 'sent') {
-    var box = document.getElementById('supportBanner');
-    box.style.display = 'block';
-    box.innerHTML = '<strong>Thanks!</strong> Your support request was sent. We usually respond within 1–2 business days.';
-    // Clean URL after display
-    history.replaceState(null, '', location.pathname);
+    const n = document.getElementById('supportBanner');
+    n.classList.add('show');
+    n.innerHTML = '<strong>Thanks!</strong> Your support request was sent. We usually respond within 1–2 business days.';
+    history.replaceState(null,'',location.pathname);
   }
 </script>
-
 </body>
 </html>

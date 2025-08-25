@@ -2,182 +2,190 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Terms of Service – Fret Freedom</title>
+  <title>Terms of Service – FretTracks</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
 :root{
-  --brand: #0B63FF; /* adjust to match your exact brand blue */
-  --brand-ink: #0A0F1C;
-  --bg: #ffffff;
-  --muted: #667085;
-  --card: #f7f9ff;
-  --border: #e5e7eb;
-  --radius: 16px;
+  --brand:#0B63FF;
+  --brand-dark:#0A2C6E;
+  --ink:#0A0F1C;
+  --muted:#667085;
+  --panel:#F6F8FF;
+  --panel-2:#F1F5FF;
+  --bg1:#EEF3FF;
+  --bg2:#FDFEFF;
+  --border:#E1E6F3;
+  --radius:18px;
+  --shadow:0 1px 2px rgba(9,30,66,.08), 0 2px 8px rgba(9,30,66,.06);
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
 body{
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  color: var(--brand-ink); background: var(--bg); line-height:1.65;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  color:var(--ink); 
+  background: radial-gradient(1200px 600px at 20% -10%, var(--bg1), transparent) ,
+              radial-gradient(900px 500px at 120% 10%, #EAF0FF, transparent) ,
+              var(--bg2);
+  line-height:1.7;
 }
-.wrapper{max-width:1000px;margin:0 auto;padding:24px}
-.topbar{position:sticky; top:0; background:#fff; border-bottom:1px solid var(--border); z-index:10;}
-.nav{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 24px; max-width:1000px; margin:0 auto;}
-.brand{font-weight:800; letter-spacing:.2px; font-size:20px; color:var(--brand); text-decoration:none;}
-.links a{display:inline-block; padding:8px 12px; border-radius:12px; text-decoration:none; color:var(--brand-ink);}
-.links a:hover{background:#f2f6ff}
-.hero{margin-top:16px; background:var(--card); border:1px solid var(--border); border-radius: var(--radius); padding:28px;}
-.hero h1{font-size:42px; line-height:1.15; margin:0 0 10px}
-.hero p.lead{font-size:18px; color:var(--muted); margin:0 0 12px}
-.badges{display:flex; gap:8px; flex-wrap:wrap; margin:16px 0 6px}
-.badge{background:#eef3ff; color:#193277; border:1px solid #dbe6ff; padding:6px 10px; border-radius:999px; font-size:13px}
-.section{margin:28px 0}
-.grid{display:grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap:16px}
-.card{background:#fff; border:1px solid var(--border); border-radius: var(--radius); padding:18px; box-shadow: 0 1px 0 rgba(2,8,20,0.04), 0 1px 2px rgba(2,8,20,0.06);}
-.card h3{margin:0 0 6px}
-.cta-line{margin-top:12px; font-weight:600; color:#193277; background:#f8fbff; padding:10px 14px; border:1px dashed #cfe0ff; border-radius:12px;}
-.footer{margin:40px 0 20px; color:var(--muted); font-size:14px; text-align:center}
-.button{display:inline-block; padding:10px 14px; border-radius:12px; text-decoration:none; color:white; background: var(--brand); border:1px solid #0547bd;}
-ul{margin:10px 0 0 18px}
-label input, label textarea, input, textarea{width:100%; border:1px solid var(--border); border-radius:12px; padding:10px; font:inherit}
+h1,h2,h3,h4{color:var(--brand-dark); letter-spacing:.2px}
+.container{max-width:1150px;margin:0 auto;padding:28px}
+.topbar{position:sticky;top:0;background:#fffbd;z-index:20}
+.nav-wrap{background:#fff;border-bottom:1px solid var(--border);box-shadow:0 1px 0 rgba(2,8,20,.03)}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 24px;max-width:1150px;margin:0 auto}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none}
+.brand img{width:36px;height:36px;border-radius:10px;box-shadow:var(--shadow)}
+.brand .title{font-weight:800;color:var(--brand-dark);font-size:20px}
+.links a{display:inline-block;padding:8px 12px;border-radius:12px;text-decoration:none;color:var(--ink)}
+.links a:hover{background:#E9F0FF}
+.hero{margin-top:18px;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow)}
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+.footer{margin:40px 0 24px;text-align:center;color:var(--muted);font-size:14px}
+.prose{max-width:850px}
+.prose p{margin:12px 0}
 </style>
 </head>
 <body>
 
 <div class="topbar">
-  <div class="nav">
-    <a class="brand" href="index.html">Fret Freedom</a>
-    <div class="links">
-      <a href="privacy.html">Privacy</a>
-      <a href="tos.html">Terms</a>
-      <a href="support.html">Support</a>
+  <div class="nav-wrap">
+    <div class="nav">
+      <a class="brand" href="index.html">
+        <img src="logo.png" alt="FretTracks logo">
+        <span class="title">FretTracks</span>
+      </a>
+      <div class="links">
+        <a href="privacy.html">Privacy</a>
+        <a href="tos.html">Terms</a>
+        <a href="support.html">Support</a>
+      </div>
     </div>
   </div>
 </div>
 
-<div class="wrapper">
-  <section class="card">
-    
-<h1>FretTracks Terms of Service</h1>
-<p><em>Last Updated: August 21, 2025</em></p>
-<h2>1. Acceptance of Terms</h2>
-<p>By downloading, installing, or using the FretTracks mobile application ("App"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, do not use the App.</p>
-<h2>2. Service Description</h2>
-<p>FretTracks is a guitar learning application that provides access to guitar scales, backing tracks, tabs, and educational content to help users improve their guitar playing skills.</p>
-<h3>2.1 Technical Requirements</h3>
-<ul>
-<li>A compatible iOS device</li>
-<li>Active internet connection required for most features</li>
-<li>Sufficient device storage for temporary content caching</li>
-<li>Current version of iOS as supported by the App Store</li>
-</ul>
-<h2>3. Subscription Terms</h2>
-<h3>3.1 Free Trial</h3>
-<ul>
-<li>New users may be eligible for a 7-day free trial</li>
-<li>No payment will be charged during the trial period</li>
-<li>You may cancel at any time during the trial without charge</li>
-<li>If you do not cancel before the trial ends, your subscription will automatically convert to a paid monthly subscription</li>
-</ul>
-<h3>3.2 Monthly Subscription</h3>
-<ul>
-<li>Monthly subscriptions are billed in advance on a recurring basis</li>
-<li>Payment will be charged to your Apple ID account upon confirmation of purchase</li>
-<li>Subscriptions automatically renew unless auto-renew is turned off at least 24 hours before the end of the current period</li>
-<li>Your account will be charged for renewal within 24 hours prior to the end of the current period</li>
-<li>You can manage and cancel your subscription through your Apple ID Account Settings</li>
-</ul>
-<h3>3.3 Service Availability</h3>
-<ul>
-<li>We commit to providing the FretTracks service for the duration of your active subscription period</li>
-<li>Service is provided "as is" and we make no guarantees regarding uninterrupted access</li>
-<li>We reserve the right to modify features or content within the App</li>
-</ul>
-<h2>4. Intellectual Property and Usage Rights</h2>
-<h3>4.1 Copyright Protection</h3>
-<p>All content within the FretTracks App, including but not limited to:</p>
-<ul>
-<li>Audio files and backing tracks</li>
-<li>Musical compositions and arrangements</li>
-<li>Guitar tabs and notation</li>
-<li>Images, graphics, and visual content</li>
-<li>Educational materials and text</li>
-</ul>
-<p>...is protected by copyright and other intellectual property laws and is owned by or licensed to FretTracks.</p>
-<h3>4.2 Personal Use License</h3>
-<p>Your subscription grants you a limited, non-exclusive, non-transferable license to:</p>
-<ul>
-<li>Access and use the App content solely for your personal educational purposes</li>
-<li>Stream and temporarily download content for offline use within the App only</li>
-</ul>
-<h3>4.3 Prohibited Uses</h3>
-<p>You may NOT:</p>
-<ul>
-<li>Share, distribute, or publicly perform any content from the App</li>
-<li>Copy, download, or extract audio files, backing tracks, or other content outside the App</li>
-<li>Use any content for commercial purposes</li>
-<li>Post, upload, or share any App content on social media, websites, or other platforms</li>
-<li>Create derivative works based on App content</li>
-<li>Reverse engineer, modify, or attempt to extract source materials</li>
-<li>Allow others to access your account or share your subscription</li>
-</ul>
-<h3>4.4 Copyright Enforcement</h3>
-<p>Violation of these usage restrictions may result in:</p>
-<ul>
-<li>Immediate termination of your subscription without refund</li>
-<li>Legal action for copyright infringement</li>
-<li>Claims for damages and attorney fees</li>
-</ul>
-<h2>5. Account Terms</h2>
-<h3>5.1 Account Responsibility</h3>
-<ul>
-<li>You are responsible for maintaining the confidentiality of your account</li>
-<li>You are responsible for all activities that occur under your account</li>
-<li>You must immediately notify us of any unauthorized use of your account</li>
-</ul>
-<h3>5.2 Account Termination</h3>
-<p>We reserve the right to suspend or terminate your account if you:</p>
-<ul>
-<li>Violate these Terms of Service</li>
-<li>Engage in prohibited uses of App content</li>
-<li>Provide false or misleading information</li>
-<li>Engage in any activity that could harm the App or other users</li>
-</ul>
-<h2>6. Refunds and Cancellations</h2>
-<h3>6.1 Apple's Refund Policy</h3>
-<ul>
-<li>All purchases are processed through Apple's App Store</li>
-<li>Refund requests must be made through Apple's standard refund process</li>
-<li>We do not directly process refunds for App Store purchases</li>
-<li>Cancellation of subscriptions must be done through your Apple ID Account Settings</li>
-</ul>
-<h3>6.2 No Refunds for Violations</h3>
-<p>No refunds will be provided for accounts terminated due to Terms of Service violations.</p>
-<h2>7. Disclaimers and Limitation of Liability</h2>
-<h3>7.1 Service Disclaimer</h3>
-<ul>
-<li>The App is provided "as is" without warranties of any kind</li>
-<li>We do not guarantee that the service will be uninterrupted or error-free</li>
-<li>We do not warrant that the App will meet your specific requirements</li>
-</ul>
-<h3>7.2 Limitation of Liability</h3>
-<p>To the maximum extent permitted by law:</p>
-<ul>
-<li>Our total liability shall not exceed the amount you paid for your subscription in the 12 months preceding the claim</li>
-<li>We shall not be liable for any indirect, incidental, special, or consequential damages</li>
-<li>We shall not be liable for any loss of profits, data, or business opportunities</li>
-</ul>
-<h2>8. Privacy</h2>
-<p>Your privacy is important to us. Please review our Privacy Policy, which also governs your use of the App, to understand our practices.</p>
-<h2>9. Changes to Terms</h2>
-<p>We reserve the right to modify these Terms at any time. We will notify users of any material changes through the App or via email. Your continued use of the App after such modifications constitutes acceptance of the updated Terms.</p>
-<h2>10. Governing Law</h2>
-<p>These Terms shall be governed by and construed in accordance with the laws of the State of California, United States, without regard to its conflict of law provisions.</p>
-<h2>11. Contact Information</h2>
-<p>If you have any questions about these Terms of Service, please contact us at <a href="mailto:support@frettracks.com">support@frettracks.com</a>.</p>
-<p>By using FretTracks, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service.</p>
+<div class="container">
+  <header class="hero">
+    <h1>Terms of Service</h1>
+    <p class="prose">The rules and conditions for using FretTracks.</p>
+  </header>
 
-  </section>
+  <main class="card prose" style="margin-top:16px">
+    <article>
+      <p>This page is live on frettracks-terms.notion.site View site Site settings
+FretTracks Terms of Service 
+ August 21, 2025 Last Updated:
+1. Acceptance of Terms
+By downloading, installing, or using the FretTracks mobile application (&quot;App&quot;), you agree 
+to be bound by these Terms of Service (&quot;Terms&quot;). If you do not agree to these Terms, do 
+not use the App.
+2. Service Description
+FretTracks is a guitar learning application that provides access to guitar scales, backing 
+tracks, tabs, and educational content to help users improve their guitar playing skills.
+2.1 Technical Requirements
+•A compatible iOS device
+•Active internet connection required for most features
+•Sufficient device storage for temporary content caching
+•Current version of iOS as supported by the App Store
+3. Subscription Terms
+3.1 Free Trial
+•New users may be eligible for a 7-day free trial
+•No payment will be charged during the trial period
+•You may cancel at any time during the trial without charge
+•If you do not cancel before the trial ends, your subscription will automatically 
+convert to a paid monthly subscription
+3.2 Monthly Subscription
+•Monthly subscriptions are billed in advance on a recurring basis
+•Payment will be charged to your Apple ID account upon confirmation of purchase
+•Subscriptions automatically renew unless auto-renew is turned off at least 24 hours 
+before the end of the current period
+•Your account will be charged for renewal within 24 hours prior to the end of the 
+current period
+•You can manage and cancel your subscription through your Apple ID Account 
+Settings
+3.3 Service Availability
+•We commit to providing the FretTracks service for the duration of your active 
+subscription period
+•Service is provided &quot;as is&quot; and we make no guarantees regarding uninterrupted 
+access
+•We reserve the right to modify features or content within the App
+4. Intellectual Property and Usage Rights
+4.1 Copyright Protection
+All content within the FretTracks App, including but not limited to:
+•Audio files and backing tracks
+•Musical compositions and arrangements
+•Guitar tabs and notation
+•Images, graphics, and visual content
+•Educational materials and text
+...is protected by copyright and other intellectual property laws and is owned by or 
+licensed to FretTracks.
+4.2 Personal Use License
+Your subscription grants you a limited, non-exclusive, non-transferable license to:
+•Access and use the App content solely for your personal educational purposes
+•Stream and temporarily download content for offline use within the App only
+4.3 Prohibited Uses
+You may NOT:
+•Share, distribute, or publicly perform any content from the App
+•Copy, download, or extract audio files, backing tracks, or other content outside the 
+App
+•Use any content for commercial purposes
+•Post, upload, or share any App content on social media, websites, or other platforms
+•Create derivative works based on App content
+•Reverse engineer, modify, or attempt to extract source materials
+•Allow others to access your account or share your subscription
+4.4 Copyright Enforcement
+Violation of these usage restrictions may result in:
+•Immediate termination of your subscription without refund
+•Legal action for copyright infringement
+•Claims for damages and attorney fees
+5. Account Terms
+5.1 Account Responsibility
+•You are responsible for maintaining the confidentiality of your account
+•You are responsible for all activities that occur under your account
+•You must immediately notify us of any unauthorized use of your account
+5.2 Account Termination
+We reserve the right to suspend or terminate your account if you:
+•Violate these Terms of Service
+•Engage in prohibited uses of App content
+•Provide false or misleading information
+•Engage in any activity that could harm the App or other users
+6. Refunds and Cancellations
+6.1 Apple&#x27;s Refund Policy
+•All purchases are processed through Apple&#x27;s App Store
+•Refund requests must be made through Apple&#x27;s standard refund process
+•We do not directly process refunds for App Store purchases
+•Cancellation of subscriptions must be done through your Apple ID Account Settings
+6.2 No Refunds for Violations
+No refunds will be provided for accounts terminated due to Terms of Service violations.
+7. Disclaimers and Limitation of Liability
+7.1 Service Disclaimer
+•The App is provided &quot;as is&quot; without warranties of any kind
+•We do not guarantee that the service will be uninterrupted or error-free
+•We do not warrant that the App will meet your specific requirements
+7.2 Limitation of Liability
+To the maximum extent permitted by law:
+•Our total liability shall not exceed the amount you paid for your subscription in the 
+12 months preceding the claim
+•We shall not be liable for any indirect, incidental, special, or consequential damages
+•We shall not be liable for any loss of profits, data, or business opportunities
+8. Privacy
+Your privacy is important to us. Please review our Privacy Policy, which also governs your 
+use of the App, to understand our practices.
+9. Changes to Terms
+We reserve the right to modify these Terms at any time. We will notify users of any 
+material changes through the App or via email. Your continued use of the App after such 
+modifications constitutes acceptance of the updated Terms.
+10. Governing Law
+These Terms shall be governed by and construed in accordance with the laws of the 
+State of California, United States, without regard to its conflict of law provisions.
+11. Contact Information
+If you have any questions about these Terms of Service, please contact us at:
+ support@frettracks.com Email:
+ FretTracks App:
+By using FretTracks, you acknowledge that you have read, understood, and agree to be 
+bound by these Terms of Service.</p>
+    </article>
+  </main>
+
   <div class="footer">© 2025 FretTracks Labs LLC</div>
 </div>
 </body>
