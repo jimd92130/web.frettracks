@@ -78,48 +78,6 @@ label{font-weight:600; display:block; margin:6px 0 6px}
 .notice.show{display:block}
 .prose{max-width:850px}
 .prose p{margin:12px 0}
-
-/* User ID Banner */
-.user-id-banner {
-  background: linear-gradient(135deg, #E1EAFF 0%, #F1F5FF 100%);
-  border: 2px solid var(--brand);
-  border-radius: var(--radius);
-  padding: 18px 22px;
-  margin-bottom: 24px;
-  box-shadow: var(--shadow);
-  display: none; /* Hidden by default */
-}
-.user-id-banner.show {
-  display: block;
-}
-.user-id-banner strong {
-  color: var(--brand-dark);
-  font-size: 17px;
-  display: block;
-  margin-bottom: 8px;
-}
-.user-id-value {
-  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--brand);
-  background: #fff;
-  padding: 10px 16px;
-  border-radius: 10px;
-  display: inline-block;
-  border: 1px solid #CFE0FF;
-  letter-spacing: 2px;
-}
-.user-id-instructions {
-  margin-top: 12px;
-  font-size: 15px;
-  color: var(--ink);
-  line-height: 1.5;
-}
-.user-id-instructions::before {
-  content: "📋 ";
-  font-size: 18px;
-}
 </style>
 </head>
 <body>
@@ -142,17 +100,6 @@ label{font-weight:600; display:block; margin:6px 0 6px}
 
 <div class="container">
 
-  <!-- USER ID BANNER (auto-populated from URL) -->
-  <div id="userIdBanner" class="user-id-banner">
-    <strong>Your User ID (last 5 digits):</strong>
-    <div>
-      <span id="userId" class="user-id-value"></span>
-    </div>
-    <div class="user-id-instructions">
-      Please include this ID in your support message below. It helps us quickly locate your account and assist you faster.
-    </div>
-  </div>
-
   <section class="card prose">
     <h1>Support</h1>
     <p>Having trouble with the app? We're here to help.</p>
@@ -161,7 +108,7 @@ label{font-weight:600; display:block; margin:6px 0 6px}
       <input type="hidden" name="_subject" value="FretTracks Support Request">
       <input type="hidden" name="_next" value="https://frettracks.com/?support=sent">
       
-      <!-- Hidden User ID field (auto-populated) -->
+      <!-- Hidden User ID field (auto-populated from URL) -->
       <input type="hidden" id="hiddenUserId" name="user_id" value="">
 
       <!-- Honeypot -->
@@ -206,38 +153,21 @@ label{font-weight:600; display:block; margin:6px 0 6px}
 </div>
 
 <script>
-  // Extract user ID from URL query parameter
-  function getUserIdFromUrl() {
+  // Extract user ID from URL query parameter and auto-populate hidden field
+  (function() {
     const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('uid');
-  }
-
-  // Display user ID if present
-  const userId = getUserIdFromUrl();
-  
-  if (userId) {
-    // Show the banner
-    const banner = document.getElementById('userIdBanner');
-    if (banner) {
-      banner.classList.add('show');
-    }
+    const userId = urlParams.get('uid');
     
-    // Display the user ID
-    const userIdElement = document.getElementById('userId');
-    if (userIdElement) {
-      userIdElement.textContent = userId;
+    if (userId) {
+      const hiddenField = document.getElementById('hiddenUserId');
+      if (hiddenField) {
+        hiddenField.value = userId;
+        console.log('✅ User ID captured:', userId);
+      }
+    } else {
+      console.log('ℹ️ No user ID in URL');
     }
-    
-    // Auto-populate hidden form field
-    const hiddenField = document.getElementById('hiddenUserId');
-    if (hiddenField) {
-      hiddenField.value = userId;
-    }
-    
-    console.log('✅ User ID received:', userId);
-  } else {
-    console.log('ℹ️ No user ID provided in URL');
-  }
+  })();
 </script>
 
 </body>
