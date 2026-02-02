@@ -175,6 +175,28 @@
       border-top: 1px solid #e5e7eb;
     }
 
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #10b981;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
     .error-box {
       background: #fee;
       border: 2px solid #fcc;
@@ -200,11 +222,12 @@
 
     function copyPromoCode() {
       const cleanCode = promoCode.trim().toUpperCase();
-      const btn = document.getElementById('copyCodeBtn');
+      const btn = document.getElementById('inlineCodeBtn');
       
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(cleanCode).then(() => {
           showCopySuccess(btn);
+          showToast('✓ Code copied!');
         }).catch(() => {
           fallbackCopy(cleanCode, btn);
         });
@@ -250,17 +273,54 @@
       textArea.value = text;
       textArea.style.position = 'fixed';
       textArea.style.left = '-999999px';
+      textArea.style.top = '0';
       document.body.appendChild(textArea);
+      textArea.focus();
       textArea.select();
       
       try {
-        document.execCommand('copy');
-        showCopySuccess(button);
+        const successful = document.execCommand('copy');
+        if (successful) {
+          showCopySuccess(button);
+          showToast('✓ Code copied!');
+        } else {
+          showToast('Tap and hold the code to copy', true);
+        }
       } catch (err) {
-        alert('Please copy manually (long-press the code)');
+        showToast('Tap and hold the code to copy', true);
       }
       
       document.body.removeChild(textArea);
+    }
+
+    function showToast(message, isError = false) {
+      // Remove any existing toast
+      const existingToast = document.querySelector('.toast');
+      if (existingToast) {
+        existingToast.remove();
+      }
+
+      // Create new toast
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      if (isError) {
+        toast.style.background = '#ef4444';
+      }
+      toast.textContent = message;
+      document.body.appendChild(toast);
+
+      // Trigger animation
+      setTimeout(() => {
+        toast.classList.add('show');
+      }, 10);
+
+      // Remove after 2.5 seconds
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+          toast.remove();
+        }, 300);
+      }, 2500);
     }
 
     if (!promoCode) {
