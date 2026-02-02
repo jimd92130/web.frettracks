@@ -63,6 +63,13 @@
       margin-bottom: 10px;
     }
 
+    .duration {
+      color: #10b981;
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 15px;
+    }
+
     .subtitle {
       color: #666;
       font-size: 16px;
@@ -214,9 +221,10 @@
   </div>
 
   <script>
-    // Parse URL parameter
+    // Parse URL parameters
     const urlParams = new URLSearchParams(window.location.search);
     const promoCode = urlParams.get('code');
+    const durationMonths = parseInt(urlParams.get('months')) || 1; // Default to 1 month
 
     const APP_STORE_URL = 'https://apps.apple.com/us/app/frettracks/id6747992581';
 
@@ -335,10 +343,12 @@
     } else {
       // Show promo code and instructions
       const cleanCode = promoCode.trim().toUpperCase();
+      const durationText = durationMonths === 1 ? '1 Month Free' : `${durationMonths} Months Free`;
       
       document.getElementById('content').innerHTML = `
         <img src="/logo.png" alt="FretTracks" class="logo">
         <h1>Your Free FretTracks Access!</h1>
+        <div class="duration">${durationText}</div>
         <p class="subtitle">Learn lead guitar fast with interactive backing tracks and animated fretboard scales.</p>
 
         <div class="instructions">
