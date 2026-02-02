@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Get FretTracks</title>
+  <title>Your FretTracks Promo Code</title>
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="/favicon.png">
@@ -11,79 +11,350 @@
   <!-- Open Graph / iMessage / Social Preview -->
   <meta property="og:title" content="FretTracks - Learn Lead Guitar Fast">
   <meta property="og:description" content="Master lead guitar with interactive backing tracks and real-time fretboard visualization">
-  <meta property="og:image" content="https://frettracks-18991.web.app/share.png">
+  <meta property="og:image" content="https://frettracks.com/share.png">
   <meta property="og:image:width" content="1024">
   <meta property="og:image:height" content="1024">
-  <meta property="og:url" content="https://frettracks-18991.web.app/get">
+  <meta property="og:url" content="https://frettracks.com/app-store.html">
   <meta property="og:type" content="website">
 
-  <!-- Twitter (helps some preview engines) -->
+  <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="FretTracks - Learn Lead Guitar Fast">
   <meta name="twitter:description" content="Master lead guitar with interactive backing tracks">
-  <meta name="twitter:image" content="https://frettracks-18991.web.app/share.png">
-
-  <!-- Scraper friendly redirect (do not set to 0) -->
-  <meta http-equiv="refresh" content="1;url=https://apps.apple.com/us/app/frettracks/id6747992581">
-
-  <script>
-    // JS fallback redirect
-    setTimeout(function () {
-      window.location.href = "https://apps.apple.com/us/app/frettracks/id6747992581";
-    }, 800);
-  </script>
+  <meta name="twitter:image" content="https://frettracks.com/share.png">
 
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      min-height: 100vh;
-      margin: 0;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      text-align: center;
       padding: 20px;
     }
+
     .container {
-      max-width: 420px;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      padding: 40px;
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
     }
-    img {
-      width: 140px;
-      height: 140px;
-      margin-bottom: 20px;
+
+    .logo {
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 20px;
       border-radius: 22px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
     }
+
     h1 {
-      font-size: 26px;
+      color: #333;
+      font-size: 28px;
       margin-bottom: 10px;
     }
-    p {
+
+    .subtitle {
+      color: #666;
       font-size: 16px;
-      opacity: 0.9;
-      margin-bottom: 22px;
+      margin-bottom: 30px;
     }
-    a {
+
+    .promo-code-box {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+    }
+
+    .promo-label {
+      font-size: 14px;
+      opacity: 0.9;
+      margin-bottom: 5px;
+    }
+
+    .promo-code-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 5px;
+    }
+
+    .promo-code {
+      font-size: 32px;
+      font-weight: bold;
+      letter-spacing: 2px;
+    }
+
+    .copy-code-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 20px;
+    }
+
+    .copy-code-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.05);
+    }
+
+    .copy-code-btn:active {
+      transform: scale(0.95);
+    }
+
+    .copy-code-btn.copied {
+      background: rgba(16, 185, 129, 0.3);
+      border-color: rgba(16, 185, 129, 0.5);
+    }
+
+    .promo-duration {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .instructions {
+      background: #f9fafb;
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 25px;
+      text-align: left;
+    }
+
+    .instructions h2 {
+      color: #333;
+      font-size: 18px;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .step {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 15px;
+    }
+
+    .step:last-child {
+      margin-bottom: 0;
+    }
+
+    .step-number {
+      background: #667eea;
+      color: white;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 14px;
+      flex-shrink: 0;
+      margin-right: 12px;
+      margin-top: 2px;
+    }
+
+    .step-text {
+      color: #333;
+      font-size: 15px;
+      line-height: 1.5;
+      flex: 1;
+    }
+
+    .download-btn {
       display: inline-block;
-      background: white;
-      color: #667eea;
-      padding: 14px 26px;
-      border-radius: 10px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 16px 40px;
+      border-radius: 12px;
       text-decoration: none;
       font-weight: 600;
+      font-size: 18px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .download-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .download-btn:active {
+      transform: translateY(0);
+    }
+
+    .note {
+      color: #666;
+      font-size: 13px;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .error-box {
+      background: #fee;
+      border: 2px solid #fcc;
+      border-radius: 12px;
+      padding: 20px;
+      color: #c33;
+      margin-bottom: 20px;
     }
   </style>
 </head>
 
 <body>
-  <div class="container">
-    <img src="/share.png" alt="FretTracks">
-    <h1>FretTracks</h1>
-    <p>Opening the App Store...</p>
-    <a href="https://apps.apple.com/us/app/frettracks/id6747992581">
-      Open in App Store
-    </a>
+  <div class="container" id="content">
+    <!-- Content will be inserted here by JavaScript -->
   </div>
+
+  <script>
+    // Parse URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const promoCode = urlParams.get('code');
+
+    const APP_STORE_URL = 'https://apps.apple.com/us/app/frettracks/id6747992581';
+
+    function copyPromoCode() {
+      const cleanCode = promoCode.trim().toUpperCase();
+      const btn = document.getElementById('copyCodeBtn');
+      
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(cleanCode).then(() => {
+          showCopySuccess(btn);
+        }).catch(() => {
+          fallbackCopy(cleanCode, btn);
+        });
+      } else {
+        fallbackCopy(cleanCode, btn);
+      }
+    }
+
+    function showCopySuccess(button) {
+      button.classList.add('copied');
+      button.textContent = '✓';
+      
+      if (navigator.vibrate) {
+        navigator.vibrate(50);
+      }
+      
+      try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.value = 800;
+        gainNode.gain.value = 0.05;
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.1);
+      } catch (e) {
+        // Beep not supported
+      }
+      
+      setTimeout(() => {
+        button.classList.remove('copied');
+        button.innerHTML = '📋';
+      }, 2000);
+    }
+
+    function fallbackCopy(text, button) {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.select();
+      
+      try {
+        document.execCommand('copy');
+        showCopySuccess(button);
+      } catch (err) {
+        alert('Please copy manually (long-press the code)');
+      }
+      
+      document.body.removeChild(textArea);
+    }
+
+    if (!promoCode) {
+      // No code provided
+      document.getElementById('content').innerHTML = `
+        <div class="error-box">
+          <h1>Missing Promo Code</h1>
+          <p style="margin-top: 10px;">This link appears to be incomplete. Please check the link you received and try again.</p>
+        </div>
+        <a href="${APP_STORE_URL}" class="download-btn">Visit App Store Anyway</a>
+      `;
+    } else {
+      // Show promo code and instructions
+      const cleanCode = promoCode.trim().toUpperCase();
+      
+      document.getElementById('content').innerHTML = `
+        <div class="logo">🎸</div>
+        <h1>Your Free FretTracks Access!</h1>
+        <p class="subtitle">Learn lead guitar fast with interactive backing tracks</p>
+
+        <div class="promo-code-box">
+          <div class="promo-label">Your Promo Code</div>
+          <div class="promo-code-container">
+            <div class="promo-code">${cleanCode}</div>
+            <button class="copy-code-btn" id="copyCodeBtn" onclick="copyPromoCode()">📋</button>
+          </div>
+          <div class="promo-duration">Free access included</div>
+        </div>
+
+        <div class="instructions">
+          <h2>How to Redeem</h2>
+          
+          <div class="step">
+            <div class="step-number">1</div>
+            <div class="step-text">Download FretTracks from the App Store</div>
+          </div>
+
+          <div class="step">
+            <div class="step-number">2</div>
+            <div class="step-text">Open the app and go to the <strong>Account</strong> tab at the bottom</div>
+          </div>
+
+          <div class="step">
+            <div class="step-number">3</div>
+            <div class="step-text">Scroll down and enter your code: <strong>${cleanCode}</strong></div>
+          </div>
+        </div>
+
+        <a href="${APP_STORE_URL}" class="download-btn">Download App</a>
+
+        <div class="note">
+          That's it! No auto-renew or charges.<br>
+          Enjoy learning lead guitar!
+        </div>
+      `;
+    }
+  </script>
 </body>
 </html>
