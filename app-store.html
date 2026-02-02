@@ -55,11 +55,6 @@
       height: 100px;
       margin: 0 auto 20px;
       border-radius: 22px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 48px;
     }
 
     h1 {
@@ -74,74 +69,40 @@
       margin-bottom: 30px;
     }
 
-    .promo-code-box {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 20px;
-      border-radius: 12px;
-      margin-bottom: 30px;
-    }
-
-    .promo-label {
-      font-size: 14px;
-      opacity: 0.9;
-      margin-bottom: 5px;
-    }
-
-    .promo-code-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      margin-bottom: 5px;
-    }
-
-    .promo-code {
-      font-size: 32px;
-      font-weight: bold;
-      letter-spacing: 2px;
-    }
-
-    .copy-code-btn {
-      background: rgba(255, 255, 255, 0.2);
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      color: white;
-      width: 44px;
-      height: 44px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-size: 20px;
-    }
-
-    .copy-code-btn:hover {
-      background: rgba(255, 255, 255, 0.3);
-      transform: scale(1.05);
-    }
-
-    .copy-code-btn:active {
-      transform: scale(0.95);
-    }
-
-    .copy-code-btn.copied {
-      background: rgba(16, 185, 129, 0.3);
-      border-color: rgba(16, 185, 129, 0.5);
-    }
-
-    .promo-duration {
-      font-size: 14px;
-      opacity: 0.9;
-    }
-
     .instructions {
       background: #f9fafb;
       border-radius: 12px;
       padding: 25px;
       margin-bottom: 25px;
       text-align: left;
+    }
+
+    .code-copy-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .code-copy-inline:hover {
+      transform: scale(1.02);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .code-copy-inline:active {
+      transform: scale(0.98);
+    }
+
+    .code-copy-inline.copied {
+      background: #10b981;
     }
 
     .instructions h2 {
@@ -253,8 +214,9 @@
     }
 
     function showCopySuccess(button) {
+      const cleanCode = promoCode.trim().toUpperCase();
       button.classList.add('copied');
-      button.textContent = '✓';
+      button.textContent = cleanCode + ' ✓';
       
       if (navigator.vibrate) {
         navigator.vibrate(50);
@@ -269,7 +231,7 @@
         gainNode.connect(audioContext.destination);
         
         oscillator.frequency.value = 800;
-        gainNode.gain.value = 0.05;
+        gainNode.gain.value = 0.01; // Reduced from 0.05 (80% quieter)
         
         oscillator.start(audioContext.currentTime);
         oscillator.stop(audioContext.currentTime + 0.1);
@@ -279,7 +241,7 @@
       
       setTimeout(() => {
         button.classList.remove('copied');
-        button.innerHTML = '📋';
+        button.textContent = cleanCode + ' 📋';
       }, 2000);
     }
 
@@ -315,35 +277,26 @@
       const cleanCode = promoCode.trim().toUpperCase();
       
       document.getElementById('content').innerHTML = `
-        <div class="logo">🎸</div>
+        <img src="/logo.png" alt="FretTracks" class="logo">
         <h1>Your Free FretTracks Access!</h1>
         <p class="subtitle">Learn lead guitar fast with interactive backing tracks</p>
-
-        <div class="promo-code-box">
-          <div class="promo-label">Your Promo Code</div>
-          <div class="promo-code-container">
-            <div class="promo-code">${cleanCode}</div>
-            <button class="copy-code-btn" id="copyCodeBtn" onclick="copyPromoCode()">📋</button>
-          </div>
-          <div class="promo-duration">Free access included</div>
-        </div>
 
         <div class="instructions">
           <h2>How to Redeem</h2>
           
           <div class="step">
             <div class="step-number">1</div>
-            <div class="step-text">Download FretTracks from the App Store</div>
+            <div class="step-text">Copy your code: <span class="code-copy-inline" id="inlineCodeBtn" onclick="copyPromoCode()">${cleanCode} 📋</span></div>
           </div>
 
           <div class="step">
             <div class="step-number">2</div>
-            <div class="step-text">Open the app and go to the <strong>Account</strong> tab at the bottom</div>
+            <div class="step-text">Download the app using the button below</div>
           </div>
 
           <div class="step">
             <div class="step-number">3</div>
-            <div class="step-text">Scroll down and enter your code: <strong>${cleanCode}</strong></div>
+            <div class="step-text">In the app, click the <strong>Account</strong> tab at the bottom, click the promo code box and paste or enter your code</div>
           </div>
         </div>
 
