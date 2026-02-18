@@ -227,6 +227,7 @@
   <script>
     const urlParams = new URLSearchParams(window.location.search);
     const promoCode = urlParams.get('code');
+    const maxUses = parseInt(urlParams.get('uses')) || 1;
 
     const APP_STORE_URL = 'https://apps.apple.com/us/app/frettracks/id6747992581';
 
@@ -341,11 +342,11 @@
 
           <div class="step">
             <div class="step-number">3</div>
-            <div class="step-text">In the app, tap <strong>Tracks</strong> at the bottom. Below the trial button, tap <strong>Enter Promo Code</strong> and paste your code.<br><span style="font-size:13px; color:#999; margin-top:6px; display:block;">Already registered? Go to the Account screen to enter your code instead.</span></div>
+            <div class="step-text">In the app, tap <strong>Tracks</strong> at the bottom. Below the trial button, tap <strong>Enter Promo Code</strong> and paste your code.<br><span style="font-size:13px; color:#555; margin-top:6px; display:block;">Already registered? Go to the Account screen to enter your code instead.</span></div>
           </div>
         </div>
 
-        <p style="color: #666; font-size: 15px; margin: 20px 0;">To share this with other guitar players, forward the original message you received.</p>
+        ${maxUses > 1 ? '<p style="color: #666; font-size: 15px; margin: 20px 0;">To share this with other guitar players, forward the original message you received.</p>' : ''}
 
         <a href="${APP_STORE_URL}" class="download-btn">Download App</a>
 
