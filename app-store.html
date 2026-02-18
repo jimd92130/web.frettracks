@@ -87,29 +87,33 @@
     .code-copy-inline {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 8px 12px;
-      border-radius: 8px;
-      font-weight: bold;
-      letter-spacing: 1px;
-      font-size: 16px;
+      gap: 6px;
+      background: transparent;
+      color: #667eea;
+      border: 1.5px solid #667eea;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      font-size: 15px;
       cursor: pointer;
       transition: all 0.2s;
+      white-space: nowrap;
+      vertical-align: middle;
     }
 
     .code-copy-inline:hover {
-      transform: scale(1.02);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+      background: rgba(102, 126, 234, 0.08);
     }
 
     .code-copy-inline:active {
-      transform: scale(0.98);
+      transform: scale(0.97);
     }
 
     .code-copy-inline.copied {
-      background: #10b981;
+      color: #10b981;
+      border-color: #10b981;
+      background: rgba(16, 185, 129, 0.07);
     }
 
     .instructions h2 {
@@ -221,17 +225,15 @@
   </div>
 
   <script>
-    // Parse URL parameters
     const urlParams = new URLSearchParams(window.location.search);
     const promoCode = urlParams.get('code');
-    const durationMonths = parseInt(urlParams.get('months')) || 1; // Default to 1 month
 
     const APP_STORE_URL = 'https://apps.apple.com/us/app/frettracks/id6747992581';
 
     function copyPromoCode() {
       const cleanCode = promoCode.trim().toUpperCase();
       const btn = document.getElementById('inlineCodeBtn');
-      
+
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(cleanCode).then(() => {
           showCopySuccess(btn);
@@ -247,32 +249,25 @@
     function showCopySuccess(button) {
       const cleanCode = promoCode.trim().toUpperCase();
       button.classList.add('copied');
-      button.textContent = cleanCode + ' ✓';
-      
-      if (navigator.vibrate) {
-        navigator.vibrate(50);
-      }
-      
+      button.innerHTML = cleanCode + ' <span style="font-size:13px;">✓</span>';
+
+      if (navigator.vibrate) navigator.vibrate(50);
+
       try {
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
         const oscillator = audioContext.createOscillator();
         const gainNode = audioContext.createGain();
-        
         oscillator.connect(gainNode);
         gainNode.connect(audioContext.destination);
-        
         oscillator.frequency.value = 800;
-        gainNode.gain.value = 0.01; // Reduced from 0.05 (80% quieter)
-        
+        gainNode.gain.value = 0.01;
         oscillator.start(audioContext.currentTime);
         oscillator.stop(audioContext.currentTime + 0.1);
-      } catch (e) {
-        // Beep not supported
-      }
-      
+      } catch (e) {}
+
       setTimeout(() => {
         button.classList.remove('copied');
-        button.textContent = cleanCode + ' 📋';
+        button.innerHTML = cleanCode + ' <span style="font-size:12px;">📋</span>';
       }, 2000);
     }
 
@@ -285,7 +280,6 @@
       document.body.appendChild(textArea);
       textArea.focus();
       textArea.select();
-      
       try {
         const successful = document.execCommand('copy');
         if (successful) {
@@ -297,42 +291,25 @@
       } catch (err) {
         showToast('Tap and hold the code to copy', true);
       }
-      
       document.body.removeChild(textArea);
     }
 
     function showToast(message, isError = false) {
-      // Remove any existing toast
       const existingToast = document.querySelector('.toast');
-      if (existingToast) {
-        existingToast.remove();
-      }
-
-      // Create new toast
+      if (existingToast) existingToast.remove();
       const toast = document.createElement('div');
       toast.className = 'toast';
-      if (isError) {
-        toast.style.background = '#ef4444';
-      }
+      if (isError) toast.style.background = '#ef4444';
       toast.textContent = message;
       document.body.appendChild(toast);
-
-      // Trigger animation
-      setTimeout(() => {
-        toast.classList.add('show');
-      }, 10);
-
-      // Remove after 2.5 seconds
+      setTimeout(() => toast.classList.add('show'), 10);
       setTimeout(() => {
         toast.classList.remove('show');
-        setTimeout(() => {
-          toast.remove();
-        }, 300);
+        setTimeout(() => toast.remove(), 300);
       }, 2500);
     }
 
     if (!promoCode) {
-      // No code provided
       document.getElementById('content').innerHTML = `
         <div class="error-box">
           <h1>Missing Promo Code</h1>
@@ -341,22 +318,20 @@
         <a href="${APP_STORE_URL}" class="download-btn">Visit App Store Anyway</a>
       `;
     } else {
-      // Show promo code and instructions
       const cleanCode = promoCode.trim().toUpperCase();
-      const durationText = durationMonths === 1 ? '1 Month Free' : `${durationMonths} Months Free`;
-      
+
       document.getElementById('content').innerHTML = `
         <img src="/logo.png" alt="FretTracks" class="logo">
         <h1>FretTracks Promo Code</h1>
-        <div class="duration">${durationText}</div>
+        <div class="duration">Free Trial Extended!</div>
         <p class="subtitle">500+ backing tracks let you learn to play lead guitar with the band!</p>
 
         <div class="instructions">
           <h2>How to Redeem</h2>
-          
+
           <div class="step">
             <div class="step-number">1</div>
-            <div class="step-text">Tap the code below to copy it. <span class="code-copy-inline" id="inlineCodeBtn" onclick="copyPromoCode()">${cleanCode} 📋</span></div>
+            <div class="step-text">Tap the code below to copy it. <span class="code-copy-inline" id="inlineCodeBtn" onclick="copyPromoCode()">${cleanCode} <span style="font-size:12px;">📋</span></span></div>
           </div>
 
           <div class="step">
