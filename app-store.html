@@ -228,6 +228,9 @@
     const urlParams = new URLSearchParams(window.location.search);
     const promoCode = urlParams.get('code');
     const maxUses = parseInt(urlParams.get('uses')) || 1;
+    const durRaw = urlParams.get('dur') || '';
+    const durationMonths = durRaw.length > 0 ? parseInt(durRaw[0]) : 1;
+    const monthLabel = durationMonths > 1 ? `${durationMonths}-Month` : '1-Month';
 
     const APP_STORE_URL = 'https://apps.apple.com/us/app/frettracks/id6747992581';
 
@@ -323,7 +326,7 @@
 
       document.getElementById('content').innerHTML = `
         <img src="/logo.png" alt="FretTracks" class="logo">
-        <h1>FretTracks Promo Code</h1>
+        <h1>${monthLabel} Free FretTracks Promo Code</h1>
         <p class="subtitle">Learn lead guitar or write melodies with perfectly matched scales and backing tracks.</p>
 
         <div class="instructions">
