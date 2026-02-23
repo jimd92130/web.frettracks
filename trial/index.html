@@ -74,8 +74,8 @@
     }
 
     .trial-line {
-      font-size: 14px;
-      font-weight: 500;
+      font-size: 21px;
+      font-weight: 600;
       color: var(--primary);
       margin-bottom: 16px;
       letter-spacing: 0.01em;
@@ -87,24 +87,34 @@
       line-height: 1.65;
       margin-bottom: 20px;
       font-weight: 400;
+      text-align: left;
     }
 
-    .pills {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
+    .bullets {
+      list-style: none;
       margin-bottom: 32px;
-      flex-wrap: wrap;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
 
-    .pill {
-      background: #EEF4FC;
-      color: var(--primary-dark);
-      font-size: 13px;
-      font-weight: 600;
-      padding: 6px 14px;
-      border-radius: 100px;
-      border: 1px solid #C8DEFA;
+    .bullets li {
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .bullets li::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--primary);
+      flex-shrink: 0;
     }
 
     .cta-btn {
@@ -162,16 +172,17 @@
     <p class="trial-line">Try free for 30 days.</p>
 
     <p class="tagline">
-      FretTracks helps intermediate guitarists stop practicing scales in isolation and start making music — over real backing tracks, in real keys, right now.
+      FretTracks helps intermediate guitarists stop practicing scales in isolation and start making music over backing tracks that put you in the band. You might surprise yourself.
     </p>
 
-    <div class="pills">
-      <span class="pill">Dozens of scales</span>
-      <span class="pill">Hundreds of backing tracks</span>
-    </div>
+    <ul class="bullets">
+      <li>Dozens of scales</li>
+      <li>Hundreds of backing tracks</li>
+      <li>Blues, Rock, Country, Jazz and more</li>
+    </ul>
 
     <a class="cta-btn" href="https://apps.apple.com/app/frettracks/id6747992581" target="_blank">
-      Get FretTracks on the App Store
+      View on the App Store
     </a>
 
     <p class="fine-print">
