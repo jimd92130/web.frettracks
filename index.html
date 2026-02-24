@@ -12,7 +12,6 @@
   --brand-dark:#3A7BC8;
   --ink:#212121;
   --muted:#667085;
-  --panel:#F6F7F9;
   --bg:#F6F7F9;
   --surface:#FFFFFF;
   --border:#E0E0E0;
@@ -27,84 +26,102 @@ body{
   background:var(--bg);
   line-height:1.7;
 }
-h1,h2,h3,h4{color:var(--ink); letter-spacing:.2px}
-.container{max-width:1150px;margin:0 auto;padding:28px 28px}
-.nav-wrap{background:#fff;border-bottom:1px solid var(--border);box-shadow:0 1px 0 rgba(2,8,20,.03);position:sticky;top:0;z-index:20}
-.nav{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 28px;max-width:1150px;margin:0 auto}
-.brand{display:flex;align-items:center;gap:12px;text-decoration:none}
-.brand img{width:54px;height:54px;border-radius:10px;box-shadow:var(--shadow)}
-.brand .title{font-weight:800;color:var(--ink);font-size:30px}
-.links{display:flex;align-items:center;gap:4px}
-.links a{display:inline-block;padding:8px 12px;border-radius:12px;text-decoration:none;color:var(--ink);font-size:15px}
+h1,h2,h3,h4{color:var(--ink);letter-spacing:.2px}
+
+/* NAV */
+.nav-wrap{background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;max-width:1150px;margin:0 auto;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
+.brand .pick{width:40px;height:40px;border-radius:9px;box-shadow:var(--shadow)}
+.brand .wordmark{height:28px;width:auto}
+
+/* Hamburger */
+.hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:4px}
+.hamburger span{display:block;width:24px;height:2px;background:var(--ink);border-radius:2px;transition:all 0.2s}
+
+.links{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.links a{display:inline-block;padding:7px 11px;border-radius:10px;text-decoration:none;color:var(--ink);font-size:15px;white-space:nowrap}
 .links a:hover{background:#E9F0FF}
-.links a.trial-link{background:var(--brand);color:#fff;font-weight:700;padding:8px 16px}
-.links a.trial-link:hover{background:var(--brand-dark)}
 
-.hero{
-  margin-top:24px;background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--radius);padding:40px 36px;box-shadow:var(--shadow)
+/* Mobile nav */
+@media(max-width:600px){
+  .hamburger{display:flex}
+  .links{
+    display:none;flex-direction:column;align-items:flex-start;
+    position:absolute;top:62px;left:0;right:0;
+    background:#fff;border-bottom:1px solid var(--border);
+    padding:8px 16px 16px;gap:2px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.08);
+  }
+  .links.open{display:flex}
+  .links a{width:100%;padding:10px 12px;font-size:16px}
 }
-.hero h1{font-size:42px;line-height:1.15;margin:0 0 14px;color:var(--ink)}
-.hero h1 span{color:var(--brand)}
-.lead{font-size:18px;color:var(--muted);margin:0 0 20px;max-width:680px}
-.badges{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
-.badge{background:#EEF4FC;border:1px solid #C8DEFA;color:#3A7BC8;padding:6px 14px;border-radius:999px;font-size:13px;font-weight:600}
 
-.hero-cta-row{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-top:24px}
+/* CONTAINER */
+.container{max-width:1150px;margin:0 auto;padding:20px 20px}
+
+/* HERO */
+.hero{
+  margin-top:20px;background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:36px 32px;box-shadow:var(--shadow)
+}
+.hero h1{font-size:clamp(28px,5vw,42px);line-height:1.15;margin:0 0 14px}
+.hero h1 span{color:var(--brand)}
+.lead{font-size:clamp(15px,2vw,18px);color:var(--muted);margin:0 0 20px;max-width:680px}
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}
+.badge{background:#EEF4FC;border:1px solid #C8DEFA;color:#3A7BC8;padding:5px 12px;border-radius:999px;font-size:13px;font-weight:600}
+.hero-cta-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:24px}
 .hero-cta{
-  display:inline-block;padding:15px 28px;
+  display:inline-block;padding:14px 24px;
   background:var(--brand);color:#fff;border-radius:12px;
-  text-decoration:none;font-weight:700;font-size:17px;
+  text-decoration:none;font-weight:700;font-size:16px;
   box-shadow:0 4px 14px rgba(74,144,226,0.35);
-  transition:background 0.18s ease, transform 0.18s ease
+  transition:background 0.18s,transform 0.18s;
+  white-space:nowrap;
 }
 .hero-cta:hover{background:var(--brand-dark);transform:translateY(-1px)}
-.app-store-badge img{height:44px;display:block}
+.app-store-badge img{height:42px;display:block}
+.app-note{margin-top:14px;font-size:13px;color:var(--muted)}
 
-.app-note{
-  margin-top:16px;
-  font-size:13px;
-  color:var(--muted);
-  display:flex;
-  align-items:center;
-  gap:6px;
-}
-.app-note::before{
-  content:'📱';
-  font-size:14px;
-}
+/* GRID */
+.grid{display:grid;gap:16px;margin:24px 0}
+@media(min-width:1024px){.grid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:640px) and (max-width:1023px){.grid{grid-template-columns:repeat(2,1fr)}}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow)}
+.card h3{margin:0 0 8px;font-size:17px}
+.card p{margin:0;color:var(--muted);font-size:14px}
 
-.grid{display:grid;gap:16px;margin:28px 0}
-@media (min-width:1024px){.grid{grid-template-columns:repeat(3,1fr)}}
-@media (min-width:700px) and (max-width:1023px){.grid{grid-template-columns:repeat(2,1fr)}}
-@media (max-width:699px){.grid{grid-template-columns:1fr}}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow)}
-.card h3{margin:0 0 8px;font-size:18px}
-.card p{margin:0;color:var(--muted);font-size:15px}
-
-.includes-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px 32px;box-shadow:var(--shadow)}
-.includes-card h3{margin:0 0 14px}
+/* INCLUDES */
+.includes-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:26px 28px;box-shadow:var(--shadow)}
+.includes-card h3{margin:0 0 12px}
 .includes-card ul{margin:0;padding-left:20px;color:var(--muted);font-size:15px}
 .includes-card ul li{margin-bottom:6px}
 
+/* CTA BAND */
 .cta-band{
-  margin:32px 0;background:var(--brand);border-radius:var(--radius);
-  padding:36px 32px;text-align:center;color:#fff
+  margin:28px 0;background:var(--brand);border-radius:var(--radius);
+  padding:32px 28px;text-align:center;color:#fff
 }
-.cta-band h2{color:#fff;font-size:28px;margin:0 0 10px}
-.cta-band p{color:rgba(255,255,255,0.85);margin:0 0 20px;font-size:16px}
+.cta-band h2{color:#fff;font-size:clamp(20px,3vw,28px);margin:0 0 10px}
+.cta-band p{color:rgba(255,255,255,0.85);margin:0 0 20px;font-size:15px}
 .cta-band-buttons{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap}
 .cta-band a.main{
-  display:inline-block;padding:14px 28px;background:#fff;
+  display:inline-block;padding:13px 26px;background:#fff;
   color:var(--brand);border-radius:12px;text-decoration:none;
-  font-weight:700;font-size:16px;
-  transition:transform 0.18s ease
+  font-weight:700;font-size:15px;transition:transform 0.18s;white-space:nowrap;
 }
 .cta-band a.main:hover{transform:translateY(-1px)}
-.cta-band .app-store-badge img{height:42px;display:block}
+.cta-band .app-store-badge img{height:40px;display:block}
 
-.footer{margin:40px 0 24px;text-align:center;color:var(--muted);font-size:14px}
+/* FOOTER */
+.footer{margin:36px 0 20px;text-align:center;color:var(--muted);font-size:14px}
 .footer a{color:var(--muted);text-decoration:underline}
+
+@media(max-width:480px){
+  .hero{padding:24px 20px}
+  .hero-cta-row{flex-direction:column;align-items:flex-start}
+  .cta-band{padding:24px 20px}
+}
 </style>
 </head>
 <body>
@@ -112,9 +129,12 @@ h1,h2,h3,h4{color:var(--ink); letter-spacing:.2px}
 <div class="nav-wrap">
   <div class="nav">
     <a class="brand" href="index.html">
-      <img src="logo.png" alt="FretTracks logo" style="width:44px;height:44px;border-radius:10px;box-shadow:var(--shadow);">
-      <img src="/trial/frettracks.png" alt="FretTracks" style="height:36px;width:auto;border-radius:0;box-shadow:none;">
+      <img class="pick" src="logo.png" alt="FretTracks logo">
+      <img class="wordmark" src="/trial/frettracks.png" alt="FretTracks">
     </a>
+    <button class="hamburger" onclick="document.querySelector('.links').classList.toggle('open')" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
     <div class="links">
       <a href="privacy.html">Privacy</a>
       <a href="tos.html">Terms</a>
@@ -141,7 +161,7 @@ h1,h2,h3,h4{color:var(--ink); letter-spacing:.2px}
         <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download on the App Store">
       </a>
     </div>
-    <p class="app-note">FretTracks is an iPhone &amp; iPad app — download it free from the App Store.</p>
+    <p class="app-note">📱 FretTracks is an iPhone &amp; iPad app — download it free from the App Store.</p>
   </section>
 
   <section class="grid">
