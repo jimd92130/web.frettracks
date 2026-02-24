@@ -3,147 +3,185 @@
 <head>
   <link rel="icon" href="/favicon.png" type="image/png" sizes="32x32" />
   <meta charset="utf-8" />
-  <title>FretTracks – Learn to Jam</title>
+  <title>FretTracks – Play Lead Guitar With a Band</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="FretTracks helps guitarists learn scales and use them over real chord progressions with integrated backing tracks." />
+  <meta name="description" content="FretTracks helps intermediate guitarists move past scale drills to start making music over real backing tracks." />
   <style>
 :root{
-  --brand:#0B63FF;
-  --brand-dark:#0A2C6E; /* headings and accents */
-  --ink:#0A0F1C;
+  --brand:#4A90E2;
+  --brand-dark:#3A7BC8;
+  --ink:#212121;
   --muted:#667085;
-  --panel:#F6F8FF;
-  --panel-2:#F1F5FF;
-  --bg1:#EEF3FF;
-  --bg2:#FDFEFF;
-  --border:#E1E6F3;
+  --panel:#F6F7F9;
+  --bg:#F6F7F9;
+  --surface:#FFFFFF;
+  --border:#E0E0E0;
   --radius:18px;
   --shadow:0 1px 2px rgba(9,30,66,.08), 0 2px 8px rgba(9,30,66,.06);
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
 body{
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-  color:var(--ink); 
-  background: radial-gradient(1200px 600px at 20% -10%, var(--bg1), transparent) ,
-              radial-gradient(900px 500px at 120% 10%, #EAF0FF, transparent) ,
-              var(--bg2);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  color:var(--ink);
+  background:var(--bg);
   line-height:1.7;
 }
-h1,h2,h3,h4{color:var(--brand-dark); letter-spacing:.2px}
-.container { max-width:1150px;margin:0 auto;padding:28px 28px; }
-.topbar{position:sticky;top:0;background:#fffbd;z-index:20}
-.nav-wrap{background:#fff;border-bottom:1px solid var(--border);box-shadow:0 1px 0 rgba(2,8,20,.03)}
-.nav { display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 28px;max-width:1150px;margin:0 auto; }
+h1,h2,h3,h4{color:var(--ink); letter-spacing:.2px}
+.container{max-width:1150px;margin:0 auto;padding:28px 28px}
+.nav-wrap{background:#fff;border-bottom:1px solid var(--border);box-shadow:0 1px 0 rgba(2,8,20,.03);position:sticky;top:0;z-index:20}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 28px;max-width:1150px;margin:0 auto}
 .brand{display:flex;align-items:center;gap:12px;text-decoration:none}
 .brand img{width:54px;height:54px;border-radius:10px;box-shadow:var(--shadow)}
-.brand .title{font-weight:800;color:var(--brand-dark);font-size:30px}
-.links a{display:inline-block;padding:8px 12px;border-radius:12px;text-decoration:none;color:var(--ink)}
+.brand .title{font-weight:800;color:var(--ink);font-size:30px}
+.links{display:flex;align-items:center;gap:4px}
+.links a{display:inline-block;padding:8px 12px;border-radius:12px;text-decoration:none;color:var(--ink);font-size:15px}
 .links a:hover{background:#E9F0FF}
+.links a.trial-link{background:var(--brand);color:#fff;font-weight:700;padding:8px 16px}
+.links a.trial-link:hover{background:var(--brand-dark)}
+
 .hero{
-  margin-top:18px;background:var(--panel);border:1px solid var(--border);
-  border-radius:var(--radius);padding:32px;box-shadow:var(--shadow)
+  margin-top:24px;background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:40px 36px;box-shadow:var(--shadow)
 }
-.hero h1{font-size:44px;line-height:1.1;margin:0 0 12px}
-.lead{font-size:18px;color:var(--muted);margin:0 0 16px}
-.badges{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
-.badge{background:#E1EAFF;border:1px solid #CFE0FF;color:#14306B;padding:6px 12px;border-radius:999px;font-size:13px}
-.callout{margin-top:14px;background:#fff;border:1px dashed #CFE0FF;padding:12px 14px;border-radius:12px;font-weight:600;color:#17326B}
-/* Feature cards grid: 3 per row on large screens */
+.hero h1{font-size:42px;line-height:1.15;margin:0 0 14px;color:var(--ink)}
+.hero h1 span{color:var(--brand)}
+.lead{font-size:18px;color:var(--muted);margin:0 0 20px;max-width:680px}
+.badges{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
+.badge{background:#EEF4FC;border:1px solid #C8DEFA;color:#3A7BC8;padding:6px 14px;border-radius:999px;font-size:13px;font-weight:600}
+
+.hero-cta-row{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-top:24px}
+.hero-cta{
+  display:inline-block;padding:15px 28px;
+  background:var(--brand);color:#fff;border-radius:12px;
+  text-decoration:none;font-weight:700;font-size:17px;
+  box-shadow:0 4px 14px rgba(74,144,226,0.35);
+  transition:background 0.18s ease, transform 0.18s ease
+}
+.hero-cta:hover{background:var(--brand-dark);transform:translateY(-1px)}
+.app-store-badge img{height:44px;display:block}
+
+.app-note{
+  margin-top:16px;
+  font-size:13px;
+  color:var(--muted);
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.app-note::before{
+  content:'📱';
+  font-size:14px;
+}
+
 .grid{display:grid;gap:16px;margin:28px 0}
 @media (min-width:1024px){.grid{grid-template-columns:repeat(3,1fr)}}
 @media (min-width:700px) and (max-width:1023px){.grid{grid-template-columns:repeat(2,1fr)}}
 @media (max-width:699px){.grid{grid-template-columns:1fr}}
-.card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
-.section{margin:24px 0}
-.footer{margin:40px 0 24px;text-align:center;color:var(--muted);font-size:14px}
-/* Form */
-form{max-width:760px}
-form .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-@media (max-width:760px){form .row{grid-template-columns:1fr}}
-input, select, textarea{
-  width:100%; padding:13px 14px; border:1px solid var(--border); border-radius:12px;
-  font-size:16px; outline:none; background:#fff;
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow)}
+.card h3{margin:0 0 8px;font-size:18px}
+.card p{margin:0;color:var(--muted);font-size:15px}
+
+.includes-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px 32px;box-shadow:var(--shadow)}
+.includes-card h3{margin:0 0 14px}
+.includes-card ul{margin:0;padding-left:20px;color:var(--muted);font-size:15px}
+.includes-card ul li{margin-bottom:6px}
+
+.cta-band{
+  margin:32px 0;background:var(--brand);border-radius:var(--radius);
+  padding:36px 32px;text-align:center;color:#fff
 }
-input:focus, select:focus, textarea:focus{border-color:#93B5FF; box-shadow:0 0 0 3px rgba(11,99,255,.12)}
-label{font-weight:600; display:block; margin:6px 0 6px}
-.button{display:inline-block;padding:12px 16px;border-radius:12px;text-decoration:none;background:var(--brand);color:#fff;border:1px solid #0547bd;font-weight:700}
-.small{color:var(--muted);font-size:14px}
-.notice{display:none;margin-bottom:16px}
-.notice.show{display:block}
-.prose{max-width:1005}
-.prose p{margin:12px 0}
+.cta-band h2{color:#fff;font-size:28px;margin:0 0 10px}
+.cta-band p{color:rgba(255,255,255,0.85);margin:0 0 20px;font-size:16px}
+.cta-band-buttons{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap}
+.cta-band a.main{
+  display:inline-block;padding:14px 28px;background:#fff;
+  color:var(--brand);border-radius:12px;text-decoration:none;
+  font-weight:700;font-size:16px;
+  transition:transform 0.18s ease
+}
+.cta-band a.main:hover{transform:translateY(-1px)}
+.cta-band .app-store-badge img{height:42px;display:block}
+
+.footer{margin:40px 0 24px;text-align:center;color:var(--muted);font-size:14px}
+.footer a{color:var(--muted);text-decoration:underline}
 </style>
 </head>
 <body>
 
-<div class="topbar">
-  <div class="nav-wrap">
-    <div class="nav">
-      <a class="brand" href="index.html">
-        <img src="logo.png" alt="FretTracks logo">
-        <span class="title">FretTracks</span>
-      </a>
-      <div class="links">
-        <a href="privacy.html">Privacy</a>
-        <a href="tos.html">Terms</a>
-        <a href="support.html">Support</a>
-      </div>
+<div class="nav-wrap">
+  <div class="nav">
+    <a class="brand" href="index.html">
+      <img src="logo.png" alt="FretTracks logo">
+      <span class="title">FretTracks</span>
+    </a>
+    <div class="links">
+      <a href="privacy.html">Privacy</a>
+      <a href="tos.html">Terms</a>
+      <a href="support.html">Support</a>
+      <a href="/trial">Free Trial</a>
     </div>
   </div>
 </div>
 
 <div class="container">
 
-  <div id="supportBanner" class="card notice"></div>
-
   <section class="hero">
-    <h1>Get Your Guitar Playing on Track!</h1>
-    <p class="lead">You've wanted to learn how to jam, but never knew where to start.  That ends today! Everything you need to go from memorizing songs, to becoming a musician!</p>
+    <h1>Play lead guitar —<br><span>with a band.</span></h1>
+    <p class="lead">Ready to move past scale drills to start making music over backing tracks that put you in the band? FretTracks makes it happen.</p>
     <div class="badges">
+      <span class="badge">Dozens of Scales</span>
       <span class="badge">500+ Backing Tracks</span>
-      <span class="badge">100+ Guitar Scales</span>
+      <span class="badge">Blues, Rock, Country, Jazz & More</span>
       <span class="badge">Complete Tab Diagrams</span>
-      <span class="badge">The what, why and how!</span>
     </div>
-    <div class="callout">FretTracks is only available as a <strong>mobile app</strong> (not a web app). To start your free trial, open the App Store or Google Play on your phone and search for <strong>“FretTracks”</strong>.</div>
+    <div class="hero-cta-row">
+      <a class="hero-cta" href="/trial">Start Your 30-Day Free Trial →</a>
+      <a class="app-store-badge" href="https://apps.apple.com/app/frettracks/id6747992581" target="_blank">
+        <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download on the App Store">
+      </a>
+    </div>
+    <p class="app-note">FretTracks is an iPhone &amp; iPad app — download it free from the App Store.</p>
   </section>
 
   <section class="grid">
     <div class="card">
-      <h3>Everything you need</h3>
-      <p>Hear the scale, see the tab, and jam over progressions that highlight each mode’s unique sound.</p>
+      <h3>Learn by playing</h3>
+      <p>Hear the scale, see the tab, and jam over progressions that highlight each mode's unique sound — in real keys, right now.</p>
     </div>
     <div class="card">
       <h3>No more random guessing</h3>
-      <p>We explain the why — clear guidance on what makes each mode tick and how to land notes that sing.</p>
+      <p>Clear guidance on what makes each scale tick and how to land notes that sing over any chord progression.</p>
     </div>
     <div class="card">
       <h3>Practice that feels musical</h3>
-      <p>Loopable tracks in multiple keys, genres and tempos keep practice focused and fun.</p>
+      <p>Loopable backing tracks in multiple keys, genres, and tempos keep practice focused, fun, and musical.</p>
     </div>
   </section>
 
-  <div class="card prose">
+  <div class="includes-card">
     <h3>FretTracks Includes:</h3>
     <ul>
-      <li>Diatonic modes: Ionian, Dorian, Mixolydian, Aeolian</li>
-      <li>Pentatonics and Blues, with mode‑aware progressions</li>
-      <li>Chord progressions that showcase each scale’s flavor</li>
+      <li>Diatonic modes: Ionian, Dorian, Mixolydian, Aeolian and more</li>
+      <li>Pentatonics and Blues, with mode-aware progressions</li>
+      <li>Chord progressions that showcase each scale's flavor</li>
       <li>Clean tab diagrams and audio examples</li>
     </ul>
   </div>
 
-  <div class="footer">© 2025 FretTracks Labs LLC · <a href="privacy.html">Privacy</a> · <a href="tos.html">Terms</a> · <a href="support.html">Support</a></div>
+  <div class="cta-band">
+    <h2>Try the FretTracks app free for 30 days.</h2>
+    <p>Download on iPhone or iPad. No commitment — cancel anytime.</p>
+    <div class="cta-band-buttons">
+      <a class="main" href="/trial">Try FretTracks Free</a>
+      <a class="app-store-badge" href="https://apps.apple.com/app/frettracks/id6747992581" target="_blank">
+        <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download on the App Store">
+      </a>
+    </div>
+  </div>
+
+  <div class="footer">© 2026 FretTracks Labs LLC · <a href="privacy.html">Privacy</a> · <a href="tos.html">Terms</a> · <a href="support.html">Support</a></div>
 </div>
 
-<script>
-  if (new URLSearchParams(location.search).get('support') === 'sent') {
-    const n = document.getElementById('supportBanner');
-    n.classList.add('show');
-    n.innerHTML = '<strong>Thanks!</strong> Your support request was sent. We usually respond within 1–2 business days.';
-    history.replaceState(null,'',location.pathname);
-  }
-</script>
 </body>
 </html>
