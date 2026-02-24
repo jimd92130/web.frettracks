@@ -5,95 +5,93 @@
   <title>Support – FretTracks</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" href="/favicon.png" type="image/png" sizes="32x32" />
-
   <style>
 :root{
-  --brand:#0B63FF;
-  --brand-dark:#0A2C6E; /* headings and accents */
-  --ink:#0A0F1C;
+  --brand:#4A90E2;
+  --brand-dark:#3A7BC8;
+  --ink:#212121;
   --muted:#667085;
   --panel:#F6F8FF;
-  --panel-2:#F1F5FF;
   --bg1:#EEF3FF;
   --bg2:#FDFEFF;
-  --border:#E1E6F3;
+  --border:#E0E0E0;
   --radius:18px;
   --shadow:0 1px 2px rgba(9,30,66,.08), 0 2px 8px rgba(9,30,66,.06);
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
 body{
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-  color:var(--ink); 
-  background: radial-gradient(1200px 600px at 20% -10%, var(--bg1), transparent) ,
-              radial-gradient(900px 500px at 120% 10%, #EAF0FF, transparent) ,
-              var(--bg2);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  color:var(--ink);
+  background:
+    radial-gradient(1200px 600px at 20% -10%, var(--bg1), transparent),
+    radial-gradient(900px 500px at 120% 10%, #EAF0FF, transparent),
+    var(--bg2);
   line-height:1.7;
 }
-h1,h2,h3,h4{color:var(--brand-dark); letter-spacing:.2px}
-.container { max-width:1150px;margin:0 auto;padding:28px 28px;}
-.topbar{
-  position:sticky;
-  top:0;
-  background:#FFFFFF; /* FIXED: solid white background */
-  z-index:20;
-  box-shadow:0 1px 3px rgba(9,30,66,.08); /* subtle shadow for depth */
-}
-.nav { display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 28px;max-width:1150px;margin:0 auto; }
-.brand{display:flex;align-items:center;gap:12px;text-decoration:none}
-.brand img{width:54px;height:54px;border-radius:10px;box-shadow:var(--shadow)}
-.brand .title{font-weight:800;color:var(--brand-dark);font-size:30px}
-.links a{display:inline-block;padding:8px 12px;border-radius:12px;text-decoration:none;color:var(--ink)}
+h1,h2,h3,h4{color:var(--ink);letter-spacing:.2px}
+
+/* NAV */
+.nav-wrap{background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20;box-shadow:0 1px 3px rgba(9,30,66,.08)}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;max-width:1150px;margin:0 auto;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
+.brand .pick{width:40px;height:40px;border-radius:9px;box-shadow:var(--shadow)}
+.brand .wordmark{height:28px;width:auto}
+.hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:4px}
+.hamburger span{display:block;width:24px;height:2px;background:var(--ink);border-radius:2px}
+.links{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.links a{display:inline-block;padding:7px 11px;border-radius:10px;text-decoration:none;color:var(--ink);font-size:15px;white-space:nowrap}
 .links a:hover{background:#E9F0FF}
-.hero{
-  margin-top:18px;background:var(--panel);border:1px solid var(--border);
-  border-radius:var(--radius);padding:32px;box-shadow:var(--shadow)
+
+@media(max-width:600px){
+  .hamburger{display:flex}
+  .links{
+    display:none;flex-direction:column;align-items:flex-start;
+    position:absolute;top:62px;left:0;right:0;
+    background:#fff;border-bottom:1px solid var(--border);
+    padding:8px 16px 16px;gap:2px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.08);
+  }
+  .links.open{display:flex}
+  .links a{width:100%;padding:10px 12px;font-size:16px}
 }
-.hero h1{font-size:44px;line-height:1.1;margin:0 0 12px}
-.lead{font-size:18px;color:var(--muted);margin:0 0 16px}
-.badges{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
-.badge{background:#E1EAFF;border:1px solid #CFE0FF;color:#14306B;padding:6px 12px;border-radius:999px;font-size:13px}
-.callout{margin-top:14px;background:#fff;border:1px dashed #CFE0FF;padding:12px 14px;border-radius:12px;font-weight:600;color:#17326B}
-/* Feature cards grid: 3 per row on large screens */
-.grid{display:grid;gap:16px;margin:28px 0}
-@media (min-width:1024px){.grid{grid-template-columns:repeat(3,1fr)}}
-@media (min-width:700px) and (max-width:1023px){.grid{grid-template-columns:repeat(2,1fr)}}
-@media (max-width:699px){.grid{grid-template-columns:1fr}}
+
+/* CONTENT — unchanged from original */
+.container{max-width:1150px;margin:0 auto;padding:28px 28px}
 .card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
-.section{margin:24px 0}
 .footer{margin:40px 0 24px;text-align:center;color:var(--muted);font-size:14px}
-/* Form */
+.footer a{color:var(--muted);text-decoration:underline}
 form{max-width:760px}
 form .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-@media (max-width:760px){form .row{grid-template-columns:1fr}}
-input, select, textarea{
-  width:100%; padding:13px 14px; border:1px solid var(--border); border-radius:12px;
-  font-size:16px; outline:none; background:#fff;
+@media(max-width:760px){form .row{grid-template-columns:1fr}}
+input,select,textarea{
+  width:100%;padding:13px 14px;border:1px solid var(--border);border-radius:12px;
+  font-size:16px;outline:none;background:#fff;
 }
-input:focus, select:focus, textarea:focus{border-color:#93B5FF; box-shadow:0 0 0 3px rgba(11,99,255,.12)}
-label{font-weight:600; display:block; margin:6px 0 6px}
-.button{display:inline-block;padding:12px 16px;border-radius:12px;text-decoration:none;background:var(--brand);color:#fff;border:1px solid #0547bd;font-weight:700}
+input:focus,select:focus,textarea:focus{border-color:#93B5FF;box-shadow:0 0 0 3px rgba(74,144,226,.12)}
+label{font-weight:600;display:block;margin:6px 0 6px}
+.button{display:inline-block;padding:12px 16px;border-radius:12px;text-decoration:none;background:var(--brand);color:#fff;border:1px solid var(--brand-dark);font-weight:700;cursor:pointer;font-size:16px}
 .small{color:var(--muted);font-size:14px}
-.notice{display:none;margin-bottom:16px}
-.notice.show{display:block}
 .prose{max-width:850px}
 .prose p{margin:12px 0}
 </style>
 </head>
 <body>
 
-<div class="topbar">
-  <div class="nav-wrap">
-    <div class="nav">
-      <a class="brand" href="index.html">
-        <img src="logo.png" alt="FretTracks logo">
-        <span class="title">FretTracks</span>
-      </a>
-      <div class="links">
-        <a href="privacy.html">Privacy</a>
-        <a href="tos.html">Terms</a>
-        <a href="support.html">Support</a>
-      </div>
+<div class="nav-wrap">
+  <div class="nav">
+    <a class="brand" href="index.html">
+      <img class="pick" src="logo.png" alt="FretTracks logo">
+      <img class="wordmark" src="/trial/frettracks.png" alt="FretTracks">
+    </a>
+    <button class="hamburger" onclick="document.querySelector('.links').classList.toggle('open')" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="links">
+      <a href="privacy.html">Privacy</a>
+      <a href="tos.html">Terms</a>
+      <a href="support.html">Support</a>
+      <a href="/trial">Free Trial</a>
     </div>
   </div>
 </div>
@@ -107,11 +105,7 @@ label{font-weight:600; display:block; margin:6px 0 6px}
     <form action="https://formspree.io/f/xdklnydy" method="POST">
       <input type="hidden" name="_subject" value="FretTracks Support Request">
       <input type="hidden" name="_next" value="https://frettracks.com/?support=sent">
-      
-      <!-- Hidden User ID field (auto-populated from URL) -->
       <input type="hidden" id="hiddenUserId" name="user_id" value="">
-
-      <!-- Honeypot -->
       <p style="display:none"><label>Leave this empty: <input name="website"></label></p>
 
       <div class="row">
@@ -135,7 +129,7 @@ label{font-weight:600; display:block; margin:6px 0 6px}
       <p><label>Message<textarea name="message" rows="8" required></textarea></label></p>
 
       <button class="button" type="submit">Submit</button>
-      <p class="small" style="margin-top:10px">We use Formspree to securely process this form. See our <a href="privacy.html">Privacy Policy</a>. </p>
+      <p class="small" style="margin-top:10px">We use Formspree to securely process this form. See our <a href="privacy.html">Privacy Policy</a>.</p>
     </form>
   </section>
 
@@ -149,23 +143,16 @@ label{font-weight:600; display:block; margin:6px 0 6px}
     </ul>
   </section>
 
-  <div class="footer">© 2025 FretTracks Labs LLC</div>
+  <div class="footer">© 2026 FretTracks Labs LLC · <a href="privacy.html">Privacy</a> · <a href="tos.html">Terms</a> · <a href="support.html">Support</a></div>
 </div>
 
 <script>
-  // Extract user ID from URL query parameter and auto-populate hidden field
   (function() {
     const urlParams = new URLSearchParams(window.location.search);
     const userId = urlParams.get('uid');
-    
     if (userId) {
       const hiddenField = document.getElementById('hiddenUserId');
-      if (hiddenField) {
-        hiddenField.value = userId;
-        console.log('✅ User ID captured:', userId);
-      }
-    } else {
-      console.log('ℹ️ No user ID in URL');
+      if (hiddenField) hiddenField.value = userId;
     }
   })();
 </script>
