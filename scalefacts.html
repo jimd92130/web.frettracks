@@ -930,7 +930,7 @@ function buildFretboardImage(state,tone){
 function buildScaleImage(state,tone){
   const c=igCanvas(), ctx=c.getContext('2d');
   drawBackground(ctx,tone);
-  drawTitle(ctx,`${state.root} ${state.displayName}`,'Scale Degrees');
+  drawTitle(ctx,'Scale Degrees',`${state.root} ${state.displayName}`);
   const scaleTableTop = SAFE + ACCENT_BAND_H + 90 + 62 + 30; // title + subtitle + gap
   drawHRule(ctx, scaleTableTop - 14);
 
@@ -972,20 +972,23 @@ function buildChordsImage(state,tone){
 
   const cd=state.chordsData;
   const isParent=cd&&cd.type==='parent';
-  let chordsImgTitle;
+
+  // Title system: fixed title + scale name as subtitle
+  // Use scale name or parent scale name as subtitle
+  let chordsSubtitle;
   if(isParent){
     const pk=cd.parentKey||'';
-    if(pk==='aeolian')      chordsImgTitle=`Chords in ${state.root} Minor (Aeolian)`;
-    else if(pk==='ionian')  chordsImgTitle=`Chords in ${state.root} Major (Ionian)`;
-    else                    chordsImgTitle=`Chords in ${state.root} ${cd.parentDisplayName}`;
+    if(pk==='aeolian')      chordsSubtitle=`${state.root} Minor (Aeolian)`;
+    else if(pk==='ionian')  chordsSubtitle=`${state.root} Major (Ionian)`;
+    else                    chordsSubtitle=`${state.root} ${cd.parentDisplayName}`;
   } else {
-    if(state.sk==='ionian')       chordsImgTitle=`Chords in ${state.root} Major (Ionian)`;
-    else if(state.sk==='aeolian') chordsImgTitle=`Chords in ${state.root} Minor (Aeolian)`;
-    else                          chordsImgTitle=`Chords in ${state.root} ${state.displayName}`;
+    if(state.sk==='ionian')       chordsSubtitle=`${state.root} Major (Ionian)`;
+    else if(state.sk==='aeolian') chordsSubtitle=`${state.root} Minor (Aeolian)`;
+    else                          chordsSubtitle=`${state.root} ${state.displayName}`;
   }
 
-  drawTitle(ctx,chordsImgTitle,'');
-  const chordsTableTop = SAFE + ACCENT_BAND_H + 90 + 50; // title + gap
+  drawTitle(ctx,'Play It Over These Chords', chordsSubtitle);
+  const chordsTableTop = SAFE + ACCENT_BAND_H + 90 + 62 + 30; // title + subtitle + gap
   drawHRule(ctx, chordsTableTop - 14);
 
   // Get parent display name for footnote (fixes pentatonic footnote bug)
@@ -1050,7 +1053,8 @@ function buildVideoImage(state,tone){
   const scaleName=`${state.root} ${state.displayName}`;
   const maxW=IG_W-SAFE*2-40;
 
-  const VIDEO_TITLE_Y = SAFE + ACCENT_BAND_H + 80;
+  const VIDEO_TITLE_Y = SAFE + ACCENT_BAND_H + 90;
+  const maxW=IG_W-SAFE*2-40;
   ctx.textAlign='center';
 
   // Line 1 — auto-fit
@@ -1059,22 +1063,21 @@ function buildVideoImage(state,tone){
   ctx.fillStyle='#FFFFFF';
   ctx.fillText("It's Easy to Sound Great",IG_W/2,VIDEO_TITLE_Y);
 
-  // Line 2 — Playing [scale name]
-  ctx.fillStyle='rgba(255,255,255,0.88)';
-  fitText(ctx,`Playing ${scaleName}`,maxW,78,'bold');
-  ctx.fillStyle='rgba(255,255,255,0.88)';
-  ctx.fillText(`Playing ${scaleName}`,IG_W/2,VIDEO_TITLE_Y+100);
+  // Line 2 — Playing [scale name] as subtitle
+  ctx.fillStyle='rgba(255,255,255,0.82)';
+  fitText(ctx,`Playing ${scaleName}`,maxW,60,'500');
+  ctx.fillStyle='rgba(255,255,255,0.82)';
+  ctx.fillText(`Playing ${scaleName}`,IG_W/2,VIDEO_TITLE_Y+76);
 
-  // Line 3
-  ctx.fillStyle='rgba(255,255,255,0.70)';
-  ctx.font=`500 54px ${FONT}`;
-  ctx.fillText('Over Backing Tracks',IG_W/2,VIDEO_TITLE_Y+178);
-  ctx.fillText('from FretTracks',IG_W/2,VIDEO_TITLE_Y+246);
+  // Line 3 — Over Backing Tracks from FretTracks
+  ctx.fillStyle='rgba(255,255,255,0.60)';
+  ctx.font=`400 46px ${FONT}`;
+  ctx.fillText('Over Backing Tracks from FretTracks',IG_W/2,VIDEO_TITLE_Y+140);
 
-  drawHRule(ctx,VIDEO_TITLE_Y+290);
+  drawHRule(ctx,VIDEO_TITLE_Y+180);
 
   // CTA box — consistent font size with other images
-  const boxY=IG_H-SAFE-340;
+  const boxY=IG_H-SAFE-280;
   ctx.save();
   roundRect(ctx,SAFE,boxY,IG_W-SAFE*2,240,24);
   ctx.fillStyle='rgba(0,0,0,0.22)'; ctx.fill(); ctx.restore();
