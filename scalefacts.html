@@ -9,7 +9,6 @@
   :root {
     --bg: #f7f5f0;
     --surface: #edeae3;
-    --surface2: #e3dfd7;
     --border: #c8c3b8;
     --accent: #8b6020;
     --accent2: #1e6e96;
@@ -20,174 +19,91 @@
     --dim-color: #b02828;
     --aug-color: #a05010;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
   body {
     background: var(--bg);
     color: var(--text);
     font-family: 'Inter', system-ui, sans-serif;
     min-height: 100vh;
   }
-
   header {
     border-bottom: 2px solid var(--border);
     padding: 1.3rem 2.5rem;
-    display: flex;
-    align-items: baseline;
-    gap: 1.2rem;
+    display: flex; align-items: baseline; gap: 1.2rem;
     background: var(--surface);
   }
-  header h1 {
-    font-size: 1.35rem;
-    font-weight: 700;
-    color: var(--accent);
-    letter-spacing: -0.02em;
-  }
-  header span {
-    font-size: 0.7rem;
-    color: var(--text-muted);
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    font-weight: 500;
-  }
+  header h1 { font-size: 1.35rem; font-weight: 700; color: var(--accent); letter-spacing: -0.02em; }
+  header span { font-size: 0.7rem; color: var(--text-muted); letter-spacing: 0.09em; text-transform: uppercase; font-weight: 500; }
 
   .input-section {
     padding: 1.5rem 2.5rem;
     border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex-wrap: wrap;
+    display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
     background: white;
   }
-  .input-label {
-    font-size: 0.7rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    font-weight: 600;
-  }
+  .input-label { font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); font-weight: 600; }
 
   select {
     background: var(--bg);
     border: 1.5px solid var(--border);
     color: var(--text);
     font-family: 'Inter', sans-serif;
-    font-size: 0.95rem;
-    font-weight: 500;
+    font-size: 0.95rem; font-weight: 500;
     padding: 0.52rem 2.2rem 0.52rem 0.8rem;
-    outline: none;
-    cursor: pointer;
-    appearance: none;
-    -webkit-appearance: none;
+    outline: none; cursor: pointer;
+    appearance: none; -webkit-appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7' viewBox='0 0 10 7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238b6020' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 0.65rem center;
-    border-radius: 4px;
-    transition: border-color 0.2s;
+    background-repeat: no-repeat; background-position: right 0.65rem center;
+    border-radius: 4px; transition: border-color 0.2s;
   }
   select:focus { border-color: var(--accent); }
   #rootSelect { width: 88px; }
-  #scaleSelect { width: 250px; }
+  #scaleSelect { width: 260px; }
 
   .btn {
-    background: var(--accent);
-    color: white;
-    border: none;
-    font-family: 'Inter', sans-serif;
-    font-size: 0.8rem;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    padding: 0.58rem 1.5rem;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: opacity 0.2s;
+    background: var(--accent); color: white; border: none;
+    font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 600;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 0.58rem 1.5rem; cursor: pointer; border-radius: 4px; transition: opacity 0.2s;
   }
   .btn:hover { opacity: 0.83; }
 
   .quick-picks {
-    padding: 0.8rem 2.5rem;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 0.45rem;
-    flex-wrap: wrap;
+    padding: 0.8rem 2.5rem; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;
     background: var(--surface);
   }
-  .qp-label {
-    font-size: 0.64rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    font-weight: 600;
-    margin-right: 0.2rem;
-  }
+  .qp-label { font-size: 0.64rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); font-weight: 600; margin-right: 0.2rem; }
   .qp-btn {
-    background: white;
-    border: 1px solid var(--border);
-    color: var(--text-muted);
-    font-family: 'Inter', sans-serif;
-    font-size: 0.7rem;
-    font-weight: 500;
-    padding: 0.26rem 0.65rem;
-    cursor: pointer;
-    border-radius: 3px;
-    transition: all 0.15s;
+    background: white; border: 1px solid var(--border); color: var(--text-muted);
+    font-family: 'Inter', sans-serif; font-size: 0.7rem; font-weight: 500;
+    padding: 0.26rem 0.65rem; cursor: pointer; border-radius: 3px; transition: all 0.15s;
   }
   .qp-btn:hover { border-color: var(--accent); color: var(--accent); }
 
   #output { padding: 2rem 2.5rem; display: none; }
   #output.visible { display: block; }
 
-  .scale-title {
-    font-size: 1.9rem;
-    font-weight: 700;
-    letter-spacing: -0.025em;
-    margin-bottom: 0.2rem;
-  }
-  .scale-subtitle {
-    font-size: 0.7rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    font-weight: 500;
-    margin-bottom: 2rem;
-  }
+  .scale-title { font-size: 1.9rem; font-weight: 700; letter-spacing: -0.025em; margin-bottom: 0.2rem; }
+  .scale-subtitle { font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); font-weight: 500; margin-bottom: 2rem; }
 
   .section-label {
-    font-size: 0.64rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    font-weight: 600;
-    margin-bottom: 0.7rem;
-    padding-bottom: 0.38rem;
-    border-bottom: 1px solid var(--border);
+    font-size: 0.64rem; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--text-muted); font-weight: 600; margin-bottom: 0.7rem;
+    padding-bottom: 0.38rem; border-bottom: 1px solid var(--border);
   }
-
   .fretboard-section { margin-bottom: 2.5rem; }
   .fretboard-wrap { overflow-x: auto; }
-  .fretboard-svg-container { min-width: 680px; }
+  .fretboard-svg-container { min-width: 700px; }
 
-  .legend {
-    display: flex; gap: 1.3rem; margin-top: 0.7rem; flex-wrap: wrap;
-  }
-  .legend-item {
-    display: flex; align-items: center; gap: 0.4rem;
-    font-size: 0.7rem; color: var(--text-muted); font-weight: 500;
-  }
+  .legend { display: flex; gap: 1.3rem; margin-top: 0.7rem; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.7rem; color: var(--text-muted); font-weight: 500; }
   .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 
-  .formula-row {
-    margin-top: 0.8rem; font-size: 0.7rem; color: var(--text-muted);
-  }
+  .formula-row { margin-top: 0.8rem; font-size: 0.7rem; color: var(--text-muted); }
   .formula-row strong { color: var(--accent); font-weight: 600; }
 
-  .tables-grid {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem;
-  }
+  .tables-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; }
   @media (max-width: 600px) {
     .tables-grid { grid-template-columns: 1fr; }
     header, .input-section, .quick-picks, #output { padding-left: 1rem; padding-right: 1rem; }
@@ -199,9 +115,7 @@
     font-size: 0.64rem; letter-spacing: 0.1em; text-transform: uppercase;
     color: var(--text-muted); border-bottom: 1.5px solid var(--border); font-weight: 600;
   }
-  tbody td {
-    padding: 0.48rem 0.7rem; border-bottom: 1px solid var(--border); vertical-align: middle;
-  }
+  tbody td { padding: 0.48rem 0.7rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
   tbody tr:last-child td { border-bottom: none; }
   tbody tr:hover { background: var(--surface); }
 
@@ -214,15 +128,11 @@
   .roman-m { color: var(--minor-color); }
   .roman-d { color: var(--dim-color); }
   .roman-A { color: var(--aug-color); }
-
   .chord-M { color: var(--major-color); font-weight: 600; }
   .chord-m { color: var(--minor-color); font-weight: 600; }
   .chord-d { color: var(--dim-color); font-weight: 600; }
   .chord-A { color: var(--aug-color); font-weight: 600; }
-
-  .no-chords td {
-    color: var(--text-muted); font-style: italic; padding: 0.9rem 0.7rem; font-size: 0.77rem;
-  }
+  .no-chords td { color: var(--text-muted); font-style: italic; padding: 0.9rem 0.7rem; font-size: 0.77rem; }
 </style>
 </head>
 <body>
@@ -241,7 +151,6 @@
     <option>G</option><option>Ab</option><option>A</option>
     <option>Bb</option><option>B</option>
   </select>
-
   <span class="input-label">Scale / Mode</span>
   <select id="scaleSelect">
     <optgroup label="Diatonic Modes">
@@ -266,7 +175,6 @@
       <option value="melodic_minor">Melodic Minor (Ascending)</option>
     </optgroup>
   </select>
-
   <button class="btn" onclick="generate()">Generate ›</button>
 </div>
 
@@ -288,7 +196,6 @@
 <div id="output">
   <div class="scale-title" id="scaleTitle"></div>
   <div class="scale-subtitle" id="scaleSubtitle"></div>
-
   <div class="fretboard-section">
     <div class="section-label">Fretboard · 2 Octaves</div>
     <div class="fretboard-wrap">
@@ -300,7 +207,6 @@
     </div>
     <div class="formula-row" id="formulaRow"></div>
   </div>
-
   <div class="tables-grid">
     <div>
       <div class="section-label">Scale Degrees</div>
@@ -321,38 +227,116 @@
 
 <script>
 // ============================================================
-// MUSIC THEORY ENGINE
+// ENHARMONIC SPELLING ENGINE
 // ============================================================
+// Letter names in order
+const LETTERS = ['C','D','E','F','G','A','B'];
 
-const SHARP = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
-const FLAT  = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
-const FLAT_ROOTS = new Set(['F','Bb','Eb','Ab','Db','Gb']);
+// Semitone value of each natural note
+const NATURAL_ST = { C:0, D:2, E:4, F:5, G:7, A:9, B:11 };
 
-function noteIdx(n) {
-  let i = SHARP.indexOf(n); if (i===-1) i = FLAT.indexOf(n); return i;
-}
-function useFlatSpelling(root) {
-  return FLAT_ROOTS.has(root) || (FLAT.includes(root) && !SHARP.includes(root));
-}
-function semitoneToNote(st, flat) {
-  const n = ((st % 12) + 12) % 12;
-  return flat ? FLAT[n] : SHARP[n];
+// Given a root note name and an interval in semitones, return the properly
+// spelled note name so that each letter is used exactly once per octave.
+// rootDegreeIdx = which scale degree this is (0-based), rootLetterIdx = index into LETTERS for root
+function spellNote(rootLetter, scaleStepIndex, semitoneFromRoot) {
+  // The letter for this scale step is rootLetter + scaleStepIndex (mod 7)
+  const rootLetterIdx = LETTERS.indexOf(rootLetter);
+  const targetLetterIdx = (rootLetterIdx + scaleStepIndex) % 7;
+  const targetLetter = LETTERS[targetLetterIdx];
+
+  // Natural semitone of target letter relative to C
+  const targetNatural = NATURAL_ST[targetLetter];
+  // Actual semitone of the note relative to C (root pitch + interval, mod 12)
+  const rootPitch = NATURAL_ST[rootLetter]; // we'll add accidental below
+  // We need the pitch of THIS note mod 12
+  // But we don't know root accidental here — caller must pass absolute rootPitch
+  return targetLetter; // placeholder; real logic in buildDiatonicNotes
 }
 
+// Build properly spelled diatonic note names for a scale
+// rootName: e.g. "Bb", intervals: semitone offsets from root
+function buildDiatonicNotes(rootName, intervals) {
+  // Parse root
+  const rootLetter = rootName[0].toUpperCase();
+  const rootAccidental = rootName.slice(1); // '', '#', 'b', 'bb'
+  const rootLetterIdx = LETTERS.indexOf(rootLetter);
+
+  // Root pitch in semitones (0=C)
+  let rootPitch = NATURAL_ST[rootLetter];
+  if (rootAccidental === '#')  rootPitch += 1;
+  if (rootAccidental === '##') rootPitch += 2;
+  if (rootAccidental === 'b')  rootPitch -= 1;
+  if (rootAccidental === 'bb') rootPitch -= 2;
+  rootPitch = ((rootPitch % 12) + 12) % 12;
+
+  return intervals.map((iv, stepIdx) => {
+    const targetLetterIdx = (rootLetterIdx + stepIdx) % 7;
+    const targetLetter = LETTERS[targetLetterIdx];
+    const targetNatural = NATURAL_ST[targetLetter];
+
+    // Actual pitch of this note
+    const notePitch = ((rootPitch + iv) % 12 + 12) % 12;
+
+    // Difference: how much do we need to alter the natural letter?
+    let diff = notePitch - targetNatural;
+    // Wrap to -2..+2 range
+    if (diff >  6) diff -= 12;
+    if (diff < -6) diff += 12;
+    // Prefer accidentals within -2..+2
+    if (diff >  2) diff -= 12;
+    if (diff < -2) diff += 12;
+
+    let acc = '';
+    if (diff ===  2) acc = '##';
+    else if (diff ===  1) acc = '#';
+    else if (diff === -1) acc = 'b';
+    else if (diff === -2) acc = 'bb';
+
+    return targetLetter + acc;
+  });
+}
+
+// For blues/pentatonic scales that use chromatic intervals (not strictly diatonic),
+// spell using a simpler sharp/flat preference based on root key.
+// Flat keys prefer flats for accidentals; sharp keys prefer sharps.
+const FLAT_KEYS = new Set(['F','Bb','Eb','Ab','Db','Gb','Cb','Bb']);
+
+function spellChromatic(rootName, intervals) {
+  const rootLetter = rootName[0].toUpperCase();
+  let rootPitch = NATURAL_ST[rootLetter];
+  const acc = rootName.slice(1);
+  if (acc === '#') rootPitch += 1;
+  if (acc === 'b') rootPitch -= 1;
+  rootPitch = ((rootPitch % 12) + 12) % 12;
+
+  const useFlat = FLAT_KEYS.has(rootName);
+
+  const SHARP_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  const FLAT_NAMES  = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
+
+  return intervals.map(iv => {
+    const pitch = ((rootPitch + iv) % 12 + 12) % 12;
+    return useFlat ? FLAT_NAMES[pitch] : SHARP_NAMES[pitch];
+  });
+}
+
+// ============================================================
+// SCALE DEFINITIONS
+// ============================================================
 const SCALES = {
-  ionian:          { ivs:[0,2,4,5,7,9,11], degs:['1','2','3','4','5','6','7'],        formula:'W – W – H – W – W – W – H',       chords:true  },
-  dorian:          { ivs:[0,2,3,5,7,9,10], degs:['1','2','b3','4','5','6','b7'],       formula:'W – H – W – W – W – H – W',       chords:true  },
-  phrygian:        { ivs:[0,1,3,5,7,8,10], degs:['1','b2','b3','4','5','b6','b7'],     formula:'H – W – W – W – H – W – W',       chords:true  },
-  lydian:          { ivs:[0,2,4,6,7,9,11], degs:['1','2','3','#4','5','6','7'],        formula:'W – W – W – H – W – W – H',       chords:true  },
-  mixolydian:      { ivs:[0,2,4,5,7,9,10], degs:['1','2','3','4','5','6','b7'],        formula:'W – W – H – W – W – H – W',       chords:true  },
-  aeolian:         { ivs:[0,2,3,5,7,8,10], degs:['1','2','b3','4','5','b6','b7'],      formula:'W – H – W – W – H – W – W',       chords:true  },
-  locrian:         { ivs:[0,1,3,5,6,8,10], degs:['1','b2','b3','4','b5','b6','b7'],    formula:'H – W – W – H – W – W – W',       chords:true  },
-  major_pentatonic:{ ivs:[0,2,4,7,9],      degs:['1','2','3','5','6'],                 formula:'W – W – W½ – W – W½',             chords:false },
-  minor_pentatonic:{ ivs:[0,3,5,7,10],     degs:['1','b3','4','5','b7'],               formula:'W½ – W – W – W½ – W',             chords:false },
-  blues:           { ivs:[0,3,5,6,7,10],   degs:['1','b3','4','b5','5','b7'],          formula:'W½ – W – H – H – W½ – W',        chords:false },
-  major_blues:     { ivs:[0,2,3,4,7,9],    degs:['1','2','b3','3','5','6'],            formula:'W – H – H – W½ – W – W½',        chords:false },
-  harmonic_minor:  { ivs:[0,2,3,5,7,8,11], degs:['1','2','b3','4','5','b6','7'],       formula:'W – H – W – W – H – W½ – H',     chords:true, chordKey:'harmonic_minor' },
-  melodic_minor:   { ivs:[0,2,3,5,7,9,11], degs:['1','2','b3','4','5','6','7'],        formula:'W – H – W – W – W – W – H',      chords:true, chordKey:'melodic_minor' },
+  ionian:          { ivs:[0,2,4,5,7,9,11],  degs:['1','2','3','4','5','6','7'],         formula:'W – W – H – W – W – W – H',      chords:true,  diatonic:true  },
+  dorian:          { ivs:[0,2,3,5,7,9,10],  degs:['1','2','b3','4','5','6','b7'],        formula:'W – H – W – W – W – H – W',      chords:true,  diatonic:true  },
+  phrygian:        { ivs:[0,1,3,5,7,8,10],  degs:['1','b2','b3','4','5','b6','b7'],      formula:'H – W – W – W – H – W – W',      chords:true,  diatonic:true  },
+  lydian:          { ivs:[0,2,4,6,7,9,11],  degs:['1','2','3','#4','5','6','7'],         formula:'W – W – W – H – W – W – H',      chords:true,  diatonic:true  },
+  mixolydian:      { ivs:[0,2,4,5,7,9,10],  degs:['1','2','3','4','5','6','b7'],         formula:'W – W – H – W – W – H – W',      chords:true,  diatonic:true  },
+  aeolian:         { ivs:[0,2,3,5,7,8,10],  degs:['1','2','b3','4','5','b6','b7'],       formula:'W – H – W – W – H – W – W',      chords:true,  diatonic:true  },
+  locrian:         { ivs:[0,1,3,5,6,8,10],  degs:['1','b2','b3','4','b5','b6','b7'],     formula:'H – W – W – H – W – W – W',      chords:true,  diatonic:true  },
+  major_pentatonic:{ ivs:[0,2,4,7,9],       degs:['1','2','3','5','6'],                  formula:'W – W – W½ – W – W½',            chords:false, diatonic:false },
+  minor_pentatonic:{ ivs:[0,3,5,7,10],      degs:['1','b3','4','5','b7'],                formula:'W½ – W – W – W½ – W',            chords:false, diatonic:false },
+  blues:           { ivs:[0,3,5,6,7,10],    degs:['1','b3','4','b5','5','b7'],           formula:'W½ – W – H – H – W½ – W',       chords:false, diatonic:false },
+  major_blues:     { ivs:[0,2,3,4,7,9],     degs:['1','2','b3','3','5','6'],             formula:'W – H – H – W½ – W – W½',       chords:false, diatonic:false },
+  harmonic_minor:  { ivs:[0,2,3,5,7,8,11],  degs:['1','2','b3','4','5','b6','7'],        formula:'W – H – W – W – H – W½ – H',    chords:true,  diatonic:true, chordKey:'harmonic_minor' },
+  melodic_minor:   { ivs:[0,2,3,5,7,9,11],  degs:['1','2','b3','4','5','6','7'],         formula:'W – H – W – W – W – W – H',     chords:true,  diatonic:true, chordKey:'melodic_minor'  },
 };
 
 const QUALITIES = {
@@ -368,97 +352,110 @@ const QUALITIES = {
 };
 
 const ROM = ['I','II','III','IV','V','VI','VII'];
-
-function toRoman(q, i) {
-  const r = ROM[i];
-  if (q==='M') return r;
-  if (q==='m') return r.toLowerCase();
-  if (q==='d') return r.toLowerCase()+'°';
-  if (q==='A') return r+'+';
-  return r;
-}
-function toSymbol(root, q) {
-  if (q==='M') return root;
-  if (q==='m') return root+'m';
-  if (q==='d') return root+'°';
-  if (q==='A') return root+'+';
-  return root;
-}
+function toRoman(q,i){ const r=ROM[i]; return q==='M'?r:q==='m'?r.toLowerCase():q==='d'?r.toLowerCase()+'°':r+'+'; }
+function toSymbol(root,q){ return q==='M'?root:q==='m'?root+'m':q==='d'?root+'°':root+'+'; }
 
 // ============================================================
 // FRETBOARD ENGINE
-// Physical string index: 0=low E, 1=A, 2=D, 3=G, 4=B, 5=high e
-// Visual rows: row 0 = HIGH e (top), row 5 = LOW E (bottom)
+// Physical string index: 0 = low E, 5 = high e
+// Open string pitches (semitones, C=0): E=4, A=9, D=2, G=7, B=11, e=4
 // ============================================================
+const OPEN_PITCH  = [4, 9, 2, 7, 11, 4]; // phys 0=lowE .. phys 5=highe
+const STR_LABEL   = ['E','A','D','G','B','e'];
 
-const OPEN_PITCH = [4, 9, 2, 7, 11, 4]; // low E, A, D, G, B, high e
-const STRING_LABEL = ['E','A','D','G','B','e']; // index 0=low E
+// String thicknesses: phys 0 (low E) = thickest, phys 5 (high e) = thinnest
+// Row mapping: row 0 (top of diagram) = phys 5 (high e), row 5 (bottom) = phys 0 (low E)
+function physToRow(phys) { return 5 - phys; }
 
-function physToRow(phys) {
-  // phys 0 (low E) -> row 5 (bottom), phys 5 (high e) -> row 0 (top)
-  return 5 - phys;
-}
-
-function buildPattern(root, scale) {
-  const ri = noteIdx(root);
-  const ivs = scale.ivs;
-
-  // Build 2-octave sequence: [0, ...ivs[1..], 12, ...ivs[1..]+12, 24]
-  // This ensures BOTH the octave root (12) AND the final root (24) are included
-  const seq = [];
-  seq.push(0);
+// Build a 2-octave note sequence as absolute semitone offsets from root:
+// root(0), note2..note7, octave_root(12), note2..note7 again (+12), final_root(24)
+function buildSeq(ivs) {
+  const seq = [0];
   for (let i = 1; i < ivs.length; i++) seq.push(ivs[i]);
   seq.push(12);
   for (let i = 1; i < ivs.length; i++) seq.push(12 + ivs[i]);
   seq.push(24);
+  return seq;
+}
 
-  // Find start: lowest comfortable root on low E or A string
-  let startPhys = -1, startFret = -1;
-  outer:
+// Find root position: prefer low E or A string, fret 0–9
+function findStart(rootPitch) {
   for (let phys = 0; phys <= 2; phys++) {
     for (let fret = 0; fret <= 9; fret++) {
-      if ((OPEN_PITCH[phys] + fret) % 12 === ri) {
-        startPhys = phys; startFret = fret;
-        break outer;
+      if (((OPEN_PITCH[phys] + fret) % 12 + 12) % 12 === rootPitch) {
+        return { phys, fret };
       }
     }
   }
-  if (startPhys === -1) {
+  // fallback: any string
+  for (let phys = 0; phys <= 5; phys++) {
     for (let fret = 0; fret <= 12; fret++) {
-      if ((OPEN_PITCH[0] + fret) % 12 === ri) {
-        startPhys = 0; startFret = fret; break;
+      if (((OPEN_PITCH[phys] + fret) % 12 + 12) % 12 === rootPitch) {
+        return { phys, fret };
       }
     }
   }
-  if (startPhys === -1) { startPhys = 0; startFret = 0; }
+  return { phys: 0, fret: 0 };
+}
+
+// Place each note of the sequence onto a string/fret
+// Uses absolute pitch tracking to avoid octave confusion
+function buildPattern(rootName, scale) {
+  const rootLetter = rootName[0].toUpperCase();
+  const rootAcc = rootName.slice(1);
+  let rootPitch = NATURAL_ST[rootLetter];
+  if (rootAcc === '#') rootPitch++; if (rootAcc === 'b') rootPitch--;
+  rootPitch = ((rootPitch % 12) + 12) % 12;
+
+  const seq = buildSeq(scale.ivs);
+  const { phys: startPhys, fret: startFret } = findStart(rootPitch);
 
   const placed = [];
   let curPhys = startPhys;
-  let prevFret = startFret;
+
+  // Track the absolute pitch (not mod 12) as we go, so we can handle octave crossings properly
+  // The starting absolute pitch of the open string at startPhys:
+  // We define absolute pitch such that the start note = OPEN_PITCH[curPhys] + startFret
+  // We'll track the previous fret on the current string.
+
+  let prevAbsFret = startFret; // fret on current string for the previous note
 
   for (let i = 0; i < seq.length; i++) {
-    const targetSemitone = ri + seq[i]; // absolute, can be > 12
+    // The target pitch mod 12
+    const targetPitchMod = ((rootPitch + seq[i]) % 12 + 12) % 12;
 
-    const op = OPEN_PITCH[curPhys];
-    let fret = targetSemitone - op;
-    while (fret < 0)  fret += 12;
-    while (fret > 17) fret -= 12;
+    // How many semitones above the open string is this note?
+    // We want the fret such that (OPEN_PITCH[curPhys] + fret) % 12 === targetPitchMod
+    // and fret >= 0 and close to prevAbsFret
+    const openMod = OPEN_PITCH[curPhys] % 12;
+    let fret = ((targetPitchMod - openMod) % 12 + 12) % 12;
 
-    // If gap is too big, advance to next string
-    if (fret - prevFret > 5 && curPhys < 5) {
+    // Adjust to be close to prevAbsFret (within ±5 semitones preferred)
+    while (fret < prevAbsFret - 1) fret += 12;
+    while (fret > prevAbsFret + 5) fret -= 12;
+    if (fret < 0) fret += 12;
+
+    // If fret is still too high (e.g. > 17) or too far from prev, move to next string
+    if ((fret > prevAbsFret + 5 || fret > 15) && curPhys < 5) {
       curPhys++;
-      const op2 = OPEN_PITCH[curPhys];
-      fret = targetSemitone - op2;
-      while (fret < 0)  fret += 12;
-      while (fret > 17) fret -= 12;
-      if (fret > prevFret + 7) fret -= 12;
+      const newOpenMod = OPEN_PITCH[curPhys] % 12;
+      fret = ((targetPitchMod - newOpenMod) % 12 + 12) % 12;
+      // Align close to prevAbsFret on new string
+      while (fret < prevAbsFret - 6) fret += 12;
+      while (fret > prevAbsFret + 6) fret -= 12;
       if (fret < 0) fret += 12;
     }
 
-    prevFret = fret;
-    placed.push({ phys: curPhys, fret, seqIdx: i, isRoot: seq[i] % 12 === 0 });
+    prevAbsFret = fret;
+    placed.push({
+      phys: curPhys,
+      fret,
+      seqIdx: i,
+      isRoot: seq[i] % 12 === 0,
+    });
   }
 
+  // Determine display fret range
   const frets = placed.map(n => n.fret);
   const minF = Math.min(...frets);
   const maxF = Math.max(...frets);
@@ -468,21 +465,25 @@ function buildPattern(root, scale) {
   return { placed, dispMin, dispMax, seq };
 }
 
-function renderFretboard(root, scale) {
-  const { placed, dispMin, dispMax, seq } = buildPattern(root, scale);
-  const flat = useFlatSpelling(root);
-  const ri = noteIdx(root);
+// ============================================================
+// SVG FRETBOARD RENDERER
+// ============================================================
+function renderFretboard(rootName, scale, noteLabels) {
+  const rootLetter = rootName[0].toUpperCase();
+  const rootAcc = rootName.slice(1);
+  let rootPitch = NATURAL_ST[rootLetter];
+  if (rootAcc === '#') rootPitch++; if (rootAcc === 'b') rootPitch--;
+  rootPitch = ((rootPitch % 12) + 12) % 12;
 
-  // Note label for each seq position
-  const labels = seq.map(iv => semitoneToNote(ri + iv, flat));
-
+  const { placed, dispMin, dispMax, seq } = buildPattern(rootName, scale);
   const numFrets = dispMax - dispMin;
   const NUM_STR = 6;
 
-  const leftPad = 38, rightPad = 18, topPad = 30, bottomPad = 30;
-  const strSp = 30, fretW = 54;
+  // Layout
+  const leftPad=40, rightPad=16, topPad=28, bottomPad=28;
+  const strSp=32, fretW=56;
   const W = leftPad + numFrets * fretW + rightPad;
-  const H = topPad + (NUM_STR - 1) * strSp + bottomPad;
+  const H = topPad + (NUM_STR-1) * strSp + bottomPad;
 
   let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">`;
   svg += `<defs>
@@ -490,80 +491,91 @@ function renderFretboard(root, scale) {
       <stop offset="0%" stop-color="#faefd8"/>
       <stop offset="100%" stop-color="#edd898"/>
     </linearGradient>
-    <filter id="ds" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#00000044"/>
+    <filter id="ds">
+      <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#00000050"/>
     </filter>
   </defs>`;
 
   // Fretboard body
-  svg += `<rect x="${leftPad}" y="${topPad}" width="${numFrets*fretW}" height="${(NUM_STR-1)*strSp}" fill="url(#mg)" rx="2"/>`;
+  const fbX = leftPad, fbY = topPad;
+  const fbW = numFrets * fretW, fbH = (NUM_STR-1) * strSp;
+  svg += `<rect x="${fbX}" y="${fbY}" width="${fbW}" height="${fbH}" fill="url(#mg)" rx="2"/>`;
 
   // Nut
   if (dispMin === 0) {
-    svg += `<rect x="${leftPad-5}" y="${topPad-2}" width="5" height="${(NUM_STR-1)*strSp+4}" fill="#5a4820" rx="1"/>`;
+    svg += `<rect x="${leftPad-5}" y="${topPad-2}" width="5" height="${fbH+4}" fill="#5a4820" rx="1"/>`;
   }
 
   // Fret lines
   for (let f = 1; f <= numFrets; f++) {
     const x = leftPad + f * fretW;
-    svg += `<line x1="${x}" y1="${topPad}" x2="${x}" y2="${topPad+(NUM_STR-1)*strSp}" stroke="#b8a060" stroke-width="1.8"/>`;
+    svg += `<line x1="${x}" y1="${topPad}" x2="${x}" y2="${topPad+fbH}" stroke="#b8a060" stroke-width="1.8"/>`;
   }
 
-  // Fret numbers (above diagram)
+  // Fret numbers above
   for (let f = 0; f < numFrets; f++) {
     const fn = dispMin + f + 1;
     const x = leftPad + f * fretW + fretW / 2;
-    svg += `<text x="${x}" y="${topPad - 8}" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#9a8050" font-weight="500">${fn}</text>`;
+    svg += `<text x="${x}" y="${topPad-9}" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#9a8050" font-weight="500">${fn}</text>`;
   }
   if (dispMin === 0) {
-    svg += `<text x="${leftPad - 20}" y="${topPad - 8}" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#9a8050" font-weight="500">0</text>`;
+    svg += `<text x="${leftPad-22}" y="${topPad-9}" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#9a8050" font-weight="500">open</text>`;
   }
 
-  // Position markers
+  // Position markers (inlays)
   const markers = [3,5,7,9,12,15,17];
   for (const mf of markers) {
     if (mf > dispMin && mf <= dispMax) {
       const fi = mf - dispMin - 1;
       const cx = leftPad + fi * fretW + fretW / 2;
-      const midY = topPad + ((NUM_STR-1)*strSp)/2;
+      const midY = topPad + fbH / 2;
       if (mf === 12) {
-        svg += `<circle cx="${cx}" cy="${midY - strSp}" r="4" fill="#c8a860" opacity="0.45"/>`;
-        svg += `<circle cx="${cx}" cy="${midY + strSp}" r="4" fill="#c8a860" opacity="0.45"/>`;
+        svg += `<circle cx="${cx}" cy="${midY - strSp}" r="4" fill="#c8a860" opacity="0.5"/>`;
+        svg += `<circle cx="${cx}" cy="${midY + strSp}" r="4" fill="#c8a860" opacity="0.5"/>`;
       } else {
-        svg += `<circle cx="${cx}" cy="${midY}" r="4" fill="#c8a860" opacity="0.45"/>`;
+        svg += `<circle cx="${cx}" cy="${midY}" r="4" fill="#c8a860" opacity="0.5"/>`;
       }
     }
   }
 
-  // Strings: row 0 = top = high e (phys 5), row 5 = bottom = low E (phys 0)
+  // Strings
+  // row 0 (top) = phys 5 (high e), row 5 (bottom) = phys 0 (low E)
+  // String thickness: phys 0 (low E) = thickest = 3.5px, phys 5 (high e) = thinnest = 0.7px
+  // Linear scale: thickness = 3.5 - phys * 0.56  → phys0=3.5, phys5=0.7
   for (let row = 0; row < NUM_STR; row++) {
-    const phys = NUM_STR - 1 - row; // row 0 -> phys 5 (high e), row 5 -> phys 0 (low E)
+    const phys = 5 - row; // row 0 → phys 5 (high e), row 5 → phys 0 (low E)
     const y = topPad + row * strSp;
-    const thickness = 0.7 + phys * 0.38; // phys 0 (low E) thickest
-    svg += `<line x1="${leftPad}" y1="${y}" x2="${leftPad + numFrets*fretW}" y2="${y}" stroke="#6a5838" stroke-width="${thickness.toFixed(2)}" opacity="0.65"/>`;
-    // Label
-    svg += `<text x="${leftPad - 10}" y="${y + 4}" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#8a7040" font-weight="600">${STRING_LABEL[phys]}</text>`;
+    const thickness = (3.5 - phys * 0.56).toFixed(2); // phys5=0.7, phys0=3.5
+    svg += `<line x1="${leftPad}" y1="${y}" x2="${leftPad+fbW}" y2="${y}" stroke="#6a5838" stroke-width="${thickness}" opacity="0.7"/>`;
+    // String label left of nut
+    svg += `<text x="${leftPad-12}" y="${y+4}" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#7a6040" font-weight="600">${STR_LABEL[phys]}</text>`;
   }
 
   // Note dots
   for (const n of placed) {
-    const row = physToRow(n.phys); // phys 0 -> row 5 (bottom)
+    const row = physToRow(n.phys); // phys0→row5 (bottom=low E), phys5→row0 (top=high e)
     const y = topPad + row * strSp;
+
     let x;
     if (n.fret === 0 && dispMin === 0) {
-      x = leftPad - 20;
+      x = leftPad - 22;
     } else {
-      x = leftPad + (n.fret - dispMin - 0.5) * fretW;
+      // Center dot between fret lines: fret N is between line N-1 and line N
+      // Line for fret F is at x = leftPad + (F - dispMin) * fretW
+      const leftLine  = leftPad + (n.fret - dispMin - 1) * fretW;
+      const rightLine = leftPad + (n.fret - dispMin)     * fretW;
+      x = (leftLine + rightLine) / 2;
     }
 
-    const fill = n.isRoot ? '#8b6020' : '#1e6e96';
-    const label = labels[n.seqIdx];
-    const fs = label.length > 1 ? 7.5 : 9;
+    const isRoot = n.isRoot;
+    const fill   = isRoot ? '#8b6020' : '#1e6e96';
+    const label  = noteLabels[n.seqIdx];
+    const fs     = label.length > 1 ? 7.5 : 9;
 
-    svg += `<circle cx="${x}" cy="${y}" r="14" fill="${fill}" opacity="0.12"/>`;
+    svg += `<circle cx="${x}" cy="${y}" r="14" fill="${fill}" opacity="0.13"/>`;
     svg += `<circle cx="${x}" cy="${y}" r="11" fill="${fill}" filter="url(#ds)"/>`;
-    svg += `<circle cx="${x - 2}" cy="${y - 3}" r="3.5" fill="white" opacity="0.2"/>`;
-    svg += `<text x="${x}" y="${y + fs/2 - 0.3}" text-anchor="middle" dominant-baseline="middle" font-family="Inter,sans-serif" font-size="${fs}" font-weight="700" fill="white">${label}</text>`;
+    svg += `<circle cx="${x-2}" cy="${y-3}" r="3.5" fill="white" opacity="0.22"/>`;
+    svg += `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-family="Inter,sans-serif" font-size="${fs}" font-weight="700" fill="white">${label}</text>`;
   }
 
   svg += `</svg>`;
@@ -573,7 +585,6 @@ function renderFretboard(root, scale) {
 // ============================================================
 // UI
 // ============================================================
-
 const DISPLAY = {
   ionian:'Ionian (Major)', dorian:'Dorian', phrygian:'Phrygian', lydian:'Lydian',
   mixolydian:'Mixolydian', aeolian:'Aeolian (Natural Minor)', locrian:'Locrian',
@@ -583,34 +594,44 @@ const DISPLAY = {
 };
 
 function generate() {
-  const root = document.getElementById('rootSelect').value;
-  const sk = document.getElementById('scaleSelect').value;
+  const root  = document.getElementById('rootSelect').value;
+  const sk    = document.getElementById('scaleSelect').value;
   const scale = SCALES[sk];
   if (!scale) return;
 
-  const flat = useFlatSpelling(root);
-  const ri = noteIdx(root);
-  const notes = scale.ivs.map((iv, i) => ({
-    note: semitoneToNote(ri + iv, flat),
-    deg: scale.degs[i],
-    isRoot: i === 0,
-  }));
+  // Build properly spelled note names for the scale degrees
+  const noteNames = scale.diatonic
+    ? buildDiatonicNotes(root, scale.ivs)
+    : spellChromatic(root, scale.ivs);
+
+  // Build 2-octave label sequence matching buildSeq()
+  // seq = [0, iv1..ivN-1, 12, iv1+12..ivN-1+12, 24]
+  // Labels repeat: noteNames[0], noteNames[1..N-1], noteNames[0](octave), noteNames[1..N-1], noteNames[0]
+  const seqLabels = [];
+  seqLabels.push(noteNames[0]);
+  for (let i = 1; i < noteNames.length; i++) seqLabels.push(noteNames[i]);
+  seqLabels.push(noteNames[0]); // octave root
+  for (let i = 1; i < noteNames.length; i++) seqLabels.push(noteNames[i]);
+  seqLabels.push(noteNames[0]); // final root
 
   const dn = DISPLAY[sk] || sk;
-  document.getElementById('scaleTitle').textContent = `${root} ${dn}`;
-  document.getElementById('scaleSubtitle').textContent = `${notes.length}-note scale · Standard Tuning EADGBe · 2 Octaves`;
+  document.getElementById('scaleTitle').textContent    = `${root} ${dn}`;
+  document.getElementById('scaleSubtitle').textContent = `${noteNames.length}-note scale · Standard Tuning EADGBe · 2 Octaves`;
 
   const fEl = document.getElementById('formulaRow');
-  fEl.innerHTML = scale.formula ? `Formula: <strong>${scale.formula}</strong>  &nbsp;·&nbsp;  W = whole step, H = half step, W½ = 1½ steps` : '';
+  fEl.innerHTML = scale.formula
+    ? `Formula: <strong>${scale.formula}</strong> &nbsp;·&nbsp; W = whole step, H = half step, W½ = 1½ steps`
+    : '';
 
-  document.getElementById('fretboardContainer').innerHTML = renderFretboard(root, scale);
+  // Fretboard
+  document.getElementById('fretboardContainer').innerHTML = renderFretboard(root, scale, seqLabels);
 
-  // Notes table
+  // Notes table (single octave, properly spelled)
   const nb = document.querySelector('#notesTable tbody');
   nb.innerHTML = '';
-  notes.forEach(n => {
+  noteNames.forEach((note, i) => {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td class="degree-cell">${n.deg}</td><td class="note-cell${n.isRoot?' is-root':''}">${n.note}</td>`;
+    tr.innerHTML = `<td class="degree-cell">${scale.degs[i]}</td><td class="note-cell${i===0?' is-root':''}">${note}</td>`;
     nb.appendChild(tr);
   });
 
@@ -621,13 +642,12 @@ function generate() {
 
   if (scale.chords) {
     const qKey = scale.chordKey || sk;
-    const qs = QUALITIES[qKey];
+    const qs   = QUALITIES[qKey];
     if (qs) {
-      scale.ivs.forEach((iv, i) => {
-        const cr = semitoneToNote(ri + iv, flat);
-        const q = qs[i];
+      noteNames.forEach((chordRoot, i) => {
+        const q  = qs[i];
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td class="roman-cell roman-${q}">${toRoman(q,i)}</td><td class="chord-${q}">${toSymbol(cr,q)}</td>`;
+        tr.innerHTML = `<td class="roman-cell roman-${q}">${toRoman(q,i)}</td><td class="chord-${q}">${toSymbol(chordRoot,q)}</td>`;
         cb.appendChild(tr);
       });
     }
@@ -642,7 +662,7 @@ function generate() {
 }
 
 function quick(root, sk) {
-  document.getElementById('rootSelect').value = root;
+  document.getElementById('rootSelect').value  = root;
   document.getElementById('scaleSelect').value = sk;
   generate();
 }
