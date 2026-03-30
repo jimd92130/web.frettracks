@@ -107,9 +107,10 @@ tbody tr:hover{background:var(--bg);}
 .ig-close:hover{background:var(--bg);}
 /* Tone selector */
 .ig-tone-row{display:flex;gap:8px;padding:14px 24px 0;justify-content:center;}
-.ig-tone-btn{flex:1;padding:8px 0;border:2px solid var(--border);border-radius:10px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s;background:var(--bg);color:var(--ink);}
+.ig-tone-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 0;border:2px solid var(--border);border-radius:10px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s;background:var(--bg);color:var(--ink);}
 .ig-tone-btn.active{border-color:var(--brand);background:#EEF4FC;color:var(--brand);}
 .ig-tone-btn:hover{border-color:var(--brand);}
+.ig-tone-swatch{display:inline-block;width:14px;height:14px;border-radius:50%;flex-shrink:0;}
 .ig-modal-body{padding:16px 24px;display:flex;flex-direction:column;gap:10px;}
 .ig-export-btn{display:flex;align-items:center;gap:14px;width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:14px;padding:14px 16px;cursor:pointer;text-align:left;transition:all 0.15s;}
 .ig-export-btn:hover{border-color:var(--brand);background:#EEF4FC;}
@@ -236,9 +237,15 @@ tbody tr:hover{background:var(--bg);}
       <button class="ig-close" onclick="hideExportPopup()">✕</button>
     </div>
     <div class="ig-tone-row">
-      <button class="ig-tone-btn" id="toneLight" onclick="setTone('light')">Light</button>
-      <button class="ig-tone-btn active" id="toneMed" onclick="setTone('med')">Medium</button>
-      <button class="ig-tone-btn" id="toneDark" onclick="setTone('dark')">Dark</button>
+      <button class="ig-tone-btn active" id="toneLight" onclick="setTone('light')">
+        <span class="ig-tone-swatch" style="background:#4A90E2"></span>Blue Border
+      </button>
+      <button class="ig-tone-btn" id="toneMed" onclick="setTone('med')">
+        <span class="ig-tone-swatch" style="background:#5ddb9e"></span>Green Border
+      </button>
+      <button class="ig-tone-btn" id="toneDark" onclick="setTone('dark')">
+        <span class="ig-tone-swatch" style="background:#FFFFFF;border:1px solid #ccc"></span>White Border
+      </button>
     </div>
     <div class="ig-modal-body">
       <button class="ig-export-btn" onclick="exportImage('fretboard')">
@@ -267,7 +274,7 @@ tbody tr:hover{background:var(--bg);}
 // STATE
 // ============================================================
 let _exportState = null;
-let _igTone = 'med'; // light | med | dark
+let _igTone = 'light'; // light=blue border | med=green border | dark=white border
 
 // ============================================================
 // MUSIC THEORY DATA
@@ -385,13 +392,17 @@ const IG_GRADIENTS = {
 
 // Border colors per tone — all inset, all on dark background
 const IG_BORDERS = {
-  light: { color:'#4A90E2',  width:8  },  // brand blue
-  med:   { color:'#5ddb9e',  width:8  },  // mint green
-  dark:  { color:'#FFFFFF',  width:10 },  // bright white (slightly thicker — white reads thinner visually)
+  light: { color:'#4A90E2', width:16 },  // brand blue
+  med:   { color:'#5ddb9e', width:16 },  // mint green
+  dark:  { color:'#FFFFFF', width:16 },  // bright white
 };
 
-// Safe content inset — nothing draws within this many px of the canvas edge
-const SAFE = 28; // > max border width (10) + comfortable margin
+// Accent band at top — solid, same color as border
+const ACCENT_BAND_H = 50;
+
+// Safe content inset — content never draws within this many px of canvas edge
+// Must clear border (16px) + accent band where applicable + breathing room
+const SAFE = 36;
 
 // ============================================================
 // ENHARMONIC SPELLING
@@ -712,8 +723,13 @@ function drawBackground(ctx, tone){
   hl.addColorStop(0,'rgba(255,255,255,0.13)'); hl.addColorStop(1,'rgba(255,255,255,0)');
   ctx.fillStyle=hl; ctx.fillRect(0,0,IG_W,IG_H);
 
-  // Inset border — color varies by tone, always fully inside canvas
-  const b = IG_BORDERS[tone] || IG_BORDERS.med;
+  const b = IG_BORDERS[tone] || IG_BORDERS.light;
+
+  // Solid accent band at top — full width, sits inside border
+  ctx.fillStyle = b.color;
+  ctx.fillRect(b.width, b.width, IG_W - b.width*2, ACCENT_BAND_H);
+
+  // Inset border — drawn last so it sits cleanly on top of background
   const inset = b.width / 2;
   ctx.save();
   ctx.strokeStyle = b.color;
@@ -723,33 +739,36 @@ function drawBackground(ctx, tone){
 }
 
 function drawTitle(ctx,line1,line2){
-  const maxW=IG_W-140;
+  const maxW = IG_W - SAFE*2 - 40;
+  const TITLE_Y = SAFE + ACCENT_BAND_H + 90;
   ctx.textAlign='center';
   fitText(ctx,line1,maxW,T.TITLE.size,T.TITLE.weight);
   ctx.fillStyle=T.TITLE.color;
-  ctx.fillText(line1,IG_W/2,148);
+  ctx.fillText(line1,IG_W/2,TITLE_Y);
   if(line2){
     setFont(ctx,T.SUBTITLE);
     ctx.textAlign='center';
-    ctx.fillText(line2,IG_W/2,208);
+    ctx.fillText(line2,IG_W/2,TITLE_Y+62);
+    return TITLE_Y+62;
   }
+  return TITLE_Y;
 }
 
 function drawHRule(ctx,y){
   ctx.save(); ctx.strokeStyle='rgba(255,255,255,0.20)'; ctx.lineWidth=1.5;
-  ctx.beginPath(); ctx.moveTo(60,y); ctx.lineTo(IG_W-60,y); ctx.stroke(); ctx.restore();
+  ctx.beginPath(); ctx.moveTo(SAFE,y); ctx.lineTo(IG_W-SAFE,y); ctx.stroke(); ctx.restore();
 }
 
 function drawCTABox(ctx){
-  const boxY=IG_H-200;
-  drawHRule(ctx,boxY-18);
+  const boxY=IG_H-SAFE-220;
+  drawHRule(ctx,boxY-20);
   ctx.save();
-  roundRect(ctx,60,boxY,IG_W-120,158,24);
+  roundRect(ctx,SAFE,boxY,IG_W-SAFE*2,178,24);
   ctx.fillStyle='rgba(0,0,0,0.20)'; ctx.fill(); ctx.restore();
   setFont(ctx,T.CTA); ctx.textAlign='center';
   ctx.fillText('Download FretTracks on the App Store',IG_W/2,boxY+56);
   ctx.fillText('and learn to play lead guitar over',IG_W/2,boxY+96);
-  ctx.fillText('500 backing tracks.',IG_W/2,boxY+136);
+  ctx.fillText('500 backing tracks. Link in Bio.',IG_W/2,boxY+136);
 }
 
 function drawWatermark(ctx, seriesLabel){
@@ -857,20 +876,21 @@ function buildFretboardImage(state,tone){
     const c=igCanvas(), ctx=c.getContext('2d');
     drawBackground(ctx,tone);
 
-    // Title — auto-fit, safe from edges
+    // Title — auto-fit, safe from edges and below accent band
+    const TITLE_Y = SAFE + ACCENT_BAND_H + 90; // clears border(16) + band(50) + breathing(~40)
     const maxW=IG_W-SAFE*2-40;
     ctx.textAlign='center';
     fitText(ctx,`${state.root} ${state.displayName}`,maxW,T.TITLE.size,T.TITLE.weight);
     ctx.fillStyle=T.TITLE.color;
-    ctx.fillText(`${state.root} ${state.displayName}`,IG_W/2,SAFE+110);
+    ctx.fillText(`${state.root} ${state.displayName}`,IG_W/2,TITLE_Y);
 
     // Tagline under title
     ctx.fillStyle='rgba(255,255,255,0.88)';
     ctx.font=`500 46px ${FONT}`;
     ctx.textAlign='center';
-    ctx.fillText(TAGLINES[state.sk]||'',IG_W/2,SAFE+168);
+    ctx.fillText(TAGLINES[state.sk]||'',IG_W/2,TITLE_Y+62);
 
-    drawHRule(ctx,SAFE+198);
+    drawHRule(ctx,TITLE_Y+92);
 
     const svgEl=document.querySelector('#fretboardContainer svg');
     if(!svgEl){ drawCTABox(ctx); resolve(c); return; }
@@ -880,7 +900,7 @@ function buildFretboardImage(state,tone){
     const url=URL.createObjectURL(svgBlob);
     const img=new Image();
     img.onload=()=>{
-      const cardX=SAFE, cardY=SAFE+220, cardW=IG_W-SAFE*2;
+      const cardX=SAFE, cardY=TITLE_Y+110, cardW=IG_W-SAFE*2;
       const aspect=svgEl.viewBox.baseVal.height/svgEl.viewBox.baseVal.width;
       const cardH=Math.round(cardW*aspect);
 
@@ -911,10 +931,12 @@ function buildScaleImage(state,tone){
   const c=igCanvas(), ctx=c.getContext('2d');
   drawBackground(ctx,tone);
   drawTitle(ctx,`${state.root} ${state.displayName}`,'Scale Degrees');
-  drawHRule(ctx,230);
+  const scaleTableTop = SAFE + ACCENT_BAND_H + 90 + 62 + 30; // title + subtitle + gap
+  drawHRule(ctx, scaleTableTop - 14);
 
   const rows=state.noteNames.length;
-  const tableTop=252, tableBot=IG_H-SAFE-80;
+  const tableTop = scaleTableTop;
+  const tableBot=IG_H-SAFE-80;
   const rowH=Math.floor((tableBot-tableTop)/(rows+1));
   const colDeg=SAFE+72, colNote=SAFE+412;
 
@@ -963,7 +985,8 @@ function buildChordsImage(state,tone){
   }
 
   drawTitle(ctx,chordsImgTitle,'');
-  drawHRule(ctx,180);
+  const chordsTableTop = SAFE + ACCENT_BAND_H + 90 + 50; // title + gap
+  drawHRule(ctx, chordsTableTop - 14);
 
   // Get parent display name for footnote (fixes pentatonic footnote bug)
   const parentDN = isParent ? cd.parentDisplayName : null;
@@ -983,7 +1006,7 @@ function buildChordsImage(state,tone){
   }
   const fnBlockH = fnLines*FN_LINE_H + 80;
   const WM_RESERVE = SAFE+80;
-  const tableTop=200;
+  const tableTop = chordsTableTop;
   const tableBot=IG_H - fnBlockH - WM_RESERVE;
 
   const chords=cd?cd.chords:[];
@@ -1027,27 +1050,28 @@ function buildVideoImage(state,tone){
   const scaleName=`${state.root} ${state.displayName}`;
   const maxW=IG_W-SAFE*2-40;
 
+  const VIDEO_TITLE_Y = SAFE + ACCENT_BAND_H + 80;
   ctx.textAlign='center';
 
-  // Line 1 — reduced size so it never clips
+  // Line 1 — auto-fit
   ctx.fillStyle='#FFFFFF';
   fitText(ctx,"It's Easy to Sound Great",maxW,84,'bold');
   ctx.fillStyle='#FFFFFF';
-  ctx.fillText("It's Easy to Sound Great",IG_W/2,SAFE+100);
+  ctx.fillText("It's Easy to Sound Great",IG_W/2,VIDEO_TITLE_Y);
 
   // Line 2 — Playing [scale name]
   ctx.fillStyle='rgba(255,255,255,0.88)';
   fitText(ctx,`Playing ${scaleName}`,maxW,78,'bold');
   ctx.fillStyle='rgba(255,255,255,0.88)';
-  ctx.fillText(`Playing ${scaleName}`,IG_W/2,SAFE+200);
+  ctx.fillText(`Playing ${scaleName}`,IG_W/2,VIDEO_TITLE_Y+100);
 
   // Line 3
   ctx.fillStyle='rgba(255,255,255,0.70)';
   ctx.font=`500 54px ${FONT}`;
-  ctx.fillText('Over Backing Tracks',IG_W/2,SAFE+278);
-  ctx.fillText('from FretTracks',IG_W/2,SAFE+346);
+  ctx.fillText('Over Backing Tracks',IG_W/2,VIDEO_TITLE_Y+178);
+  ctx.fillText('from FretTracks',IG_W/2,VIDEO_TITLE_Y+246);
 
-  drawHRule(ctx,SAFE+390);
+  drawHRule(ctx,VIDEO_TITLE_Y+290);
 
   // CTA box — consistent font size with other images
   const boxY=IG_H-SAFE-340;
