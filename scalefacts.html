@@ -244,7 +244,7 @@ tbody tr:hover{background:var(--bg);}
         <span class="ig-tone-swatch" style="background:#5ddb9e"></span>Green Border
       </button>
       <button class="ig-tone-btn" id="toneDark" onclick="setTone('dark')">
-        <span class="ig-tone-swatch" style="background:#d0d0d0;border:1px solid #bbb"></span>Gray Border
+        <span class="ig-tone-swatch" style="background:#f0a030"></span>Gold Border
       </button>
     </div>
     <div class="ig-modal-body">
@@ -394,7 +394,7 @@ const IG_GRADIENTS = {
 const IG_BORDERS = {
   light: { color:'#4A90E2', width:16 },  // brand blue
   med:   { color:'#5ddb9e', width:16 },  // mint green
-  dark:  { color:'#d0d0d0', width:16 },  // light gray — visible against IG white feed
+  dark:  { color:'#f0a030', width:16 },  // gold/amber
 };
 
 // Accent band at top — solid, same color as border
@@ -899,7 +899,7 @@ function buildFretboardImage(state,tone){
 function buildScaleImage(state,tone){
   const c=igCanvas(), ctx=c.getContext('2d');
   drawBackground(ctx,tone);
-  drawTitle(ctx,'Scale Degrees',`${state.root} ${state.displayName}`);
+  drawTitle(ctx,'The Notes',`${state.root} ${state.displayName} Uses These Notes`);
   const scaleTableTop = SAFE + ACCENT_BAND_H + 90 + 62 + 30; // title + subtitle + gap
   drawHRule(ctx, scaleTableTop - 14);
 
@@ -956,7 +956,7 @@ function buildChordsImage(state,tone){
     else                          chordsSubtitle=`${state.root} ${state.displayName}`;
   }
 
-  drawTitle(ctx,'Play It Over These Chords', chordsSubtitle);
+  drawTitle(ctx,'The Chords',`Play ${state.root} ${state.displayName} Over These Chords`);
   const chordsTableTop = SAFE + ACCENT_BAND_H + 90 + 62 + 30; // title + subtitle + gap
   drawHRule(ctx, chordsTableTop - 14);
 
@@ -1024,25 +1024,25 @@ function buildVideoImage(state,tone){
   const VIDEO_TITLE_Y = SAFE + ACCENT_BAND_H + 90;
   ctx.textAlign='center';
 
-  // Line 1 — "The Sound" — big, bold, same as other image titles
+  // Line 1 — "The Sound" — bold title, same size as other images
   ctx.fillStyle='#FFFFFF';
   ctx.font=`bold 96px ${FONT}`;
   ctx.fillText('The Sound',IG_W/2,VIDEO_TITLE_Y);
 
-  // Line 2 — scale name — connects this to the set
+  // Line 2 — "[Scale Name] with Backing Tracks"
   ctx.fillStyle='rgba(255,255,255,0.75)';
-  fitText(ctx,scaleName,maxW,54,'500');
+  fitText(ctx,`${scaleName} with Backing Tracks`,maxW,52,'500');
   ctx.fillStyle='rgba(255,255,255,0.75)';
-  ctx.fillText(scaleName,IG_W/2,VIDEO_TITLE_Y+72);
+  ctx.fillText(`${scaleName} with Backing Tracks`,IG_W/2,VIDEO_TITLE_Y+72);
 
-  // Line 3 — "You. Sooner Than You Think." — the emotional hook
+  // Line 3 — "You. Sooner Than You Think." — the hook
   ctx.fillStyle='rgba(255,255,255,0.92)';
   fitText(ctx,'You. Sooner Than You Think.',maxW,62,'bold');
   ctx.fillStyle='rgba(255,255,255,0.92)';
   ctx.fillText('You. Sooner Than You Think.',IG_W/2,VIDEO_TITLE_Y+152);
 
-  // Line 4 — "With FretTracks." — the brand closer, own line
-  ctx.fillStyle='rgba(255,255,255,0.70)';
+  // Line 4 — "With FretTracks." — brand closer, own line
+  ctx.fillStyle='rgba(255,255,255,0.65)';
   ctx.font=`500 54px ${FONT}`;
   ctx.fillText('With FretTracks.',IG_W/2,VIDEO_TITLE_Y+222);
 
@@ -1090,7 +1090,7 @@ async function buildProofSheet(canvases, state) {
   ctx.fillStyle = '#212121';
   ctx.font = `bold 36px ui-sans-serif,system-ui,sans-serif`;
   ctx.textAlign = 'center';
-  const toneLabel = _igTone==='light' ? 'Blue Border' : _igTone==='med' ? 'Green Border' : 'Gray Border';
+  const toneLabel = _igTone==='light' ? 'Blue Border' : _igTone==='med' ? 'Green Border' : 'Gold Border';
   ctx.fillText(`${state.root} ${state.displayName}  ·  ${toneLabel}  ·  Proof Sheet`, totalW/2, MARGIN + 44);
 
   // Divider under header
