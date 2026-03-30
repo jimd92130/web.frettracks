@@ -298,6 +298,7 @@ tbody tr:hover{background:var(--bg);}
 // ============================================================
 // CONSTANTS
 // ============================================================
+let _exportState = null; // populated by generate(), used by Instagram export
 const LETTERS    = ['C','D','E','F','G','A','B'];
 const NATURAL_ST = { C:0, D:2, E:4, F:5, G:7, A:9, B:11 };
 const OPEN_PITCH = [4, 9, 2, 7, 11, 4]; // low E=0 … high e=5
@@ -625,28 +626,33 @@ function generate(){
   const prevFn = document.getElementById('chordsFootnote');
   if(prevFn) prevFn.remove();
 
+  // Build chordsData first, then render, then save to _exportState at the end
+  let chordsData = null;
+
   if(scale.chords){
     // Standard diatonic scale — regular chord table
     document.getElementById('chordsLabel').textContent=`Chords of ${root} ${dn.split(' ')[0]}`;
     const qs=QUALITIES[scale.chordKey||sk];
-    if(qs) noteNames.forEach((cr,i)=>{
-      const q=qs[i];
-      const tr=document.createElement('tr');
-      tr.innerHTML=`<td class="roman-cell roman-${q}">${toRoman(q,i)}</td><td class="chord-${q}" style="padding-left:2rem">${toSymbol(cr,q)}</td>`;
-      cb.appendChild(tr);
-    });
-    // Scale-appropriate footnote for diatonic
-    const fnDiv=document.createElement('div');
-    fnDiv.id='chordsFootnote'; fnDiv.className='chords-footnote';
-    fnDiv.innerHTML=`Lead guitar and melodies using the ${root} ${dn} sound great over these chords — because every chord is built entirely from notes of that scale.`;
-    document.querySelector('.table-card:last-child').appendChild(fnDiv);
-    _exportState.chordsData = { type:'diatonic', chords: noteNames.map((cr,i)=>({roman:toRoman(qs[i],i),symbol:toSymbol(cr,qs[i]),q:qs[i]})), footnote: fnDiv.innerHTML, bluesNote:null };
+    if(qs){
+      noteNames.forEach((cr,i)=>{
+        const q=qs[i];
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td class="roman-cell roman-${q}">${toRoman(q,i)}</td><td class="chord-${q}" style="padding-left:2rem">${toSymbol(cr,q)}</td>`;
+        cb.appendChild(tr);
+      });
+      const footnote=`Lead guitar and melodies using the ${root} ${dn} sound great over these chords — because every chord is built entirely from notes of that scale.`;
+      const fnDiv=document.createElement('div');
+      fnDiv.id='chordsFootnote'; fnDiv.className='chords-footnote';
+      fnDiv.innerHTML=footnote;
+      document.querySelector('.table-card:last-child').appendChild(fnDiv);
+      chordsData = { type:'diatonic', chords: noteNames.map((cr,i)=>({roman:toRoman(qs[i],i),symbol:toSymbol(cr,qs[i]),q:qs[i]})), footnote, bluesNote:null };
+    }
   } else {
     // Pentatonic / blues — show parent key chords with 7ths
     const pc = buildParentChords(root, sk);
     if(pc){
       document.getElementById('chordsLabel').textContent=`Chords of ${root} ${pc.parentDisplayName} (parent key of ${root} ${dn})`;
-      pc.chords.forEach((ch,i)=>{
+      pc.chords.forEach((ch)=>{
         const tr=document.createElement('tr');
         tr.innerHTML=`<td class="roman-cell roman-${ch.q}">${ch.roman}</td><td class="chord-${ch.q}" style="padding-left:2rem">${ch.symbol}</td>`;
         cb.appendChild(tr);
@@ -657,15 +663,14 @@ function generate(){
       if(pc.bluesNote) fnHTML += `<div class="blues-note">🎸 ${pc.bluesNote}</div>`;
       fnDiv.innerHTML = fnHTML;
       document.querySelector('.table-card:last-child').appendChild(fnDiv);
-      _exportState.chordsData = { type:'parent', parentDisplayName:pc.parentDisplayName, chords:pc.chords, footnote:pc.footnote, bluesNote:pc.bluesNote };
+      chordsData = { type:'parent', parentDisplayName:pc.parentDisplayName, chords:pc.chords, footnote:pc.footnote, bluesNote:pc.bluesNote };
     }
   }
 
   document.getElementById('output').classList.add('visible');
 
-  // Save state for Instagram export
-  _exportState = { root, sk, scale, noteNames, displayName: dn, formula: scale.formula||'', chordsData: _exportState ? _exportState.chordsData : null };
-  // chordsData is set above in the chord rendering block
+  // Save complete state for Instagram export
+  _exportState = { root, sk, scale, noteNames, displayName: dn, formula: scale.formula||'', chordsData };
 }
 
 function quick(root,sk){
@@ -678,13 +683,6 @@ function quick(root,sk){
 // INSTAGRAM EXPORT SYSTEM
 // Ctrl+Shift+I → popup → canvas-based 1080×1920 PNG downloads
 // ============================================================
-
-// Current scale state (populated by generate())
-let _exportState = null;
-
-// Intercept generate() to capture state for export
-const _origGenerate = generate;
-// We'll patch generate below after defining export helpers
 
 // ── CANVAS HELPERS ──────────────────────────────────────────
 
