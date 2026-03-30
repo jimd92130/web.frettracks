@@ -487,14 +487,17 @@ function renderFretboard(rootName, scale, noteLabels) {
   const leftPad = 52, rightPad = 24, topPad = 32, bottomPad = 24;
   const strSp = 32, fretW = 58;
 
-  const W = leftPad + numSlots * fretW + rightPad;
-  const H = topPad + (NUM_STR - 1) * strSp + bottomPad;
+  const svgNativeW = leftPad + numSlots * fretW + rightPad;
+  const svgNativeH = topPad + (NUM_STR - 1) * strSp + bottomPad;
 
   function physToRow(p) { return 5 - p; }
-  // X-center of the slot for fret N
+  // X-center of slot for fret N: note at fret N sits between wire N-1 and wire N
   function slotCx(fretN) { return leftPad + (fretN - dispMin) * fretW + fretW / 2; }
 
-  let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">`;
+  // Scale to window with 50px margin each side, never exceeding native size
+  const svgStyle = `max-width:${svgNativeW}px;width:calc(100vw - 100px);height:auto;display:block;`;
+
+  let svg = `<svg viewBox="0 0 ${svgNativeW} ${svgNativeH}" xmlns="http://www.w3.org/2000/svg" style="${svgStyle}">`;
   svg += `<defs>
     <linearGradient id="mg" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#faefd8"/>
@@ -510,16 +513,18 @@ function renderFretboard(rootName, scale, noteLabels) {
   const fbW = numSlots * fretW;
   svg += `<rect x="${leftPad}" y="${topPad}" width="${fbW}" height="${fbH}" fill="url(#mg)" rx="2"/>`;
 
-  // Fret wires: k=0..numSlots, x = leftPad + k*fretW
-  // Wire k corresponds to fret number (dispMin - 1 + k)
+  // Fret wires: k = 0..numSlots, wire k at x = leftPad + k*fretW
   for (let k = 0; k <= numSlots; k++) {
     const x = leftPad + k * fretW;
     svg += `<line x1="${x}" y1="${topPad}" x2="${x}" y2="${topPad+fbH}" stroke="#b8a060" stroke-width="1.8"/>`;
-    // Label this wire with its fret number
-    const wireNum = dispMin - 1 + k;
-    if (wireNum >= 0) {
-      svg += `<text x="${x}" y="${topPad - 10}" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#7a6840" font-weight="600">${wireNum}</text>`;
-    }
+  }
+
+  // Fret number labels — centered in each slot (slot k = fret dispMin+k)
+  // slotCx for slot k = leftPad + k*fretW + fretW/2
+  for (let k = 0; k < numSlots; k++) {
+    const fretNum = dispMin + k;
+    const cx = leftPad + k * fretW + fretW / 2;
+    svg += `<text x="${cx}" y="${topPad - 10}" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#7a6840" font-weight="600">${fretNum}</text>`;
   }
 
   // Position markers (inlays) — marker for fret N sits in slot N (between wire N-1 and wire N)
