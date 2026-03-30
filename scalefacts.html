@@ -699,6 +699,24 @@ function drawBackground(ctx, tone){
   const hl=ctx.createRadialGradient(160,180,0,160,180,650);
   hl.addColorStop(0,'rgba(255,255,255,0.13)'); hl.addColorStop(1,'rgba(255,255,255,0)');
   ctx.fillStyle=hl; ctx.fillRect(0,0,IG_W,IG_H);
+
+  // Inset border — lite gets dark navy, dark gets soft white, med gets none
+  const BORDER_W = 8;
+  const INSET = BORDER_W / 2;
+  if(tone === 'light'){
+    ctx.save();
+    ctx.strokeStyle = '#1e3a6b';
+    ctx.lineWidth = BORDER_W;
+    ctx.strokeRect(INSET, INSET, IG_W - BORDER_W, IG_H - BORDER_W);
+    ctx.restore();
+  } else if(tone === 'dark'){
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255,255,255,0.55)';
+    ctx.lineWidth = BORDER_W;
+    ctx.strokeRect(INSET, INSET, IG_W - BORDER_W, IG_H - BORDER_W);
+    ctx.restore();
+  }
+  // med: no border
 }
 
 function drawTitle(ctx,line1,line2){
@@ -775,13 +793,77 @@ function safeFilename(root,sk,type){
   return `frettracks-${type}-${root}-${sk}`.replace(/[^a-zA-Z0-9-]/g,'_')+'.png';
 }
 
+// Aspirational footnotes — deterministic by scale key
+function getChordFootnote(root, sk, displayName) {
+  const scaleFull = `${root} ${displayName}`;
+  // Blues always gets its own text
+  if(sk==='blues')
+    return `The I7, IV7 and V7 are the engine of the blues. Play the ${root} Blues scale freely over all these chords — it was built for exactly this.`;
+  // Option A
+  const A = (s) => `Try playing notes from the ${s} over these chords. You'll be surprised how good it sounds.`;
+  // Option C
+  const C = (s) => `Play the ${s} freely over any of these chords. The scale and the chords were made for each other.`;
+  // Option D
+  const D = (s) => `These chords were built from the same notes as the ${s} scale. Play the scale over them and your ear will guide you.`;
+
+  const MAP = {
+    ionian:          A, dorian:    D, phrygian: C, lydian:    C,
+    mixolydian:      A, aeolian:   D, locrian:  C,
+    major_pentatonic:A, minor_pentatonic: D,
+  };
+  return (MAP[sk]||A)(scaleFull);
+}
+
+// Shared CTA text used inside boxes — consistent size across all images
+const CTA_BOX_SIZE = 38; // px — readable and matched everywhere
+
+function drawCTABox(ctx){
+  const boxY=IG_H-220;
+  drawHRule(ctx,boxY-20);
+  ctx.save();
+  roundRect(ctx,60,boxY,IG_W-120,178,24);
+  ctx.fillStyle='rgba(0,0,0,0.22)'; ctx.fill(); ctx.restore();
+  ctx.fillStyle='#FFFFFF';
+  ctx.font=`bold ${CTA_BOX_SIZE}px ${FONT}`;
+  ctx.textAlign='center';
+  ctx.fillText('Download FretTracks on the App Store',IG_W/2,boxY+60);
+  ctx.fillText('and learn to play lead guitar over',  IG_W/2,boxY+108);
+  ctx.fillText('500 backing tracks. Link in Bio.',    IG_W/2,boxY+156);
+}
+
+// Watermark — just "Try FretTracks free. Link in Bio." big enough to read, no series label
+function drawWatermark(ctx){
+  const WM_SIZE=36;
+  ctx.save();
+  ctx.fillStyle='#FFFFFF';
+  ctx.font=`bold ${WM_SIZE}px ${FONT}`;
+  ctx.textAlign='center';
+  ctx.fillText('Try FretTracks free. Link in Bio.', IG_W/2, IG_H-48);
+  ctx.restore();
+}
+
 // ── IMAGE 1: FRETBOARD ──────────────────────────────────────
 function buildFretboardImage(state,tone){
   return new Promise(resolve=>{
     const c=igCanvas(), ctx=c.getContext('2d');
     drawBackground(ctx,tone);
-    drawTitle(ctx,`${state.root} ${state.displayName}`,'');
-    drawHRule(ctx,188);
+
+    // Title
+    const maxW=IG_W-140;
+    ctx.textAlign='center';
+    fitText(ctx,`${state.root} ${state.displayName}`,maxW,T.TITLE.size,T.TITLE.weight);
+    ctx.fillStyle=T.TITLE.color;
+    ctx.fillText(`${state.root} ${state.displayName}`,IG_W/2,148);
+
+    // Tagline as subtitle — bigger, right under title
+    const tagline = TAGLINES[state.sk]||'';
+    ctx.fillStyle='rgba(255,255,255,0.88)';
+    ctx.font=`500 46px ${FONT}`;
+    ctx.textAlign='center';
+    ctx.fillText(tagline,IG_W/2,210);
+
+    // Rule below subtitle
+    drawHRule(ctx,240);
 
     const svgEl=document.querySelector('#fretboardContainer svg');
     if(!svgEl){ drawCTABox(ctx); resolve(c); return; }
@@ -791,10 +873,12 @@ function buildFretboardImage(state,tone){
     const url=URL.createObjectURL(svgBlob);
     const img=new Image();
     img.onload=()=>{
-      const cardX=50,cardY=240,cardW=IG_W-100;
+      // Push diagram down — good margin below subtitle
+      const cardX=50, cardY=300, cardW=IG_W-100;
       const aspect=svgEl.viewBox.baseVal.height/svgEl.viewBox.baseVal.width;
       const cardH=Math.round(cardW*aspect);
 
+      // Maple card
       ctx.save();
       ctx.shadowColor='rgba(0,0,0,0.28)'; ctx.shadowBlur=36; ctx.shadowOffsetY=10;
       roundRect(ctx,cardX,cardY,cardW,cardH+52,28);
@@ -802,17 +886,15 @@ function buildFretboardImage(state,tone){
       ctx.drawImage(img,cardX+14,cardY+26,cardW-28,cardH);
       URL.revokeObjectURL(url);
 
-      // Tagline
-      const tagY=cardY+cardH+80;
-      setFont(ctx,T.TAGLINE); ctx.textAlign='center';
-      ctx.fillText(TAGLINES[state.sk]||'',IG_W/2,tagY);
-
-      // Hook
-      setFont(ctx,T.HOOK); ctx.textAlign='center';
-      ctx.fillText(HOOKS[state.sk]||'',IG_W/2,tagY+60);
+      // Hook — below diagram, above CTA
+      const hookY=cardY+cardH+80;
+      ctx.fillStyle='rgba(255,255,255,0.92)';
+      ctx.font=`600 44px ${FONT}`;
+      ctx.textAlign='center';
+      ctx.fillText(HOOKS[state.sk]||'',IG_W/2,hookY);
 
       drawCTABox(ctx);
-      drawWatermark(ctx,`${state.root} ${state.displayName} · Fretboard`);
+      // No watermark line on fretboard — CTA box covers it
       resolve(c);
     };
     img.onerror=()=>{ drawCTABox(ctx); resolve(c); };
@@ -828,7 +910,8 @@ function buildScaleImage(state,tone){
   drawHRule(ctx,230);
 
   const rows=state.noteNames.length;
-  const tableTop=252, tableBot=IG_H-100;
+  // Reserve space for watermark at bottom
+  const tableTop=252, tableBot=IG_H-130;
   const rowH=Math.floor((tableBot-tableTop)/(rows+1));
   const colDeg=100, colNote=540;
 
@@ -852,7 +935,8 @@ function buildScaleImage(state,tone){
     }
   });
 
-  drawWatermark(ctx,`${state.root} ${state.displayName} · Scale Degrees`);
+  drawHRule(ctx, IG_H-100);
+  drawWatermark(ctx);
   return Promise.resolve(c);
 }
 
@@ -878,12 +962,30 @@ function buildChordsImage(state,tone){
   drawTitle(ctx,chordsImgTitle,'');
   drawHRule(ctx,180);
 
-  const chords=cd?cd.chords:[];
+  // Build aspirational footnote text
+  const footnoteText = getChordFootnote(state.root, state.sk, state.displayName);
+
+  // Measure footnote height to calculate table space
+  const FN_SIZE=46; // slightly larger, readable
+  ctx.font=`400 ${FN_SIZE}px ${FONT}`;
+  const FN_LINE_H=FN_SIZE+14;
+  const FN_MAX_W=IG_W-120;
+  // Estimate lines
+  const words=footnoteText.split(' ');
+  let fnLines=1, testLine='';
+  for(const w of words){
+    const test=testLine?testLine+' '+w:w;
+    if(ctx.measureText(test).width>FN_MAX_W&&testLine){ fnLines++; testLine=w; }
+    else testLine=test;
+  }
+  const fnBlockH = fnLines*FN_LINE_H + 60; // padding above/below
+
+  // Watermark height reserve
+  const WM_RESERVE=100;
   const tableTop=200;
-  const FOOTNOTE_SIZE=T.FOOTNOTE.size;
-  const footnoteLines=cd&&cd.footnote?Math.ceil(cd.footnote.length/48):0;
-  const footnoteH=footnoteLines*(FOOTNOTE_SIZE+14)+80;
-  const tableBot=IG_H-footnoteH-100;
+  const tableBot=IG_H - fnBlockH - WM_RESERVE;
+
+  const chords=cd?cd.chords:[];
   const rowH=Math.floor((tableBot-tableTop)/(chords.length+1));
   const colNash=100, colChord=460;
 
@@ -896,21 +998,23 @@ function buildChordsImage(state,tone){
     const rowY=tableTop+64+i*rowH, textY=rowY+rowH*0.62;
     if(i%2===0){ ctx.save(); ctx.fillStyle='rgba(255,255,255,0.07)'; ctx.fillRect(60,rowY,IG_W-120,rowH); ctx.restore(); }
     if(i>0){ ctx.save(); ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(60,rowY); ctx.lineTo(IG_W-60,rowY); ctx.stroke(); ctx.restore(); }
-    ctx.fillStyle='#FFFFFF'; ctx.font=`${T.DATA_MD.weight} ${T.DATA_MD.size}px ${FONT}`; ctx.textAlign='left';
+    ctx.fillStyle='#FFFFFF';
+    ctx.font=`${T.DATA_MD.weight} ${T.DATA_MD.size}px ${FONT}`; ctx.textAlign='left';
     ctx.fillText(ch.roman,colNash,textY);
     ctx.font=`bold ${T.DATA_LG.size}px ${FONT}`;
     ctx.fillText(ch.symbol,colChord,textY);
   });
 
-  // Footnote
-  if(cd&&cd.footnote){
-    const fnY=tableBot+30;
-    drawHRule(ctx,fnY-16);
-    ctx.fillStyle='#FFFFFF'; ctx.font=`400 ${FOOTNOTE_SIZE}px ${FONT}`; ctx.textAlign='left';
-    canvasWrapText(ctx,cd.footnote,60,fnY+FOOTNOTE_SIZE+16,IG_W-120,FOOTNOTE_SIZE+14);
-  }
+  // Footnote — aspirational, full white, no box
+  const fnY=tableBot+30;
+  drawHRule(ctx,fnY-16);
+  ctx.fillStyle='#FFFFFF';
+  ctx.font=`400 ${FN_SIZE}px ${FONT}`;
+  ctx.textAlign='left';
+  canvasWrapText(ctx,footnoteText,60,fnY+FN_SIZE+10,FN_MAX_W,FN_LINE_H);
 
-  drawWatermark(ctx,`${state.root} ${state.displayName} · Chords`);
+  drawHRule(ctx, IG_H-100);
+  drawWatermark(ctx);
   return Promise.resolve(c);
 }
 
@@ -920,49 +1024,50 @@ function buildVideoImage(state,tone){
   drawBackground(ctx,tone);
 
   const scaleName=`${state.root} ${state.displayName}`;
-  const maxW=IG_W-140;
+  const maxW=IG_W-120;
 
-  // Large centered title block
+  // Title block — starts near top with comfortable padding
   ctx.textAlign='center';
   ctx.fillStyle='#FFFFFF';
-  ctx.font=`bold 88px ${FONT}`;
-  ctx.fillText("Here's How You", IG_W/2, 680);
-  ctx.fillText("Can Sound", IG_W/2, 790);
 
-  // Scale name line
-  ctx.fillStyle='rgba(255,255,255,0.85)';
-  fitText(ctx,`Playing ${scaleName}`,maxW,72,'bold');
-  ctx.fillStyle='rgba(255,255,255,0.85)';
-  ctx.fillText(`Playing ${scaleName}`,IG_W/2,920);
+  // Line 1
+  ctx.font=`bold 96px ${FONT}`;
+  ctx.fillText("It's Easy to Sound Great",IG_W/2,160);
+
+  // Line 2 — "Playing [scale name]" — auto-fit
+  ctx.fillStyle='rgba(255,255,255,0.88)';
+  fitText(ctx,`Playing ${scaleName}`,maxW,84,'bold');
+  ctx.fillStyle='rgba(255,255,255,0.88)';
+  ctx.fillText(`Playing ${scaleName}`,IG_W/2,270);
+
+  // Line 3
+  ctx.fillStyle='rgba(255,255,255,0.70)';
+  ctx.font=`500 56px ${FONT}`;
+  ctx.fillText('Over Backing Tracks',IG_W/2,356);
+  ctx.fillText('from FretTracks',IG_W/2,428);
 
   // Decorative rule
-  drawHRule(ctx,980);
+  drawHRule(ctx,490);
 
-  // Instruction for video overlay
-  ctx.fillStyle='rgba(255,255,255,0.30)';
-  ctx.font=`400 30px ${FONT}`;
-  ctx.fillText('[ overlay your video here ]',IG_W/2,1060);
+  // Video overlay hint
+  ctx.fillStyle='rgba(255,255,255,0.22)';
+  ctx.font=`400 32px ${FONT}`;
+  ctx.fillText('[ overlay your video here ]',IG_W/2,580);
 
-  // Bottom CTA
-  drawHRule(ctx,IG_H-280);
+  // CTA box — near bottom, consistent font size with other images
+  const boxY=IG_H-340;
+  drawHRule(ctx,boxY-20);
   ctx.save();
-  roundRect(ctx,60,IG_H-260,IG_W-120,200,24);
+  roundRect(ctx,60,boxY,IG_W-120,220,24);
   ctx.fillStyle='rgba(0,0,0,0.22)'; ctx.fill(); ctx.restore();
-
   ctx.fillStyle='#FFFFFF';
-  ctx.font=`bold 36px ${FONT}`; ctx.textAlign='center';
-  ctx.fillText('This is just one of the backing tracks',IG_W/2,IG_H-196);
-  ctx.fillText('from FretTracks.',IG_W/2,IG_H-148);
+  ctx.font=`bold ${CTA_BOX_SIZE}px ${FONT}`;
+  ctx.textAlign='center';
+  ctx.fillText('This is just one of the 500+ backing',IG_W/2,boxY+64);
+  ctx.fillText('tracks from FretTracks.',              IG_W/2,boxY+112);
+  ctx.fillText('Try it free. Link in Bio.',            IG_W/2,boxY+172);
 
-  // Watermark
-  ctx.fillStyle='#FFFFFF';
-  ctx.font=`${T.WM.weight} ${T.WM.size}px ${FONT}`;
-  ctx.textAlign='right';
-  ctx.fillText('Try FretTracks free. Link in bio.',IG_W-60,IG_H-44);
-  ctx.textAlign='left';
-  setFont(ctx,T.SERIES);
-  ctx.fillText(`${state.root} ${state.displayName} · Video`,60,IG_H-44);
-
+  // No watermark line — box covers it
   return Promise.resolve(c);
 }
 
