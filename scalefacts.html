@@ -695,78 +695,111 @@ function igCanvas() {
 }
 
 function drawBackground(ctx) {
-  const grad = ctx.createLinearGradient(0, 0, IG_W*0.4, IG_H);
+  const grad = ctx.createLinearGradient(0, 0, IG_W * 0.3, IG_H);
   grad.addColorStop(0,   '#6ab0f7');
   grad.addColorStop(0.5, '#4A90E2');
   grad.addColorStop(1,   '#1e5cb3');
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, IG_W, IG_H);
-  // Subtle radial highlight top-left
-  const hl = ctx.createRadialGradient(200, 200, 0, 200, 200, 700);
-  hl.addColorStop(0, 'rgba(255,255,255,0.12)');
+  // Radial highlight top-left
+  const hl = ctx.createRadialGradient(160, 180, 0, 160, 180, 650);
+  hl.addColorStop(0, 'rgba(255,255,255,0.13)');
   hl.addColorStop(1, 'rgba(255,255,255,0)');
   ctx.fillStyle = hl;
   ctx.fillRect(0, 0, IG_W, IG_H);
 }
 
-// Shared bold title block — used by fretboard and scale images
-function drawBoldTitle(ctx, line1, line2) {
-  ctx.textAlign = 'center';
-  // Pill accent behind title
-  ctx.save();
-  roundRect(ctx, 80, 90, IG_W-160, 110, 55);
-  ctx.fillStyle = 'rgba(255,255,255,0.13)';
-  ctx.fill();
-  ctx.restore();
-  // Main title
-  ctx.fillStyle = '#FFFFFF';
-  ctx.font = 'bold 96px ui-sans-serif,system-ui,sans-serif';
-  ctx.fillText(line1, IG_W/2, 178);
-  // Subtitle
-  ctx.fillStyle = 'rgba(255,255,255,0.75)';
-  ctx.font = '500 40px ui-sans-serif,system-ui,sans-serif';
-  ctx.fillText(line2, IG_W/2, 238);
+// ── TYPE SCALE (all sizes ≥ 24px) ────────────────────────────
+// TITLE_SIZE: 96px bold white — same for all 3 images
+// SUBTITLE_SIZE: 44px, 75% white
+// COL_HEADER: 36px bold, 50% white
+// DATA_LARGE: 80px bold white (note names, chord symbols)
+// DATA_MED: 52px 600-weight, 60% white (degrees, Nashville)
+// FORMULA: 42px bold white
+// STEP_KEY: 28px, 50% white (minimum floor)
+// FOOTNOTE: 36px white
+// CTA: 32px bold white
+
+const T = {
+  TITLE:    { size: 96,  weight: 'bold',  color: '#FFFFFF' },
+  SUBTITLE: { size: 44,  weight: '500',   color: 'rgba(255,255,255,0.75)' },
+  COL_HDR:  { size: 36,  weight: 'bold',  color: 'rgba(255,255,255,0.55)' },
+  DATA_LG:  { size: 80,  weight: 'bold',  color: '#FFFFFF' },
+  DATA_MD:  { size: 52,  weight: '600',   color: 'rgba(255,255,255,0.65)' },
+  FORMULA:  { size: 42,  weight: 'bold',  color: 'rgba(255,255,255,0.90)' },
+  STEP_KEY: { size: 28,  weight: '400',   color: 'rgba(255,255,255,0.50)' },
+  FOOTNOTE: { size: 34,  weight: '400',   color: '#FFFFFF' },
+  CTA:      { size: 32,  weight: 'bold',  color: '#FFFFFF' },
+};
+const FONT = 'ui-sans-serif,system-ui,sans-serif';
+function setFont(ctx, t) {
+  ctx.font = `${t.weight} ${t.size}px ${FONT}`;
+  ctx.fillStyle = t.color;
 }
 
-// Chords image uses a two-line title (longer text)
-function drawChordsTitle(ctx, line1, line2) {
-  ctx.textAlign = 'center';
+// Auto-shrink font to fit within maxW, minimum 24px
+function fitText(ctx, text, maxW, size, weight) {
+  let s = size;
+  ctx.font = `${weight} ${s}px ${FONT}`;
+  while(ctx.measureText(text).width > maxW && s > 24) {
+    s -= 2;
+    ctx.font = `${weight} ${s}px ${FONT}`;
+  }
+  return s;
+}
+
+// Unified title block — identical across all 3 images
+// line1 = scale name (auto-shrinks if needed), line2 = subtitle
+function drawTitle(ctx, line1, line2) {
+  const PAD = 80, maxW = IG_W - PAD*2;
+  // Pill
   ctx.save();
-  roundRect(ctx, 40, 60, IG_W-80, 180, 40);
+  roundRect(ctx, PAD-20, 82, IG_W-(PAD-20)*2, 118, 59);
   ctx.fillStyle = 'rgba(255,255,255,0.13)';
   ctx.fill();
   ctx.restore();
-  ctx.fillStyle = '#FFFFFF';
-  ctx.font = 'bold 72px ui-sans-serif,system-ui,sans-serif';
-  ctx.fillText(line1, IG_W/2, 150);
-  if(line2){
-    ctx.fillStyle = 'rgba(255,255,255,0.70)';
-    ctx.font = '400 38px ui-sans-serif,system-ui,sans-serif';
-    ctx.fillText(line2, IG_W/2, 210);
-  }
+  // Title — auto-fit
+  ctx.textAlign = 'center';
+  const titleSize = fitText(ctx, line1, maxW, T.TITLE.size, T.TITLE.weight);
+  ctx.fillStyle = T.TITLE.color;
+  ctx.fillText(line1, IG_W/2, 162);
+  // Subtitle
+  setFont(ctx, T.SUBTITLE);
+  ctx.textAlign = 'center';
+  ctx.fillText(line2, IG_W/2, 222);
 }
 
 function drawHRule(ctx, y) {
   ctx.save();
-  ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+  ctx.strokeStyle = 'rgba(255,255,255,0.20)';
   ctx.lineWidth = 1.5;
   ctx.beginPath(); ctx.moveTo(60, y); ctx.lineTo(IG_W-60, y); ctx.stroke();
   ctx.restore();
 }
 
-function drawCTA(ctx) {
-  const boxY = IG_H - 200;
-  drawHRule(ctx, boxY - 20);
+// Fretboard image keeps the CTA; scale/chord images get a subtle watermark instead
+function drawCTABox(ctx) {
+  const boxY = IG_H - 210;
+  drawHRule(ctx, boxY - 18);
   ctx.save();
-  roundRect(ctx, 60, boxY, IG_W-120, 160, 24);
-  ctx.fillStyle = 'rgba(0,0,0,0.18)';
+  roundRect(ctx, 60, boxY, IG_W-120, 168, 24);
+  ctx.fillStyle = 'rgba(0,0,0,0.20)';
   ctx.fill();
   ctx.restore();
-  ctx.fillStyle = '#FFFFFF';
-  ctx.font = 'bold 32px ui-sans-serif,system-ui,sans-serif';
+  setFont(ctx, T.CTA);
   ctx.textAlign = 'center';
-  ctx.fillText('Download FretTracks on the App Store and learn', IG_W/2, boxY + 58);
-  ctx.fillText('to play lead guitar over 500 backing tracks.', IG_W/2, boxY + 100);
+  ctx.fillText('Download FretTracks on the App Store', IG_W/2, boxY + 60);
+  ctx.fillText('and learn to play lead guitar over', IG_W/2, boxY + 100);
+  ctx.fillText('500 backing tracks.', IG_W/2, boxY + 140);
+}
+
+function drawWatermark(ctx) {
+  ctx.save();
+  ctx.fillStyle = 'rgba(255,255,255,0.30)';
+  ctx.font = `500 28px ${FONT}`;
+  ctx.textAlign = 'center';
+  ctx.fillText('FretTracks', IG_W/2, IG_H - 48);
+  ctx.restore();
 }
 
 function roundRect(ctx, x, y, w, h, r) {
@@ -805,63 +838,61 @@ function buildFretboardImage(state) {
     const c = igCanvas();
     const ctx = c.getContext('2d');
     drawBackground(ctx);
-    drawBoldTitle(ctx,
+    drawTitle(ctx,
       `${state.root} ${state.displayName}`,
       `${state.noteNames.length}-Note Scale  ·  Standard Tuning EADGBe`
     );
-    drawHRule(ctx, 268);
+    drawHRule(ctx, 252);
 
     const svgEl = document.querySelector('#fretboardContainer svg');
-    if(!svgEl){ drawCTA(ctx); resolve(c); return; }
+    if(!svgEl){ drawCTABox(ctx); resolve(c); return; }
 
     const svgData = new XMLSerializer().serializeToString(svgEl);
     const svgBlob = new Blob([svgData], {type:'image/svg+xml;charset=utf-8'});
     const url = URL.createObjectURL(svgBlob);
     const img = new Image();
     img.onload = () => {
-      const cardX=50, cardY=290, cardW=IG_W-100;
+      const cardX=50, cardY=274, cardW=IG_W-100;
       const aspect = svgEl.viewBox.baseVal.height / svgEl.viewBox.baseVal.width;
       const cardH = Math.round(cardW * aspect);
 
-      // Maple card
+      // Maple card with shadow
       ctx.save();
-      ctx.shadowColor='rgba(0,0,0,0.25)'; ctx.shadowBlur=32; ctx.shadowOffsetY=8;
-      roundRect(ctx, cardX, cardY, cardW, cardH+48, 28);
+      ctx.shadowColor='rgba(0,0,0,0.28)'; ctx.shadowBlur=36; ctx.shadowOffsetY=10;
+      roundRect(ctx, cardX, cardY, cardW, cardH+52, 28);
       ctx.fillStyle='#f7e8c2'; ctx.fill();
       ctx.restore();
-
-      ctx.drawImage(img, cardX+14, cardY+24, cardW-28, cardH);
+      ctx.drawImage(img, cardX+14, cardY+26, cardW-28, cardH);
       URL.revokeObjectURL(url);
 
-      // Legend — large, bright
-      const legY = cardY + cardH + 80;
-      // Root dot
+      // Legend
+      const legY = cardY + cardH + 88;
       ctx.save();
-      ctx.beginPath(); ctx.arc(90, legY, 20, 0, Math.PI*2);
+      ctx.beginPath(); ctx.arc(90, legY, 22, 0, Math.PI*2);
       ctx.fillStyle='#4A90E2'; ctx.fill(); ctx.restore();
-      ctx.fillStyle='#FFFFFF'; ctx.font='bold 36px ui-sans-serif,sans-serif'; ctx.textAlign='left';
-      ctx.fillText('Root note', 122, legY+13);
-      // Scale dot
+      setFont(ctx, T.DATA_MD); ctx.textAlign='left';
+      ctx.fillStyle='#FFFFFF';
+      ctx.font=`bold 42px ${FONT}`;
+      ctx.fillText('Root note', 126, legY+15);
+
       ctx.save();
-      ctx.beginPath(); ctx.arc(400, legY, 20, 0, Math.PI*2);
-      ctx.fillStyle='rgba(255,255,255,0.55)'; ctx.fill(); ctx.restore();
-      ctx.fillText('Scale note', 432, legY+13);
+      ctx.beginPath(); ctx.arc(460, legY, 22, 0, Math.PI*2);
+      ctx.fillStyle='rgba(255,255,255,0.50)'; ctx.fill(); ctx.restore();
+      ctx.fillText('Scale note', 496, legY+15);
 
       // Formula
       if(state.formula){
-        ctx.fillStyle='rgba(255,255,255,0.85)';
-        ctx.font='bold 34px ui-sans-serif,sans-serif';
+        setFont(ctx, T.FORMULA);
         ctx.textAlign='center';
-        ctx.fillText(`Formula: ${state.formula}`, IG_W/2, legY+72);
-        ctx.fillStyle='rgba(255,255,255,0.50)';
-        ctx.font='28px ui-sans-serif,sans-serif';
-        ctx.fillText('W = whole step  ·  H = half step  ·  W½ = 1½ steps', IG_W/2, legY+114);
+        ctx.fillText(`Formula:  ${state.formula}`, IG_W/2, legY+80);
+        setFont(ctx, T.STEP_KEY);
+        ctx.fillText('W = whole step  ·  H = half step  ·  W½ = 1½ steps', IG_W/2, legY+124);
       }
 
-      drawCTA(ctx);
+      drawCTABox(ctx);
       resolve(c);
     };
-    img.onerror = () => { drawCTA(ctx); resolve(c); };
+    img.onerror = () => { drawCTABox(ctx); resolve(c); };
     img.src = url;
   });
 }
@@ -872,72 +903,61 @@ function buildScaleImage(state) {
   const c = igCanvas();
   const ctx = c.getContext('2d');
   drawBackground(ctx);
-  drawBoldTitle(ctx, `${state.root} ${state.displayName}`, 'Scale Degrees');
-  drawHRule(ctx, 268);
+  drawTitle(ctx, `${state.root} ${state.displayName}`, 'Scale Degrees');
+  drawHRule(ctx, 252);
 
   const rows = state.noteNames.length;
-  // Distribute rows across most of the vertical space
-  const tableTop = 300;
-  const tableBot = IG_H - 230;
-  const rowH = Math.floor((tableBot - tableTop) / (rows + 1)); // +1 for header
-  const colL = 100;  // left column x
-  const colR = 580;  // right column x (Note)
+  const tableTop = 274;
+  const tableBot = IG_H - 100; // watermark only — use full space
+  const rowH = Math.floor((tableBot - tableTop) / (rows + 1));
+
+  const colDeg = 100;
+  const colNote = 540;
 
   // Column headers
-  ctx.fillStyle = 'rgba(255,255,255,0.50)';
-  ctx.font = 'bold 34px ui-sans-serif,sans-serif';
+  setFont(ctx, T.COL_HDR);
   ctx.textAlign = 'left';
-  ctx.fillText('DEGREE', colL, tableTop + 40);
-  ctx.fillText('NOTE', colR, tableTop + 40);
-
-  // Thin rule under header
-  drawHRule(ctx, tableTop + 58);
+  ctx.fillText('DEGREE', colDeg, tableTop + 46);
+  ctx.fillText('NOTE', colNote, tableTop + 46);
+  drawHRule(ctx, tableTop + 64);
 
   state.noteNames.forEach((note, i) => {
-    const rowMidY = tableTop + 58 + (i + 0.5) * rowH + rowH * 0.1;
+    const rowY   = tableTop + 64 + i * rowH;
+    const textY  = rowY + rowH * 0.62;
 
     // Alternating row tint
     if(i % 2 === 0){
-      ctx.save();
-      ctx.fillStyle = 'rgba(255,255,255,0.06)';
-      ctx.fillRect(60, tableTop + 58 + i*rowH, IG_W-120, rowH);
-      ctx.restore();
+      ctx.save(); ctx.fillStyle='rgba(255,255,255,0.07)';
+      ctx.fillRect(60, rowY, IG_W-120, rowH); ctx.restore();
     }
-
-    // Row separator
     if(i > 0){
-      ctx.save();
-      ctx.strokeStyle='rgba(255,255,255,0.14)'; ctx.lineWidth=1;
-      ctx.beginPath();
-      ctx.moveTo(60, tableTop+58+i*rowH);
-      ctx.lineTo(IG_W-60, tableTop+58+i*rowH);
-      ctx.stroke(); ctx.restore();
+      ctx.save(); ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(60,rowY); ctx.lineTo(IG_W-60,rowY); ctx.stroke(); ctx.restore();
     }
 
-    // Degree label — medium weight, dimmed
-    ctx.fillStyle = 'rgba(255,255,255,0.55)';
-    ctx.font = '500 52px ui-sans-serif,sans-serif';
+    // Degree — medium, dimmed
+    setFont(ctx, T.DATA_MD);
     ctx.textAlign = 'left';
-    ctx.fillText(state.scale.degs[i], colL, rowMidY + 18);
+    ctx.fillText(state.scale.degs[i], colDeg, textY);
 
-    // Note name — BIG, bold, bright; root in vivid blue-white
+    // Note — large, bright white; root gets bold underline accent
     const isRoot = i === 0;
-    ctx.fillStyle = isRoot ? '#ffffff' : 'rgba(255,255,255,0.92)';
-    ctx.font = isRoot ? 'bold 80px ui-sans-serif,sans-serif' : 'bold 76px ui-sans-serif,sans-serif';
-    ctx.fillText(note, colR, rowMidY + 24);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = `bold ${T.DATA_LG.size}px ${FONT}`;
+    ctx.textAlign = 'left';
+    ctx.fillText(note, colNote, textY);
 
-    // Root gets a subtle underline accent
     if(isRoot){
       ctx.save();
-      ctx.strokeStyle='rgba(255,255,255,0.5)'; ctx.lineWidth=3;
+      ctx.strokeStyle='rgba(255,255,255,0.55)'; ctx.lineWidth=4;
       const tw = ctx.measureText(note).width;
       ctx.beginPath();
-      ctx.moveTo(colR, rowMidY+34); ctx.lineTo(colR+tw, rowMidY+34);
+      ctx.moveTo(colNote, textY+10); ctx.lineTo(colNote+tw, textY+10);
       ctx.stroke(); ctx.restore();
     }
   });
 
-  drawCTA(ctx);
+  drawWatermark(ctx);
   return Promise.resolve(c);
 }
 
@@ -951,97 +971,76 @@ function buildChordsImage(state) {
   const cd = state.chordsData;
   const isParent = cd && cd.type === 'parent';
 
-  if(isParent){
-    drawChordsTitle(ctx,
-      `Chords of ${state.root} ${cd.parentDisplayName}`,
-      `(parent key of ${state.root} ${state.displayName})`
-    );
-  } else {
-    drawBoldTitle(ctx,
-      `Chords of ${state.root} ${state.displayName}`,
-      'Key Harmony'
-    );
-  }
+  // Title — same unified drawTitle, but chords may need a two-liner subtitle
+  const titleLine1 = isParent
+    ? `Chords of ${state.root} ${cd.parentDisplayName}`
+    : `Chords of ${state.root} ${state.displayName}`;
+  const titleLine2 = isParent
+    ? `Parent key of ${state.root} ${state.displayName}`
+    : 'Key Harmony';
 
-  drawHRule(ctx, isParent ? 248 : 268);
-
-  // Brighter quality colors for blue background
-  const QUAL_COLORS = {
-    M: '#5ddb9e',   // bright green
-    m: '#c49aff',   // bright purple
-    d: '#ff7878',   // bright red
-    A: '#ffb347',   // amber
-  };
+  drawTitle(ctx, titleLine1, titleLine2);
+  drawHRule(ctx, 252);
 
   const chords = cd ? cd.chords : [];
-  const tableTop = isParent ? 270 : 290;
-  const footnoteH = cd && cd.bluesNote ? 260 : 180;
-  const tableBot = IG_H - 230 - footnoteH - 30;
-  const rowH = Math.floor((tableBot - tableTop) / (chords.length + 1));
+  const tableTop = 274;
+  // Reserve space for footnote at bottom
+  const footnoteLines = cd && cd.footnote ? Math.ceil(cd.footnote.length / 55) : 0;
+  const bluesLines    = cd && cd.bluesNote ? Math.ceil(cd.bluesNote.length / 55) : 0;
+  const footnoteH     = (footnoteLines + bluesLines) * 44 + 80;
+  const tableBot      = IG_H - footnoteH - 80;
+  const rowH          = Math.floor((tableBot - tableTop) / (chords.length + 1));
 
-  const colNash = 100;
-  const colChord = 420;
+  const colNash  = 100;
+  const colChord = 480;
 
-  // Headers
-  ctx.fillStyle = 'rgba(255,255,255,0.50)';
-  ctx.font = 'bold 34px ui-sans-serif,sans-serif';
+  // Column headers
+  setFont(ctx, T.COL_HDR);
   ctx.textAlign = 'left';
-  ctx.fillText('NASHVILLE', colNash, tableTop + 40);
-  ctx.fillText('CHORD', colChord, tableTop + 40);
-  drawHRule(ctx, tableTop + 58);
+  ctx.fillText('NASHVILLE', colNash, tableTop + 46);
+  ctx.fillText('CHORD', colChord, tableTop + 46);
+  drawHRule(ctx, tableTop + 64);
 
   chords.forEach((ch, i) => {
-    const rowMidY = tableTop + 58 + (i + 0.5) * rowH + rowH * 0.1;
+    const rowY  = tableTop + 64 + i * rowH;
+    const textY = rowY + rowH * 0.62;
 
     if(i % 2 === 0){
-      ctx.save(); ctx.fillStyle='rgba(255,255,255,0.06)';
-      ctx.fillRect(60, tableTop+58+i*rowH, IG_W-120, rowH); ctx.restore();
+      ctx.save(); ctx.fillStyle='rgba(255,255,255,0.07)';
+      ctx.fillRect(60, rowY, IG_W-120, rowH); ctx.restore();
     }
     if(i > 0){
-      ctx.save(); ctx.strokeStyle='rgba(255,255,255,0.14)'; ctx.lineWidth=1;
-      ctx.beginPath();
-      ctx.moveTo(60,tableTop+58+i*rowH); ctx.lineTo(IG_W-60,tableTop+58+i*rowH);
-      ctx.stroke(); ctx.restore();
+      ctx.save(); ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(60,rowY); ctx.lineTo(IG_W-60,rowY); ctx.stroke(); ctx.restore();
     }
 
-    const qColor = QUAL_COLORS[ch.q] || '#FFFFFF';
-
-    // Roman numeral — medium, colored
-    ctx.fillStyle = qColor;
-    ctx.font = '600 52px ui-sans-serif,sans-serif';
+    // Nashville — medium weight, white
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = `${T.DATA_MD.weight} ${T.DATA_MD.size}px ${FONT}`;
     ctx.textAlign = 'left';
-    ctx.fillText(ch.roman, colNash, rowMidY + 18);
+    ctx.fillText(ch.roman, colNash, textY);
 
-    // Chord symbol — BIG, bold, bright colored
-    ctx.fillStyle = qColor;
-    ctx.font = 'bold 76px ui-sans-serif,sans-serif';
-    ctx.fillText(ch.symbol, colChord, rowMidY + 24);
+    // Chord symbol — large, bold, white
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = `bold ${T.DATA_LG.size}px ${FONT}`;
+    ctx.fillText(ch.symbol, colChord, textY);
   });
 
-  // Footnote box
-  const fnY = tableBot + 20;
-  ctx.save();
-  roundRect(ctx, 60, fnY, IG_W-120, footnoteH, 22);
-  ctx.fillStyle = 'rgba(0,0,0,0.20)';
-  ctx.fill();
-  // Left accent bar
-  ctx.fillStyle = 'rgba(255,255,255,0.40)';
-  ctx.fillRect(60, fnY, 5, footnoteH);
-  ctx.restore();
-
-  ctx.fillStyle = 'rgba(255,255,255,0.88)';
-  ctx.font = 'italic 28px ui-sans-serif,sans-serif';
-  ctx.textAlign = 'left';
+  // Footnote — large, white, full-bleed (no box)
   if(cd && cd.footnote){
-    canvasWrapText(ctx, cd.footnote, 88, fnY+44, IG_W-200, 40);
+    const fnY = tableBot + 30;
+    drawHRule(ctx, fnY - 16);
+    setFont(ctx, T.FOOTNOTE);
+    ctx.textAlign = 'left';
+    let lastY = canvasWrapText(ctx, cd.footnote, 60, fnY + 44, IG_W-120, T.FOOTNOTE.size + 10);
     if(cd.bluesNote){
-      ctx.fillStyle='rgba(255,255,255,0.60)';
-      ctx.font='italic 25px ui-sans-serif,sans-serif';
-      canvasWrapText(ctx, '— '+cd.bluesNote, 88, fnY+footnoteH-100, IG_W-200, 36);
+      ctx.fillStyle = 'rgba(255,255,255,0.65)';
+      ctx.font = `italic ${T.FOOTNOTE.size}px ${FONT}`;
+      canvasWrapText(ctx, cd.bluesNote, 60, lastY + 48, IG_W-120, T.FOOTNOTE.size + 8);
     }
   }
 
-  drawCTA(ctx);
+  drawWatermark(ctx);
   return Promise.resolve(c);
 }
 
