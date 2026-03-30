@@ -459,20 +459,40 @@ function renderFretboard(rootName, scale, noteLabels) {
 
   const { placed, minFret, maxFret, seq } = result;
 
-  // Display range: minFret to maxFret (tight fit)
-  const dispMin  = minFret;
-  const dispMax  = maxFret;
-  const numFrets = dispMax - dispMin + 1; // number of fret slots shown
+  // ── Coordinate system ──────────────────────────────────────────────────────
+  // A note at fret N sits BETWEEN fret wire (N-1) and fret wire N.
+  // We display fret wires from wire (dispMin-1) on the left to wire dispMax on the right.
+  // That gives us slots for frets dispMin … dispMax, one slot each.
+  //
+  // dispMin = lowest fret actually used across ALL strings (could be one below root fret).
+  // dispMax = highest fret actually used.
+  // numSlots = number of fret slots = dispMax - dispMin + 1
+  // Number of fret wires drawn = numSlots + 1  (wire at left edge + one per slot)
+  //
+  // Slot index for fret N: slotIdx = N - dispMin   (0-based, 0 = leftmost slot)
+  // X-center of slot:      x = leftPad + slotIdx * fretW + fretW/2
+  // Left wire of slot:     x = leftPad + slotIdx * fretW
+  // Right wire of slot:    x = leftPad + (slotIdx+1) * fretW
+  //
+  // Fret wire labels: wire at x = leftPad + k*fretW is labelled (dispMin - 1 + k)
+  //   k=0 → label dispMin-1, k=1 → label dispMin, … k=numSlots → label dispMax
+  // ──────────────────────────────────────────────────────────────────────────
+
+  const dispMin  = minFret;   // lowest fret used (across all strings)
+  const dispMax  = maxFret;   // highest fret used
+  const numSlots = dispMax - dispMin + 1;   // one slot per fret used
+  const numWires = numSlots + 1;            // fret wires: left edge + one per slot
 
   const NUM_STR = 6;
   const leftPad = 52, rightPad = 24, topPad = 32, bottomPad = 24;
   const strSp = 32, fretW = 58;
 
-  const W = leftPad + numFrets * fretW + rightPad;
+  const W = leftPad + numSlots * fretW + rightPad;
   const H = topPad + (NUM_STR - 1) * strSp + bottomPad;
 
-  // Row mapping: row 0 (top) = phys 5 (high e), row 5 (bottom) = phys 0 (low E)
   function physToRow(p) { return 5 - p; }
+  // X-center of the slot for fret N
+  function slotCx(fretN) { return leftPad + (fretN - dispMin) * fretW + fretW / 2; }
 
   let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">`;
   svg += `<defs>
@@ -485,74 +505,53 @@ function renderFretboard(rootName, scale, noteLabels) {
     </filter>
   </defs>`;
 
-  // Fretboard body — spans all displayed fret slots
-  const fbX = leftPad, fbY = topPad;
-  const fbW = numFrets * fretW, fbH = (NUM_STR - 1) * strSp;
-  svg += `<rect x="${fbX}" y="${fbY}" width="${fbW}" height="${fbH}" fill="url(#mg)" rx="2"/>`;
+  // Fretboard body
+  const fbH = (NUM_STR - 1) * strSp;
+  const fbW = numSlots * fretW;
+  svg += `<rect x="${leftPad}" y="${topPad}" width="${fbW}" height="${fbH}" fill="url(#mg)" rx="2"/>`;
 
-  // Fret lines — one at the left edge of each slot, plus the right edge
-  for (let f = 0; f <= numFrets; f++) {
-    const x = leftPad + f * fretW;
+  // Fret wires: k=0..numSlots, x = leftPad + k*fretW
+  // Wire k corresponds to fret number (dispMin - 1 + k)
+  for (let k = 0; k <= numSlots; k++) {
+    const x = leftPad + k * fretW;
     svg += `<line x1="${x}" y1="${topPad}" x2="${x}" y2="${topPad+fbH}" stroke="#b8a060" stroke-width="1.8"/>`;
+    // Label this wire with its fret number
+    const wireNum = dispMin - 1 + k;
+    if (wireNum >= 0) {
+      svg += `<text x="${x}" y="${topPad - 10}" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#7a6840" font-weight="600">${wireNum}</text>`;
+    }
   }
 
-  // Fret number labels — centered in each slot, above the board
-  // Label every slot with its fret number
-  for (let f = 0; f < numFrets; f++) {
-    const fn = dispMin + f;
-    const cx = leftPad + f * fretW + fretW / 2;
-    svg += `<text x="${cx}" y="${topPad - 10}" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#7a6840" font-weight="600">${fn}</text>`;
-  }
-  // Also label the right edge fret number
-  svg += `<text x="${leftPad + numFrets * fretW}" y="${topPad - 10}" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#7a6840" font-weight="600">${dispMax + 1}</text>`;
-
-  // Position markers (inlays) — only if they fall in range
+  // Position markers (inlays) — marker for fret N sits in slot N (between wire N-1 and wire N)
   const markerFrets = [3,5,7,9,12,15,17];
   for (const mf of markerFrets) {
-    // marker sits in the slot BEFORE fret line mf, i.e. between fret lines mf-1 and mf
-    if (mf > dispMin && mf <= dispMax + 1) {
-      const slotIdx = mf - 1 - dispMin; // 0-based slot index
-      if (slotIdx >= 0 && slotIdx < numFrets) {
-        const cx = leftPad + slotIdx * fretW + fretW / 2;
-        const midY = topPad + fbH / 2;
-        if (mf === 12) {
-          svg += `<circle cx="${cx}" cy="${midY - strSp}" r="4" fill="#c8a860" opacity="0.5"/>`;
-          svg += `<circle cx="${cx}" cy="${midY + strSp}" r="4" fill="#c8a860" opacity="0.5"/>`;
-        } else {
-          svg += `<circle cx="${cx}" cy="${midY}" r="4" fill="#c8a860" opacity="0.5"/>`;
-        }
+    if (mf >= dispMin && mf <= dispMax) {
+      const cx  = slotCx(mf);
+      const midY = topPad + fbH / 2;
+      if (mf === 12) {
+        svg += `<circle cx="${cx}" cy="${midY - strSp}" r="4" fill="#c8a860" opacity="0.5"/>`;
+        svg += `<circle cx="${cx}" cy="${midY + strSp}" r="4" fill="#c8a860" opacity="0.5"/>`;
+      } else {
+        svg += `<circle cx="${cx}" cy="${midY}" r="4" fill="#c8a860" opacity="0.5"/>`;
       }
     }
   }
 
-  // Strings
-  // row 0=top=phys5(high e), row 5=bottom=phys0(low E)
-  // Thickness: phys 0 (low E) = thickest, phys 5 (high e) = thinnest
+  // Strings: row 0=top=phys5(high e), row 5=bottom=phys0(low E)
+  // Thickness: phys 0 (low E)=3.5px → phys 5 (high e)=0.7px
   for (let row = 0; row < NUM_STR; row++) {
     const phys = 5 - row;
     const y = topPad + row * strSp;
-    // phys 0 → 3.5px, phys 5 → 0.7px
     const thickness = (0.7 + phys * 0.56).toFixed(2);
     svg += `<line x1="${leftPad}" y1="${y}" x2="${leftPad + fbW}" y2="${y}" stroke="#6a5838" stroke-width="${thickness}" opacity="0.75"/>`;
     svg += `<text x="${leftPad - 12}" y="${y + 4}" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#7a6040" font-weight="600">${STR_LABEL[phys]}</text>`;
   }
 
-  // Note dots
-  // A note at fret F sits in the slot between fret line (F-1) and fret line F.
-  // Slot index = F - dispMin - 1 (0-based), center = leftPad + slotIdx*fretW + fretW/2
-  // Exception: if dispMin === F (first fret shown = this fret), the note sits in slot 0.
+  // Note dots — use slotCx(fret) for correct horizontal placement
   for (const n of placed) {
-    const row  = physToRow(n.phys);
-    const y    = topPad + row * strSp;
-
-    // Slot: fret n.fret occupies the space between fret lines (n.fret - dispMin - 1) and (n.fret - dispMin)
-    // But our leftmost fret line is at x=leftPad representing fret dispMin.
-    // So fret dispMin sits in slot 0 (between x=leftPad and x=leftPad+fretW).
-    const slotIdx = n.fret - dispMin; // slot 0 = between dispMin and dispMin+1
-    const x = leftPad + slotIdx * fretW - fretW / 2;
-
-    // Guard: if slotIdx === 0 the note would be left of the board — put it in slot 0 center
-    const cx = slotIdx === 0 ? leftPad + fretW / 2 : x;
+    const row = physToRow(n.phys);
+    const y   = topPad + row * strSp;
+    const cx  = slotCx(n.fret);
 
     const fill  = n.isRoot ? '#8b6020' : '#1e6e96';
     const label = noteLabels[n.seqIdx];
