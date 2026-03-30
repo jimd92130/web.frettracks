@@ -57,10 +57,10 @@ h1,h2,h3,h4{color:var(--ink);letter-spacing:.2px;}
 
 /* ── CONTROL CARD ── */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;box-shadow:var(--shadow);margin-bottom:16px;}
-.card-label{font-size:12px;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
+.card-label{font-size:13px;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:#444e60;margin-bottom:14px;}
 
 .input-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
-.input-label{font-size:14px;font-weight:600;color:var(--muted);}
+.input-label{font-size:15px;font-weight:600;color:#3a4252;}
 
 select{
   background:var(--bg);border:1.5px solid var(--border);color:var(--ink);
@@ -86,10 +86,10 @@ select:focus{border-color:var(--brand);}
 
 /* ── QUICK PICKS ── */
 .quick-picks{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);}
-.qp-label{font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-right:2px;}
+.qp-label{font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#3a4252;margin-right:2px;}
 .qp-btn{
-  background:#EEF4FC;border:1px solid #C8DEFA;color:#3A7BC8;
-  font-family:inherit;font-size:12px;font-weight:600;
+  background:#EEF4FC;border:1px solid #C8DEFA;color:#2d6abf;
+  font-family:inherit;font-size:13px;font-weight:600;
   padding:4px 11px;cursor:pointer;border-radius:999px;transition:all 0.15s;
 }
 .qp-btn:hover{background:#C8DEFA;}
@@ -101,45 +101,47 @@ select:focus{border-color:var(--brand);}
 /* ── FRETBOARD CARD ── */
 .fretboard-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;box-shadow:var(--shadow);margin-bottom:16px;}
 .scale-heading{display:flex;align-items:baseline;gap:14px;margin-bottom:16px;flex-wrap:wrap;}
-.scale-title{font-size:clamp(22px,3vw,30px);font-weight:700;letter-spacing:-0.02em;color:var(--ink);}
-.scale-subtitle{font-size:13px;color:var(--muted);}
+.scale-title{font-size:clamp(24px,3vw,32px);font-weight:700;letter-spacing:-0.02em;color:var(--ink);}
+.scale-subtitle{font-size:15px;color:#444e60;font-weight:500;}
 
-.section-label{font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.section-label{font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:#3a4252;font-weight:700;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
 .fretboard-wrap{overflow-x:auto;}
 .fretboard-svg-container{min-width:500px;}
 
 .legend{display:flex;gap:16px;margin-top:10px;flex-wrap:wrap;}
-.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);font-weight:500;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:14px;color:#3a4252;font-weight:500;}
 .legend-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;}
 
-.formula-row{margin-top:10px;font-size:12px;color:var(--muted);}
-.formula-row strong{color:var(--brand);font-weight:600;}
+.formula-row{margin-top:10px;font-size:13px;color:#3a4252;}
+.formula-row strong{color:var(--brand-dark);font-weight:700;}
 
 /* ── TABLES ── */
 .tables-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
 .table-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);}
 
-table{width:100%;border-collapse:collapse;font-size:14px;}
-thead th{text-align:left;padding:6px 10px;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);border-bottom:1.5px solid var(--border);font-weight:700;}
-tbody td{padding:7px 10px;border-bottom:1px solid var(--border);vertical-align:middle;}
+table{width:100%;border-collapse:collapse;font-size:15px;}
+thead th{text-align:left;padding:6px 10px;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:#3a4252;border-bottom:1.5px solid var(--border);font-weight:700;}
+tbody td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:middle;}
 tbody tr:last-child td{border-bottom:none;}
 tbody tr:hover{background:var(--bg);}
 
-.degree-cell{font-weight:500;color:var(--muted);width:75px;font-size:13px;}
-.note-cell{font-weight:500;}
-.note-cell.is-root{color:var(--brand);font-weight:700;}
+.degree-cell{font-weight:600;color:#444e60;width:75px;font-size:14px;}
+.note-cell{font-weight:500;color:var(--ink);}
+.note-cell.is-root{color:var(--brand-dark);font-weight:700;}
 
 .roman-cell{font-weight:700;width:65px;}
 .roman-M{color:var(--major-color);} .roman-m{color:var(--minor-color);} .roman-d{color:var(--dim-color);} .roman-A{color:var(--aug-color);}
 .chord-M{color:var(--major-color);font-weight:600;} .chord-m{color:var(--minor-color);font-weight:600;} .chord-d{color:var(--dim-color);font-weight:600;} .chord-A{color:var(--aug-color);font-weight:600;}
-.no-chords td{color:var(--muted);font-style:italic;padding:12px 10px;font-size:13px;}
+.no-chords td{color:#444e60;font-style:italic;padding:12px 10px;font-size:14px;}
+.chords-footnote{margin-top:12px;font-size:13px;color:#444e60;line-height:1.5;font-style:italic;padding:10px 12px;background:var(--bg);border-radius:8px;border-left:3px solid var(--brand);}
+.chords-footnote .blues-note{margin-top:6px;color:#555f72;}
 
 .error-banner{background:#fff3f3;border:1px solid #f0b0b0;color:#a02020;padding:10px 14px;border-radius:10px;font-size:13px;margin-bottom:14px;display:none;}
 .error-banner.visible{display:block;}
 
 /* ── FOOTER ── */
-.footer{margin:28px 0 16px;text-align:center;color:var(--muted);font-size:14px;}
-.footer a{color:var(--muted);text-decoration:underline;}
+.footer{margin:28px 0 16px;text-align:center;color:#444e60;font-size:14px;}
+.footer a{color:#3a4252;text-decoration:underline;}
 
 /* ── INSTAGRAM EXPORT POPUP ── */
 .ig-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:100;align-items:center;justify-content:center;}
@@ -336,9 +338,61 @@ const QUALITIES = {
   melodic_minor:  ['m','m','A','M','M','d','d'],
 };
 
+// 7th chord suffixes for each quality in the parent-key (pentatonic/blues) context
+// aeolian parent: im7, iiø7, IIImaj7, ivm7, vm7, VImaj7, VII7
+// ionian parent:  Imaj7, iim7, iiim7, IVmaj7, V7, vim7, viiø7
+const SEVENTH_SUFFIX = {
+  aeolian: { m:'m7', d:'ø7', M_III:'maj7', M_VI:'maj7', M_VII:'7' },
+  ionian:  { M_I:'maj7', m:'m7', M_IV:'maj7', M_V:'7', d:'ø7' },
+};
+
+// Which scale keys use which parent
+const PARENT_KEY = {
+  minor_pentatonic: 'aeolian',
+  blues:            'aeolian',
+  major_pentatonic: 'ionian',
+  major_blues:      'ionian',
+};
+
+// Build 7th chord symbol for a given root, quality, and scale degree index
+// within the parent key context
+function toSymbol7(root, q, degIdx, parentKey) {
+  if(parentKey === 'aeolian') {
+    // i=0 m7, ii=1 ø7, III=2 maj7, iv=3 m7, v=4 m7, VI=5 maj7, VII=6 dom7
+    const suffixes = ['m7','ø7','maj7','m7','m7','maj7','7'];
+    return root + suffixes[degIdx];
+  } else {
+    // ionian: I=0 maj7, ii=1 m7, iii=2 m7, IV=3 maj7, V=4 dom7, vi=5 m7, vii=6 ø7
+    const suffixes = ['maj7','m7','m7','maj7','7','m7','ø7'];
+    return root + suffixes[degIdx];
+  }
+}
+
 const ROM = ['I','II','III','IV','V','VI','VII'];
 function toRoman(q,i){ const r=ROM[i]; return q==='M'?r:q==='m'?r.toLowerCase():q==='d'?r.toLowerCase()+'°':r+'+'; }
 function toSymbol(root,q){ return q==='M'?root:q==='m'?root+'m':q==='d'?root+'°':root+'+'; }
+
+// Build chords for a pentatonic/blues scale using its parent diatonic key
+// Returns { parentScaleName, parentNoteNames, chords[], footnote, bluesNote }
+function buildParentChords(root, sk) {
+  const parentKey = PARENT_KEY[sk];
+  if(!parentKey) return null;
+  const parentScale = SCALES[parentKey];
+  const parentNotes = buildDiatonicNotes(root, parentScale.ivs);
+  const qs = QUALITIES[parentKey];
+  const chords = parentNotes.map((cr, i) => ({
+    roman:  toRoman(qs[i], i),
+    symbol: toSymbol7(cr, qs[i], i, parentKey),
+    q:      qs[i],
+  }));
+  const parentDisplayName = DISPLAY[parentKey] || parentKey;
+  const scaleDn = DISPLAY[sk] || sk;
+  const footnote = `Lead guitar and melodies using the ${root} ${scaleDn} sound great over these chords — because every chord is built entirely from notes of the parent ${root} ${parentDisplayName} key.`;
+  const bluesNote = (sk === 'blues' || sk === 'major_blues')
+    ? `Blues players also commonly use ${root}7, ${parentNotes[3]}7 and ${parentNotes[4]}7 — dominant 7th chords on the I, IV and V — for a classic blues shuffle sound.`
+    : null;
+  return { parentDisplayName, parentNotes, chords, footnote, bluesNote };
+}
 
 // ============================================================
 // ENHARMONIC SPELLING
@@ -567,8 +621,13 @@ function generate(){
   });
 
   const cb=document.querySelector('#chordsTable tbody'); cb.innerHTML='';
-  document.getElementById('chordsLabel').textContent=`Chords of ${root} ${dn.split(' ')[0]}`;
+  // Remove any previous footnote
+  const prevFn = document.getElementById('chordsFootnote');
+  if(prevFn) prevFn.remove();
+
   if(scale.chords){
+    // Standard diatonic scale — regular chord table
+    document.getElementById('chordsLabel').textContent=`Chords of ${root} ${dn.split(' ')[0]}`;
     const qs=QUALITIES[scale.chordKey||sk];
     if(qs) noteNames.forEach((cr,i)=>{
       const q=qs[i];
@@ -576,16 +635,37 @@ function generate(){
       tr.innerHTML=`<td class="roman-cell roman-${q}">${toRoman(q,i)}</td><td class="chord-${q}" style="padding-left:2rem">${toSymbol(cr,q)}</td>`;
       cb.appendChild(tr);
     });
+    // Scale-appropriate footnote for diatonic
+    const fnDiv=document.createElement('div');
+    fnDiv.id='chordsFootnote'; fnDiv.className='chords-footnote';
+    fnDiv.innerHTML=`Lead guitar and melodies using the ${root} ${dn} sound great over these chords — because every chord is built entirely from notes of that scale.`;
+    document.querySelector('.table-card:last-child').appendChild(fnDiv);
+    _exportState.chordsData = { type:'diatonic', chords: noteNames.map((cr,i)=>({roman:toRoman(qs[i],i),symbol:toSymbol(cr,qs[i]),q:qs[i]})), footnote: fnDiv.innerHTML, bluesNote:null };
   } else {
-    const tr=document.createElement('tr'); tr.className='no-chords';
-    tr.innerHTML=`<td colspan="2">Chord harmony not defined for pentatonic / blues scales</td>`;
-    cb.appendChild(tr);
+    // Pentatonic / blues — show parent key chords with 7ths
+    const pc = buildParentChords(root, sk);
+    if(pc){
+      document.getElementById('chordsLabel').textContent=`Chords of ${root} ${pc.parentDisplayName} (parent key of ${root} ${dn})`;
+      pc.chords.forEach((ch,i)=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td class="roman-cell roman-${ch.q}">${ch.roman}</td><td class="chord-${ch.q}" style="padding-left:2rem">${ch.symbol}</td>`;
+        cb.appendChild(tr);
+      });
+      const fnDiv=document.createElement('div');
+      fnDiv.id='chordsFootnote'; fnDiv.className='chords-footnote';
+      let fnHTML = pc.footnote;
+      if(pc.bluesNote) fnHTML += `<div class="blues-note">🎸 ${pc.bluesNote}</div>`;
+      fnDiv.innerHTML = fnHTML;
+      document.querySelector('.table-card:last-child').appendChild(fnDiv);
+      _exportState.chordsData = { type:'parent', parentDisplayName:pc.parentDisplayName, chords:pc.chords, footnote:pc.footnote, bluesNote:pc.bluesNote };
+    }
   }
 
   document.getElementById('output').classList.add('visible');
 
   // Save state for Instagram export
-  _exportState = { root, sk, scale, noteNames, displayName: dn, formula: scale.formula||'' };
+  _exportState = { root, sk, scale, noteNames, displayName: dn, formula: scale.formula||'', chordsData: _exportState ? _exportState.chordsData : null };
+  // chordsData is set above in the chord rendering block
 }
 
 function quick(root,sk){
@@ -866,70 +946,107 @@ function buildChordsImage(state) {
   const c = igCanvas();
   const ctx = c.getContext('2d');
   drawBackground(ctx);
-  drawHeader(ctx, `${state.root} ${state.displayName}`, 'Chords of the Key');
-  drawDivider(ctx, 260);
+
+  const cd = state.chordsData;
+  const chordsTitle = cd && cd.type === 'parent'
+    ? `Chords of ${state.root} ${cd.parentDisplayName}\n(parent key of ${state.root} ${state.displayName})`
+    : `Chords of ${state.root} ${state.displayName}`;
+
+  // Draw title — may be two lines
+  const titleLines = chordsTitle.split('\n');
+  ctx.fillStyle = WHITE;
+  ctx.font = 'bold 60px ui-sans-serif, system-ui, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(titleLines[0], IG_W/2, 140);
+  if(titleLines[1]){
+    ctx.font = '400 36px ui-sans-serif, system-ui, sans-serif';
+    ctx.fillStyle = DIM_WHITE;
+    ctx.fillText(titleLines[1], IG_W/2, 190);
+  }
+  drawDivider(ctx, 230);
 
   const QUAL_COLORS = { M:'#1a6a48', m:'#5a30a0', d:'#b02828', A:'#a05010' };
+  const chords = cd ? cd.chords : [];
 
-  if(!state.scale.chords){
-    ctx.fillStyle=OFFWHITE; ctx.font='italic 36px ui-sans-serif,sans-serif'; ctx.textAlign='center';
-    ctx.fillText('Chord harmony not defined for pentatonic / blues scales.', IG_W/2, 600);
-  } else {
-    const qs = QUALITIES[state.scale.chordKey || state.sk];
-    const chords = qs ? state.noteNames.map((cr,i)=>({roman:toRoman(qs[i],i), symbol:toSymbol(cr,qs[i]), q:qs[i]})) : [];
+  const cardX=80, cardY=260, cardW=IG_W-160;
+  const rowH=88, headerH=72;
+  const cardH = headerH + chords.length*rowH + 30;
 
-    const cardX=80, cardY=295, cardW=IG_W-160;
-    const rowH=88, headerH=72;
-    const cardH = headerH + chords.length*rowH + 30;
+  ctx.save();
+  roundRect(ctx, cardX, cardY, cardW, cardH, 24);
+  ctx.fillStyle='rgba(255,255,255,0.95)';
+  ctx.shadowColor='rgba(0,0,0,0.15)'; ctx.shadowBlur=20;
+  ctx.fill();
+  ctx.restore();
 
-    ctx.save();
-    roundRect(ctx, cardX, cardY, cardW, cardH, 24);
-    ctx.fillStyle='rgba(255,255,255,0.95)';
-    ctx.shadowColor='rgba(0,0,0,0.15)'; ctx.shadowBlur=20;
-    ctx.fill();
-    ctx.restore();
+  // Header
+  ctx.fillStyle='#3a4252';
+  ctx.font='bold 28px ui-sans-serif,sans-serif';
+  ctx.textAlign='left';
+  ctx.fillText('Nashville', cardX+40, cardY+48);
+  ctx.fillText('Chord', cardX+340, cardY+48);
+  ctx.strokeStyle='#E0E0E0'; ctx.lineWidth=1.5;
+  ctx.beginPath();
+  ctx.moveTo(cardX+20, cardY+headerH); ctx.lineTo(cardX+cardW-20, cardY+headerH);
+  ctx.stroke();
 
-    // Header
-    ctx.fillStyle='#667085';
-    ctx.font='bold 28px ui-sans-serif,sans-serif';
+  chords.forEach((ch, i) => {
+    const rowY = cardY + headerH + i*rowH;
+    if(i%2===1){
+      ctx.save(); ctx.fillStyle='rgba(246,247,249,0.8)';
+      ctx.fillRect(cardX+1, rowY, cardW-2, rowH); ctx.restore();
+    }
+    if(i>0){
+      ctx.strokeStyle='#E0E0E0'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(cardX+20,rowY); ctx.lineTo(cardX+cardW-20,rowY); ctx.stroke();
+    }
+    const qColor = QUAL_COLORS[ch.q] || '#212121';
+    ctx.fillStyle=qColor;
+    ctx.font='bold 36px ui-sans-serif,sans-serif';
     ctx.textAlign='left';
-    ctx.fillText('Nashville', cardX+40, cardY+48);
-    ctx.fillText('Chord', cardX+340, cardY+48);
-    ctx.strokeStyle='#E0E0E0'; ctx.lineWidth=1.5;
-    ctx.beginPath();
-    ctx.moveTo(cardX+20, cardY+headerH); ctx.lineTo(cardX+cardW-20, cardY+headerH);
-    ctx.stroke();
+    ctx.fillText(ch.roman, cardX+40, rowY+rowH*0.65);
+    ctx.fillText(ch.symbol, cardX+340, rowY+rowH*0.65);
+  });
 
-    chords.forEach((ch, i) => {
-      const rowY = cardY + headerH + i*rowH;
-      if(i%2===1){
-        ctx.save(); ctx.fillStyle='rgba(246,247,249,0.8)';
-        ctx.fillRect(cardX+1, rowY, cardW-2, rowH); ctx.restore();
-      }
-      if(i>0){
-        ctx.strokeStyle='#E0E0E0'; ctx.lineWidth=1;
-        ctx.beginPath(); ctx.moveTo(cardX+20,rowY); ctx.lineTo(cardX+cardW-20,rowY); ctx.stroke();
-      }
-      const qColor = QUAL_COLORS[ch.q] || '#212121';
-      ctx.fillStyle=qColor;
-      ctx.font='bold 36px ui-sans-serif,sans-serif';
-      ctx.textAlign='left';
-      ctx.fillText(ch.roman, cardX+40, rowY+rowH*0.65);
-      ctx.fillText(ch.symbol, cardX+340, rowY+rowH*0.65);
-    });
+  // Footnote box
+  const fnY = cardY + cardH + 36;
+  const fnBoxH = cd && cd.bluesNote ? 220 : 150;
+  ctx.save();
+  roundRect(ctx, cardX, fnY, cardW, fnBoxH, 20);
+  ctx.fillStyle='rgba(255,255,255,0.13)';
+  ctx.fill();
+  // Blue left accent line
+  ctx.fillStyle='rgba(255,255,255,0.5)';
+  ctx.fillRect(cardX, fnY, 4, fnBoxH);
+  ctx.restore();
 
-    // Footnote
-    const fnY = cardY + cardH + 44;
-    ctx.save();
-    roundRect(ctx, cardX, fnY, cardW, 150, 20);
-    ctx.fillStyle='rgba(255,255,255,0.10)';
-    ctx.fill();
-    ctx.restore();
-    ctx.fillStyle=OFFWHITE;
-    ctx.font='italic 27px ui-sans-serif,sans-serif';
-    ctx.textAlign='center';
-    const fnText = CHORD_NOTE(`${state.root} ${state.displayName}`).split('\n');
-    fnText.forEach((line,i) => ctx.fillText(line, IG_W/2, fnY+44+(i*38)));
+  ctx.fillStyle='rgba(255,255,255,0.92)';
+  ctx.font='italic 26px ui-sans-serif,sans-serif';
+  ctx.textAlign='left';
+  // Word-wrap footnote
+  if(cd && cd.footnote){
+    const words = cd.footnote.split(' ');
+    let line='', y=fnY+44;
+    for(const word of words){
+      const test=line?line+' '+word:word;
+      if(ctx.measureText(test).width > cardW-80 && line){
+        ctx.fillText(line, cardX+32, y); line=word; y+=36;
+      } else line=test;
+    }
+    if(line) ctx.fillText(line, cardX+32, y);
+
+    if(cd.bluesNote){
+      ctx.fillStyle='rgba(255,255,255,0.72)';
+      ctx.font='italic 24px ui-sans-serif,sans-serif';
+      let ly=fnY+152, bl='';
+      for(const word of cd.bluesNote.split(' ')){
+        const test=bl?bl+' '+word:word;
+        if(ctx.measureText(test).width > cardW-80 && bl){
+          ctx.fillText(bl, cardX+32, ly); bl=word; ly+=34;
+        } else bl=test;
+      }
+      if(bl) ctx.fillText(bl, cardX+32, ly);
+    }
   }
 
   drawDivider(ctx, IG_H-180);
