@@ -349,18 +349,18 @@ const DISPLAY = {
   blues:'Blues',
 };
 
-// Per-scale benefit taglines and action hooks for IG images
+// Per-scale benefit taglines — comment on the scale TYPE not the key
 const TAGLINES = {
-  ionian:          'The foundation of Western music',
+  ionian:          'A bright, uplifting sound for any style',
   dorian:          'Minor with attitude — jazz, rock and funk',
-  phrygian:        'Dark, exotic — the sound of flamenco and metal',
-  lydian:          'Dreamy and cinematic — the "movie score" mode',
-  mixolydian:      'Major with a bluesy twist — classic rock\'s secret weapon',
-  aeolian:         'The natural minor — emotional, expressive, universal',
-  locrian:         'The dark one — tension and dissonance',
-  major_pentatonic:'5 notes that sound good over almost anything',
-  minor_pentatonic:'The rock and blues scale every guitarist needs',
-  blues:           'Add the blue note — instant soul and grit',
+  phrygian:        'Dark and exotic — instantly distinctive',
+  lydian:          'Dreamy and cinematic — a distinct musical color',
+  mixolydian:      'A bluesy major — classic rock\'s secret weapon',
+  aeolian:         'Emotional and expressive — works in every genre',
+  locrian:         'Dark tension — bold and adventurous',
+  major_pentatonic:'A versatile scale for country, rock and pop',
+  minor_pentatonic:'The essential scale for rock and blues',
+  blues:           'Soulful and gritty — the sound of the blues',
 };
 const HOOKS = {
   ionian:          'Fire it up. This is where music begins.',
@@ -375,12 +375,23 @@ const HOOKS = {
   blues:           'Jump in. One extra note changes everything.',
 };
 
-// IG background gradients by tone
+// All tones use the dark gradient — only border color varies
+const IG_GRADIENT_DARK = ['#3a7acc','#1f5aaa','#0a3070'];
 const IG_GRADIENTS = {
-  light: ['#b8dcfc','#7ab8f0','#4a8fd4'],
-  med:   ['#6ab0f7','#4A90E2','#1e5cb3'],
-  dark:  ['#3a7acc','#1f5aaa','#0a3070'],
+  light: IG_GRADIENT_DARK,
+  med:   IG_GRADIENT_DARK,
+  dark:  IG_GRADIENT_DARK,
 };
+
+// Border colors per tone — all inset, all on dark background
+const IG_BORDERS = {
+  light: { color:'#4A90E2',  width:8  },  // brand blue
+  med:   { color:'#5ddb9e',  width:8  },  // mint green
+  dark:  { color:'#FFFFFF',  width:10 },  // bright white (slightly thicker — white reads thinner visually)
+};
+
+// Safe content inset — nothing draws within this many px of the canvas edge
+const SAFE = 28; // > max border width (10) + comfortable margin
 
 // ============================================================
 // ENHARMONIC SPELLING
@@ -690,7 +701,8 @@ function fitText(ctx,text,maxW,size,weight){
 function igCanvas(){ const c=document.createElement('canvas'); c.width=IG_W; c.height=IG_H; return c; }
 
 function drawBackground(ctx, tone){
-  const stops = IG_GRADIENTS[tone] || IG_GRADIENTS.med;
+  // Dark gradient for all tones
+  const stops = IG_GRADIENT_DARK;
   const grad = ctx.createLinearGradient(0,0,IG_W*0.3,IG_H);
   grad.addColorStop(0,   stops[0]);
   grad.addColorStop(0.5, stops[1]);
@@ -700,23 +712,14 @@ function drawBackground(ctx, tone){
   hl.addColorStop(0,'rgba(255,255,255,0.13)'); hl.addColorStop(1,'rgba(255,255,255,0)');
   ctx.fillStyle=hl; ctx.fillRect(0,0,IG_W,IG_H);
 
-  // Inset border — lite gets dark navy, dark gets soft white, med gets none
-  const BORDER_W = 8;
-  const INSET = BORDER_W / 2;
-  if(tone === 'light'){
-    ctx.save();
-    ctx.strokeStyle = '#1e3a6b';
-    ctx.lineWidth = BORDER_W;
-    ctx.strokeRect(INSET, INSET, IG_W - BORDER_W, IG_H - BORDER_W);
-    ctx.restore();
-  } else if(tone === 'dark'){
-    ctx.save();
-    ctx.strokeStyle = 'rgba(255,255,255,0.55)';
-    ctx.lineWidth = BORDER_W;
-    ctx.strokeRect(INSET, INSET, IG_W - BORDER_W, IG_H - BORDER_W);
-    ctx.restore();
-  }
-  // med: no border
+  // Inset border — color varies by tone, always fully inside canvas
+  const b = IG_BORDERS[tone] || IG_BORDERS.med;
+  const inset = b.width / 2;
+  ctx.save();
+  ctx.strokeStyle = b.color;
+  ctx.lineWidth   = b.width;
+  ctx.strokeRect(inset, inset, IG_W - b.width, IG_H - b.width);
+  ctx.restore();
 }
 
 function drawTitle(ctx,line1,line2){
@@ -794,11 +797,18 @@ function safeFilename(root,sk,type){
 }
 
 // Aspirational footnotes — deterministic by scale key
-function getChordFootnote(root, sk, displayName) {
-  const scaleFull = `${root} ${displayName}`;
+// For pentatonic/blues, scaleFull should be the PARENT scale name, not the pentatonic name
+function getChordFootnote(root, sk, displayName, parentDisplayName) {
   // Blues always gets its own text
   if(sk==='blues')
     return `The I7, IV7 and V7 are the engine of the blues. Play the ${root} Blues scale freely over all these chords — it was built for exactly this.`;
+
+  // For pentatonic scales, use the parent scale name in the footnote
+  const isPentatonic = sk==='minor_pentatonic' || sk==='major_pentatonic';
+  const scaleFull = isPentatonic && parentDisplayName
+    ? `${root} ${parentDisplayName}`
+    : `${root} ${displayName}`;
+
   // Option A
   const A = (s) => `Try playing notes from the ${s} over these chords. You'll be surprised how good it sounds.`;
   // Option C
@@ -815,13 +825,13 @@ function getChordFootnote(root, sk, displayName) {
 }
 
 // Shared CTA text used inside boxes — consistent size across all images
-const CTA_BOX_SIZE = 38; // px — readable and matched everywhere
+const CTA_BOX_SIZE = 38;
 
 function drawCTABox(ctx){
   const boxY=IG_H-220;
   drawHRule(ctx,boxY-20);
   ctx.save();
-  roundRect(ctx,60,boxY,IG_W-120,178,24);
+  roundRect(ctx,SAFE,boxY,IG_W-SAFE*2,178,24);
   ctx.fillStyle='rgba(0,0,0,0.22)'; ctx.fill(); ctx.restore();
   ctx.fillStyle='#FFFFFF';
   ctx.font=`bold ${CTA_BOX_SIZE}px ${FONT}`;
@@ -831,14 +841,13 @@ function drawCTABox(ctx){
   ctx.fillText('500 backing tracks. Link in Bio.',    IG_W/2,boxY+156);
 }
 
-// Watermark — just "Try FretTracks free. Link in Bio." big enough to read, no series label
 function drawWatermark(ctx){
   const WM_SIZE=36;
   ctx.save();
   ctx.fillStyle='#FFFFFF';
   ctx.font=`bold ${WM_SIZE}px ${FONT}`;
   ctx.textAlign='center';
-  ctx.fillText('Try FretTracks free. Link in Bio.', IG_W/2, IG_H-48);
+  ctx.fillText('Try FretTracks free. Link in Bio.', IG_W/2, IG_H-SAFE-4);
   ctx.restore();
 }
 
@@ -848,22 +857,20 @@ function buildFretboardImage(state,tone){
     const c=igCanvas(), ctx=c.getContext('2d');
     drawBackground(ctx,tone);
 
-    // Title
-    const maxW=IG_W-140;
+    // Title — auto-fit, safe from edges
+    const maxW=IG_W-SAFE*2-40;
     ctx.textAlign='center';
     fitText(ctx,`${state.root} ${state.displayName}`,maxW,T.TITLE.size,T.TITLE.weight);
     ctx.fillStyle=T.TITLE.color;
-    ctx.fillText(`${state.root} ${state.displayName}`,IG_W/2,148);
+    ctx.fillText(`${state.root} ${state.displayName}`,IG_W/2,SAFE+110);
 
-    // Tagline as subtitle — bigger, right under title
-    const tagline = TAGLINES[state.sk]||'';
+    // Tagline under title
     ctx.fillStyle='rgba(255,255,255,0.88)';
     ctx.font=`500 46px ${FONT}`;
     ctx.textAlign='center';
-    ctx.fillText(tagline,IG_W/2,210);
+    ctx.fillText(TAGLINES[state.sk]||'',IG_W/2,SAFE+168);
 
-    // Rule below subtitle
-    drawHRule(ctx,240);
+    drawHRule(ctx,SAFE+198);
 
     const svgEl=document.querySelector('#fretboardContainer svg');
     if(!svgEl){ drawCTABox(ctx); resolve(c); return; }
@@ -873,12 +880,10 @@ function buildFretboardImage(state,tone){
     const url=URL.createObjectURL(svgBlob);
     const img=new Image();
     img.onload=()=>{
-      // Push diagram down — good margin below subtitle
-      const cardX=50, cardY=300, cardW=IG_W-100;
+      const cardX=SAFE, cardY=SAFE+220, cardW=IG_W-SAFE*2;
       const aspect=svgEl.viewBox.baseVal.height/svgEl.viewBox.baseVal.width;
       const cardH=Math.round(cardW*aspect);
 
-      // Maple card
       ctx.save();
       ctx.shadowColor='rgba(0,0,0,0.28)'; ctx.shadowBlur=36; ctx.shadowOffsetY=10;
       roundRect(ctx,cardX,cardY,cardW,cardH+52,28);
@@ -886,15 +891,14 @@ function buildFretboardImage(state,tone){
       ctx.drawImage(img,cardX+14,cardY+26,cardW-28,cardH);
       URL.revokeObjectURL(url);
 
-      // Hook — below diagram, above CTA
+      // Hook — top padding of 60px above the hook text
       const hookY=cardY+cardH+80;
       ctx.fillStyle='rgba(255,255,255,0.92)';
       ctx.font=`600 44px ${FONT}`;
       ctx.textAlign='center';
-      ctx.fillText(HOOKS[state.sk]||'',IG_W/2,hookY);
+      ctx.fillText(HOOKS[state.sk]||'',IG_W/2,hookY+60);
 
       drawCTABox(ctx);
-      // No watermark line on fretboard — CTA box covers it
       resolve(c);
     };
     img.onerror=()=>{ drawCTABox(ctx); resolve(c); };
@@ -910,10 +914,9 @@ function buildScaleImage(state,tone){
   drawHRule(ctx,230);
 
   const rows=state.noteNames.length;
-  // Reserve space for watermark at bottom
-  const tableTop=252, tableBot=IG_H-130;
+  const tableTop=252, tableBot=IG_H-SAFE-80;
   const rowH=Math.floor((tableBot-tableTop)/(rows+1));
-  const colDeg=100, colNote=540;
+  const colDeg=SAFE+72, colNote=SAFE+412;
 
   setFont(ctx,T.COL_HDR); ctx.textAlign='left';
   ctx.fillText('DEGREE',colDeg,tableTop+46);
@@ -922,8 +925,8 @@ function buildScaleImage(state,tone){
 
   state.noteNames.forEach((note,i)=>{
     const rowY=tableTop+64+i*rowH, textY=rowY+rowH*0.62;
-    if(i%2===0){ ctx.save(); ctx.fillStyle='rgba(255,255,255,0.07)'; ctx.fillRect(60,rowY,IG_W-120,rowH); ctx.restore(); }
-    if(i>0){ ctx.save(); ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(60,rowY); ctx.lineTo(IG_W-60,rowY); ctx.stroke(); ctx.restore(); }
+    if(i%2===0){ ctx.save(); ctx.fillStyle='rgba(255,255,255,0.07)'; ctx.fillRect(SAFE,rowY,IG_W-SAFE*2,rowH); ctx.restore(); }
+    if(i>0){ ctx.save(); ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(SAFE,rowY); ctx.lineTo(IG_W-SAFE,rowY); ctx.stroke(); ctx.restore(); }
     setFont(ctx,T.DATA_MD); ctx.textAlign='left';
     ctx.fillText(state.scale.degs[i],colDeg,textY);
     ctx.fillStyle='#FFFFFF'; ctx.font=`bold ${T.DATA_LG.size}px ${FONT}`; ctx.textAlign='left';
@@ -935,7 +938,7 @@ function buildScaleImage(state,tone){
     }
   });
 
-  drawHRule(ctx, IG_H-100);
+  drawHRule(ctx, IG_H-SAFE-70);
   drawWatermark(ctx);
   return Promise.resolve(c);
 }
@@ -962,15 +965,15 @@ function buildChordsImage(state,tone){
   drawTitle(ctx,chordsImgTitle,'');
   drawHRule(ctx,180);
 
-  // Build aspirational footnote text
-  const footnoteText = getChordFootnote(state.root, state.sk, state.displayName);
+  // Get parent display name for footnote (fixes pentatonic footnote bug)
+  const parentDN = isParent ? cd.parentDisplayName : null;
+  const footnoteText = getChordFootnote(state.root, state.sk, state.displayName, parentDN);
 
-  // Measure footnote height to calculate table space
-  const FN_SIZE=46; // slightly larger, readable
-  ctx.font=`400 ${FN_SIZE}px ${FONT}`;
+  // Measure footnote height
+  const FN_SIZE=46;
   const FN_LINE_H=FN_SIZE+14;
-  const FN_MAX_W=IG_W-120;
-  // Estimate lines
+  const FN_MAX_W=IG_W-SAFE*2;
+  ctx.font=`400 ${FN_SIZE}px ${FONT}`;
   const words=footnoteText.split(' ');
   let fnLines=1, testLine='';
   for(const w of words){
@@ -978,16 +981,14 @@ function buildChordsImage(state,tone){
     if(ctx.measureText(test).width>FN_MAX_W&&testLine){ fnLines++; testLine=w; }
     else testLine=test;
   }
-  const fnBlockH = fnLines*FN_LINE_H + 60; // padding above/below
-
-  // Watermark height reserve
-  const WM_RESERVE=100;
+  const fnBlockH = fnLines*FN_LINE_H + 80;
+  const WM_RESERVE = SAFE+80;
   const tableTop=200;
   const tableBot=IG_H - fnBlockH - WM_RESERVE;
 
   const chords=cd?cd.chords:[];
   const rowH=Math.floor((tableBot-tableTop)/(chords.length+1));
-  const colNash=100, colChord=460;
+  const colNash=SAFE+72, colChord=SAFE+432;
 
   setFont(ctx,T.COL_HDR); ctx.textAlign='left';
   ctx.fillText('NASHVILLE',colNash,tableTop+46);
@@ -996,8 +997,8 @@ function buildChordsImage(state,tone){
 
   chords.forEach((ch,i)=>{
     const rowY=tableTop+64+i*rowH, textY=rowY+rowH*0.62;
-    if(i%2===0){ ctx.save(); ctx.fillStyle='rgba(255,255,255,0.07)'; ctx.fillRect(60,rowY,IG_W-120,rowH); ctx.restore(); }
-    if(i>0){ ctx.save(); ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(60,rowY); ctx.lineTo(IG_W-60,rowY); ctx.stroke(); ctx.restore(); }
+    if(i%2===0){ ctx.save(); ctx.fillStyle='rgba(255,255,255,0.07)'; ctx.fillRect(SAFE,rowY,IG_W-SAFE*2,rowH); ctx.restore(); }
+    if(i>0){ ctx.save(); ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(SAFE,rowY); ctx.lineTo(IG_W-SAFE,rowY); ctx.stroke(); ctx.restore(); }
     ctx.fillStyle='#FFFFFF';
     ctx.font=`${T.DATA_MD.weight} ${T.DATA_MD.size}px ${FONT}`; ctx.textAlign='left';
     ctx.fillText(ch.roman,colNash,textY);
@@ -1005,15 +1006,15 @@ function buildChordsImage(state,tone){
     ctx.fillText(ch.symbol,colChord,textY);
   });
 
-  // Footnote — aspirational, full white, no box
+  // Footnote
   const fnY=tableBot+30;
   drawHRule(ctx,fnY-16);
   ctx.fillStyle='#FFFFFF';
   ctx.font=`400 ${FN_SIZE}px ${FONT}`;
   ctx.textAlign='left';
-  canvasWrapText(ctx,footnoteText,60,fnY+FN_SIZE+10,FN_MAX_W,FN_LINE_H);
+  canvasWrapText(ctx,footnoteText,SAFE,fnY+FN_SIZE+10,FN_MAX_W,FN_LINE_H);
 
-  drawHRule(ctx, IG_H-100);
+  drawHRule(ctx, IG_H-SAFE-70);
   drawWatermark(ctx);
   return Promise.resolve(c);
 }
@@ -1024,50 +1025,42 @@ function buildVideoImage(state,tone){
   drawBackground(ctx,tone);
 
   const scaleName=`${state.root} ${state.displayName}`;
-  const maxW=IG_W-120;
+  const maxW=IG_W-SAFE*2-40;
 
-  // Title block — starts near top with comfortable padding
   ctx.textAlign='center';
+
+  // Line 1 — reduced size so it never clips
   ctx.fillStyle='#FFFFFF';
+  fitText(ctx,"It's Easy to Sound Great",maxW,84,'bold');
+  ctx.fillStyle='#FFFFFF';
+  ctx.fillText("It's Easy to Sound Great",IG_W/2,SAFE+100);
 
-  // Line 1
-  ctx.font=`bold 96px ${FONT}`;
-  ctx.fillText("It's Easy to Sound Great",IG_W/2,160);
-
-  // Line 2 — "Playing [scale name]" — auto-fit
+  // Line 2 — Playing [scale name]
   ctx.fillStyle='rgba(255,255,255,0.88)';
-  fitText(ctx,`Playing ${scaleName}`,maxW,84,'bold');
+  fitText(ctx,`Playing ${scaleName}`,maxW,78,'bold');
   ctx.fillStyle='rgba(255,255,255,0.88)';
-  ctx.fillText(`Playing ${scaleName}`,IG_W/2,270);
+  ctx.fillText(`Playing ${scaleName}`,IG_W/2,SAFE+200);
 
   // Line 3
   ctx.fillStyle='rgba(255,255,255,0.70)';
-  ctx.font=`500 56px ${FONT}`;
-  ctx.fillText('Over Backing Tracks',IG_W/2,356);
-  ctx.fillText('from FretTracks',IG_W/2,428);
+  ctx.font=`500 54px ${FONT}`;
+  ctx.fillText('Over Backing Tracks',IG_W/2,SAFE+278);
+  ctx.fillText('from FretTracks',IG_W/2,SAFE+346);
 
-  // Decorative rule
-  drawHRule(ctx,490);
+  drawHRule(ctx,SAFE+390);
 
-  // Video overlay hint
-  ctx.fillStyle='rgba(255,255,255,0.22)';
-  ctx.font=`400 32px ${FONT}`;
-  ctx.fillText('[ overlay your video here ]',IG_W/2,580);
-
-  // CTA box — near bottom, consistent font size with other images
-  const boxY=IG_H-340;
-  drawHRule(ctx,boxY-20);
+  // CTA box — consistent font size with other images
+  const boxY=IG_H-SAFE-340;
   ctx.save();
-  roundRect(ctx,60,boxY,IG_W-120,220,24);
+  roundRect(ctx,SAFE,boxY,IG_W-SAFE*2,240,24);
   ctx.fillStyle='rgba(0,0,0,0.22)'; ctx.fill(); ctx.restore();
   ctx.fillStyle='#FFFFFF';
   ctx.font=`bold ${CTA_BOX_SIZE}px ${FONT}`;
   ctx.textAlign='center';
-  ctx.fillText('This is just one of the 500+ backing',IG_W/2,boxY+64);
-  ctx.fillText('tracks from FretTracks.',              IG_W/2,boxY+112);
-  ctx.fillText('Try it free. Link in Bio.',            IG_W/2,boxY+172);
+  ctx.fillText('This is just one of the 500+ backing',IG_W/2,boxY+68);
+  ctx.fillText('tracks from FretTracks.',              IG_W/2,boxY+118);
+  ctx.fillText('Try it free. Link in Bio.',            IG_W/2,boxY+186);
 
-  // No watermark line — box covers it
   return Promise.resolve(c);
 }
 
