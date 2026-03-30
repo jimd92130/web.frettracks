@@ -244,7 +244,7 @@ tbody tr:hover{background:var(--bg);}
         <span class="ig-tone-swatch" style="background:#5ddb9e"></span>Green Border
       </button>
       <button class="ig-tone-btn" id="toneDark" onclick="setTone('dark')">
-        <span class="ig-tone-swatch" style="background:#FFFFFF;border:1px solid #ccc"></span>White Border
+        <span class="ig-tone-swatch" style="background:#d0d0d0;border:1px solid #bbb"></span>Gray Border
       </button>
     </div>
     <div class="ig-modal-body">
@@ -394,7 +394,7 @@ const IG_GRADIENTS = {
 const IG_BORDERS = {
   light: { color:'#4A90E2', width:16 },  // brand blue
   med:   { color:'#5ddb9e', width:16 },  // mint green
-  dark:  { color:'#FFFFFF', width:16 },  // bright white
+  dark:  { color:'#d0d0d0', width:16 },  // light gray — visible against IG white feed
 };
 
 // Accent band at top — solid, same color as border
@@ -1024,24 +1024,29 @@ function buildVideoImage(state,tone){
   const VIDEO_TITLE_Y = SAFE + ACCENT_BAND_H + 90;
   ctx.textAlign='center';
 
-  // Line 1 — auto-fit
+  // Line 1 — "The Sound" — big, bold, same as other image titles
   ctx.fillStyle='#FFFFFF';
-  fitText(ctx,"It's Easy to Sound Great",maxW,84,'bold');
-  ctx.fillStyle='#FFFFFF';
-  ctx.fillText("It's Easy to Sound Great",IG_W/2,VIDEO_TITLE_Y);
+  ctx.font=`bold 96px ${FONT}`;
+  ctx.fillText('The Sound',IG_W/2,VIDEO_TITLE_Y);
 
-  // Line 2 — Playing [scale name] as subtitle
-  ctx.fillStyle='rgba(255,255,255,0.82)';
-  fitText(ctx,`Playing ${scaleName}`,maxW,60,'500');
-  ctx.fillStyle='rgba(255,255,255,0.82)';
-  ctx.fillText(`Playing ${scaleName}`,IG_W/2,VIDEO_TITLE_Y+76);
+  // Line 2 — scale name — connects this to the set
+  ctx.fillStyle='rgba(255,255,255,0.75)';
+  fitText(ctx,scaleName,maxW,54,'500');
+  ctx.fillStyle='rgba(255,255,255,0.75)';
+  ctx.fillText(scaleName,IG_W/2,VIDEO_TITLE_Y+72);
 
-  // Line 3 — Over Backing Tracks from FretTracks
-  ctx.fillStyle='rgba(255,255,255,0.60)';
-  ctx.font=`400 46px ${FONT}`;
-  ctx.fillText('Over Backing Tracks from FretTracks',IG_W/2,VIDEO_TITLE_Y+140);
+  // Line 3 — "You. Sooner Than You Think." — the emotional hook
+  ctx.fillStyle='rgba(255,255,255,0.92)';
+  fitText(ctx,'You. Sooner Than You Think.',maxW,62,'bold');
+  ctx.fillStyle='rgba(255,255,255,0.92)';
+  ctx.fillText('You. Sooner Than You Think.',IG_W/2,VIDEO_TITLE_Y+152);
 
-  drawHRule(ctx,VIDEO_TITLE_Y+180);
+  // Line 4 — "With FretTracks." — the brand closer, own line
+  ctx.fillStyle='rgba(255,255,255,0.70)';
+  ctx.font=`500 54px ${FONT}`;
+  ctx.fillText('With FretTracks.',IG_W/2,VIDEO_TITLE_Y+222);
+
+  drawHRule(ctx,VIDEO_TITLE_Y+268);
 
   // CTA box — consistent font size with other images
   const boxY=IG_H-SAFE-280;
