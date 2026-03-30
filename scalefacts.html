@@ -759,6 +759,8 @@ function drawHRule(ctx,y){
   ctx.beginPath(); ctx.moveTo(SAFE,y); ctx.lineTo(IG_W-SAFE,y); ctx.stroke(); ctx.restore();
 }
 
+const CTA_BOX_SIZE = 38;
+
 function drawCTABox(ctx){
   const boxY=IG_H-SAFE-220;
   drawHRule(ctx,boxY-20);
@@ -769,22 +771,6 @@ function drawCTABox(ctx){
   ctx.fillText('Download FretTracks on the App Store',IG_W/2,boxY+56);
   ctx.fillText('and learn to play lead guitar over',IG_W/2,boxY+96);
   ctx.fillText('500 backing tracks. Link in Bio.',IG_W/2,boxY+136);
-}
-
-function drawWatermark(ctx, seriesLabel){
-  // Series label lower left
-  if(seriesLabel){
-    setFont(ctx,T.SERIES);
-    ctx.textAlign='left';
-    ctx.fillText(seriesLabel, 60, IG_H-44);
-  }
-  // CTA lower right
-  ctx.save();
-  ctx.fillStyle=T.WM.color;
-  ctx.font=`${T.WM.weight} ${T.WM.size}px ${FONT}`;
-  ctx.textAlign='right';
-  ctx.fillText('Try FretTracks free. Link in bio.', IG_W-60, IG_H-44);
-  ctx.restore();
 }
 
 function roundRect(ctx,x,y,w,h,r){
@@ -841,23 +827,6 @@ function getChordFootnote(root, sk, displayName, parentDisplayName) {
     major_pentatonic:A, minor_pentatonic: D,
   };
   return (MAP[sk]||A)(scaleFull);
-}
-
-// Shared CTA text used inside boxes — consistent size across all images
-const CTA_BOX_SIZE = 38;
-
-function drawCTABox(ctx){
-  const boxY=IG_H-220;
-  drawHRule(ctx,boxY-20);
-  ctx.save();
-  roundRect(ctx,SAFE,boxY,IG_W-SAFE*2,178,24);
-  ctx.fillStyle='rgba(0,0,0,0.22)'; ctx.fill(); ctx.restore();
-  ctx.fillStyle='#FFFFFF';
-  ctx.font=`bold ${CTA_BOX_SIZE}px ${FONT}`;
-  ctx.textAlign='center';
-  ctx.fillText('Download FretTracks on the App Store',IG_W/2,boxY+60);
-  ctx.fillText('and learn to play lead guitar over',  IG_W/2,boxY+108);
-  ctx.fillText('500 backing tracks. Link in Bio.',    IG_W/2,boxY+156);
 }
 
 function drawWatermark(ctx){
