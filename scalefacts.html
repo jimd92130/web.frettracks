@@ -1063,6 +1063,83 @@ function buildVideoImage(state,tone){
   return Promise.resolve(c);
 }
 
+// ── PROOF SHEET ─────────────────────────────────────────────
+async function buildProofSheet(canvases, state) {
+  const THUMB_W    = 400;                          // width of each thumbnail
+  const THUMB_H    = Math.round(THUMB_W * IG_H / IG_W); // maintain 9:16 aspect = 711px
+  const MARGIN     = 32;                           // outer margin
+  const GAP        = 24;                           // gap between thumbs
+  const LABEL_H    = 52;                           // space below each thumb for label
+  const HEADER_H   = 72;                           // space at top for title
+  const FOOTER_H   = 48;                           // space at bottom
+
+  const cols = canvases.length;
+  const totalW = MARGIN*2 + THUMB_W*cols + GAP*(cols-1);
+  const totalH = MARGIN + HEADER_H + THUMB_H + LABEL_H + FOOTER_H + MARGIN;
+
+  const c = document.createElement('canvas');
+  c.width  = totalW;
+  c.height = totalH;
+  const ctx = c.getContext('2d');
+
+  // White background
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(0, 0, totalW, totalH);
+
+  // Header — scale name + tone
+  ctx.fillStyle = '#212121';
+  ctx.font = `bold 36px ui-sans-serif,system-ui,sans-serif`;
+  ctx.textAlign = 'center';
+  const toneLabel = _igTone==='light' ? 'Blue Border' : _igTone==='med' ? 'Green Border' : 'Gray Border';
+  ctx.fillText(`${state.root} ${state.displayName}  ·  ${toneLabel}  ·  Proof Sheet`, totalW/2, MARGIN + 44);
+
+  // Divider under header
+  ctx.strokeStyle = '#E0E0E0';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(MARGIN, MARGIN + HEADER_H - 8);
+  ctx.lineTo(totalW - MARGIN, MARGIN + HEADER_H - 8);
+  ctx.stroke();
+
+  const LABELS = ['1 — Fretboard', '2 — Scale Degrees', '3 — Chords', '4 — Video'];
+  const thumbY = MARGIN + HEADER_H;
+
+  canvases.forEach((thumb, i) => {
+    const thumbX = MARGIN + i * (THUMB_W + GAP);
+
+    // Drop shadow
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.15)';
+    ctx.shadowBlur  = 12;
+    ctx.shadowOffsetY = 4;
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(thumbX, thumbY, THUMB_W, THUMB_H);
+    ctx.restore();
+
+    // Thumbnail image
+    ctx.drawImage(thumb, thumbX, thumbY, THUMB_W, THUMB_H);
+
+    // Thin border around thumbnail
+    ctx.strokeStyle = '#CCCCCC';
+    ctx.lineWidth   = 1;
+    ctx.strokeRect(thumbX, thumbY, THUMB_W, THUMB_H);
+
+    // Label below thumbnail
+    ctx.fillStyle   = '#444e60';
+    ctx.font        = `600 22px ui-sans-serif,system-ui,sans-serif`;
+    ctx.textAlign   = 'center';
+    ctx.fillText(LABELS[i], thumbX + THUMB_W/2, thumbY + THUMB_H + 34);
+  });
+
+  // Footer
+  ctx.fillStyle = '#AAAAAA';
+  ctx.font      = `400 18px ui-sans-serif,system-ui,sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.fillText('FretTracks Scale Explorer  ·  frettracks-proof.png', totalW/2, totalH - MARGIN - 10);
+
+  return c;
+}
+
 // ── POPUP & EXPORT CONTROLS ─────────────────────────────────
 function setTone(tone){
   _igTone=tone;
@@ -1079,24 +1156,28 @@ function hideExportPopup(){ document.getElementById('igPopup').classList.remove(
 
 async function exportImage(type){
   const s=_exportState, tone=_igTone;
-  const safe=safeFilename(s.root,s.sk,'');
-  if(type==='fretboard'||type==='all'){
-    const c=await buildFretboardImage(s,tone);
-    downloadCanvas(c,safeFilename(s.root,s.sk,'fretboard'));
+
+  // Build all 4 canvases (needed for proof sheet, and reused for individual downloads)
+  const c1 = await buildFretboardImage(s,tone);
+  const c2 = await buildScaleImage(s,tone);
+  const c3 = await buildChordsImage(s,tone);
+  const c4 = await buildVideoImage(s,tone);
+
+  if(type==='fretboard') downloadCanvas(c1, safeFilename(s.root,s.sk,'fretboard'));
+  if(type==='scale')     downloadCanvas(c2, safeFilename(s.root,s.sk,'scale'));
+  if(type==='chords')    downloadCanvas(c3, safeFilename(s.root,s.sk,'chords'));
+  if(type==='video')     downloadCanvas(c4, safeFilename(s.root,s.sk,'video'));
+
+  if(type==='all'){
+    downloadCanvas(c1, safeFilename(s.root,s.sk,'fretboard'));
+    downloadCanvas(c2, safeFilename(s.root,s.sk,'scale'));
+    downloadCanvas(c3, safeFilename(s.root,s.sk,'chords'));
+    downloadCanvas(c4, safeFilename(s.root,s.sk,'video'));
+    // Proof sheet
+    const proof = await buildProofSheet([c1,c2,c3,c4], s);
+    downloadCanvas(proof, safeFilename(s.root,s.sk,'proof'));
+    hideExportPopup();
   }
-  if(type==='scale'||type==='all'){
-    const c=await buildScaleImage(s,tone);
-    downloadCanvas(c,safeFilename(s.root,s.sk,'scale'));
-  }
-  if(type==='chords'||type==='all'){
-    const c=await buildChordsImage(s,tone);
-    downloadCanvas(c,safeFilename(s.root,s.sk,'chords'));
-  }
-  if(type==='video'||type==='all'){
-    const c=await buildVideoImage(s,tone);
-    downloadCanvas(c,safeFilename(s.root,s.sk,'video'));
-  }
-  if(type==='all') hideExportPopup();
 }
 
 document.addEventListener('keydown',e=>{
