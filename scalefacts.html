@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guitar Scale Explorer</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #f5f4f0;
+    --surface2: #eeece7;
+    --border: #d8d4cc;
+    --accent: #a07830;
+    --accent2: #2a7fa0;
+    --root-color: #a07830;
+    --text: #1a1814;
+    --text-muted: #7a7060;
+    --major-color: #1a7a56;
+    --minor-color: #6a3aaa;
+    --dim-color: #c03030;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+  }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 1.6rem 3rem;
+    display: flex;
+    align-items: baseline;
+    gap: 1.5rem;
+    background: var(--surface);
+  }
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  header span {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .input-section {
+    padding: 2rem 3rem 1.6rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+    flex-wrap: wrap;
+  }
+  .input-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .scale-input {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    color: var(--text);
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    padding: 0.55rem 0.9rem;
+    outline: none;
+    width: 230px;
+    transition: border-color 0.2s;
+  }
+  .scale-input:focus { border-color: var(--accent); }
+  .scale-input::placeholder { color: #bbb; font-style: italic; }
+
+  .btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.65rem 1.5rem;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .btn:hover { opacity: 0.85; }
+
+  .error-msg {
+    color: var(--dim-color);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    display: none;
+  }
+  .error-msg.visible { display: block; }
+
+  .quick-picks {
+    padding: 0.9rem 3rem 1.1rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    flex-wrap: wrap;
+    background: var(--surface);
+  }
+  .qp-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.63rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-right: 0.2rem;
+  }
+  .qp-btn {
+    background: #fff;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    padding: 0.28rem 0.7rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .qp-btn:hover { border-color: var(--accent); color: var(--accent); background: #fdf8f2; }
+
+  #output { padding: 2.5rem 3rem; display: none; }
+  #output.visible { display: block; }
+
+  .scale-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 900;
+    margin-bottom: 0.25rem;
+    color: var(--text);
+  }
+  .scale-subtitle {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 2.2rem;
+  }
+
+  .fretboard-section { margin-bottom: 2.2rem; }
+
+  .section-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.9rem;
+    padding-bottom: 0.45rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .fretboard-wrap { overflow-x: auto; padding-bottom: 0.5rem; }
+  .fretboard-svg-container { min-width: 680px; }
+
+  .legend {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 0.9rem;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.67rem;
+    color: var(--text-muted);
+  }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+  .formula-row {
+    margin-top: 1.2rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--text-muted);
+  }
+  .formula-row span { color: var(--accent); }
+
+  .tables-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+  @media (max-width: 680px) {
+    .tables-grid { grid-template-columns: 1fr; }
+    .input-section, .quick-picks, #output { padding-left: 1.2rem; padding-right: 1.2rem; }
+    header { padding: 1.2rem; }
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.82rem;
+  }
+  thead th {
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    border-bottom: 1.5px solid var(--border);
+    font-weight: 400;
+  }
+  tbody td {
+    padding: 0.52rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: var(--surface); }
+
+  .degree-cell { font-weight: 400; color: var(--text-muted); width: 80px; }
+  .note-cell { color: var(--text); }
+  .note-cell.is-root { color: var(--accent); font-weight: 600; }
+
+  .roman-cell { font-weight: 500; width: 70px; }
+  .roman-major { color: var(--major-color); }
+  .roman-minor { color: var(--minor-color); }
+  .roman-dim   { color: var(--dim-color); }
+
+  .chord-cell { color: var(--text); }
+  .chord-cell.chord-major { color: var(--major-color); }
+  .chord-cell.chord-minor { color: var(--minor-color); }
+  .chord-cell.chord-dim   { color: var(--dim-color); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Guitar Scale Explorer</h1>
+  <span>Standard Tuning · EADGBe</span>
+</header>
+
+<div class="input-section">
+  <span class="input-label">Scale</span>
+  <input class="scale-input" id="scaleInput" type="text" placeholder="e.g. C Ionian" autocomplete="off" spellcheck="false">
+  <button class="btn" onclick="generate()">Generate</button>
+  <span class="error-msg" id="errorMsg"></span>
+</div>
+
+<div class="quick-picks">
+  <span class="qp-label">Try</span>
+  <button class="qp-btn" onclick="quick('C Ionian')">C Ionian</button>
+  <button class="qp-btn" onclick="quick('A Dorian')">A Dorian</button>
+  <button class="qp-btn" onclick="quick('E Phrygian')">E Phrygian</button>
+  <button class="qp-btn" onclick="quick('G Lydian')">G Lydian</button>
+  <button class="qp-btn" onclick="quick('G Mixolydian')">G Mixolydian</button>
+  <button class="qp-btn" onclick="quick('D Aeolian')">D Aeolian</button>
+  <button class="qp-btn" onclick="quick('B Locrian')">B Locrian</button>
+  <button class="qp-btn" onclick="quick('A Minor Pentatonic')">A Min Pent</button>
+  <button class="qp-btn" onclick="quick('G Major Pentatonic')">G Maj Pent</button>
+  <button class="qp-btn" onclick="quick('A Blues')">A Blues</button>
+  <button class="qp-btn" onclick="quick('A Harmonic Minor')">A Harm Minor</button>
+  <button class="qp-btn" onclick="quick('A Melodic Minor')">A Mel Minor</button>
+</div>
+
+<div id="output">
+  <div class="scale-title" id="scaleTitle"></div>
+  <div class="scale-subtitle" id="scaleSubtitle"></div>
+
+  <div class="fretboard-section">
+    <div class="section-label">Fretboard · 2 Octaves · Root on Low E</div>
+    <div class="fretboard-wrap">
+      <div class="fretboard-svg-container" id="fretboardContainer"></div>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#a07830"></div>Root note</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#4a90b8"></div>Scale note</div>
+    </div>
+    <div class="formula-row" id="formulaRow"></div>
+  </div>
+
+  <div class="tables-grid">
+    <div>
+      <div class="section-label">Scale Degrees</div>
+      <table id="notesTable">
+        <thead><tr><th>Degree</th><th>Note</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div>
+      <div class="section-label" id="chordsLabel">Chords of the Key</div>
+      <table id="chordsTable">
+        <thead><tr><th>Nashville</th><th>Chord</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// MUSIC THEORY ENGINE
+// ============================================================
+
+const NOTES_SHARP = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const NOTES_FLAT  = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
+const USE_FLAT    = new Set(['F','Bb','Eb','Ab','Db','Gb']);
+
+function noteIndex(name) {
+  let i = NOTES_SHARP.indexOf(name);
+  if (i === -1) i = NOTES_FLAT.indexOf(name);
+  return i;
+}
+function preferFlat(root) {
+  return USE_FLAT.has(root) || (NOTES_FLAT.includes(root) && !NOTES_SHARP.includes(root));
+}
+function noteAt(semitone, flat) {
+  const n = ((semitone % 12) + 12) % 12;
+  return flat ? NOTES_FLAT[n] : NOTES_SHARP[n];
+}
+
+const SCALES = {
+  'ionian':           { intervals:[0,2,4,5,7,9,11], degrees:['1','2','3','4','5','6','7'],        formula:'W W H W W W H',  hasDiatonicChords:true,  type:'diatonic' },
+  'dorian':           { intervals:[0,2,3,5,7,9,10], degrees:['1','2','b3','4','5','6','b7'],      formula:'W H W W W H W',  hasDiatonicChords:true,  type:'diatonic' },
+  'phrygian':         { intervals:[0,1,3,5,7,8,10], degrees:['1','b2','b3','4','5','b6','b7'],    formula:'H W W W H W W',  hasDiatonicChords:true,  type:'diatonic' },
+  'lydian':           { intervals:[0,2,4,6,7,9,11], degrees:['1','2','3','#4','5','6','7'],       formula:'W W W H W W H',  hasDiatonicChords:true,  type:'diatonic' },
+  'mixolydian':       { intervals:[0,2,4,5,7,9,10], degrees:['1','2','3','4','5','6','b7'],      formula:'W W H W W H W',  hasDiatonicChords:true,  type:'diatonic' },
+  'aeolian':          { intervals:[0,2,3,5,7,8,10], degrees:['1','2','b3','4','5','b6','b7'],    formula:'W H W W H W W',  hasDiatonicChords:true,  type:'diatonic' },
+  'locrian':          { intervals:[0,1,3,5,6,8,10], degrees:['1','b2','b3','4','b5','b6','b7'],  formula:'H W W H W W W',  hasDiatonicChords:true,  type:'diatonic' },
+  'major':            { alias:'ionian' },
+  'natural minor':    { alias:'aeolian' },
+  'minor':            { alias:'aeolian' },
+  'major pentatonic': { intervals:[0,2,4,7,9],      degrees:['1','2','3','5','6'],               formula:'W W WH W WH',   hasDiatonicChords:false, type:'pentatonic' },
+  'minor pentatonic': { intervals:[0,3,5,7,10],     degrees:['1','b3','4','5','b7'],             formula:'WH W W WH W',   hasDiatonicChords:false, type:'pentatonic' },
+  'pentatonic major': { alias:'major pentatonic' },
+  'pentatonic minor': { alias:'minor pentatonic' },
+  'blues':            { intervals:[0,3,5,6,7,10],   degrees:['1','b3','4','b5','5','b7'],        formula:'WH W H H WH W', hasDiatonicChords:false, type:'blues' },
+  'major blues':      { intervals:[0,2,3,4,7,9],    degrees:['1','2','b3','3','5','6'],          formula:'',              hasDiatonicChords:false, type:'blues' },
+  'harmonic minor':   { intervals:[0,2,3,5,7,8,11], degrees:['1','2','b3','4','5','b6','7'],     formula:'W H W W H WH H',hasDiatonicChords:true,  type:'harmonic_minor' },
+  'melodic minor':    { intervals:[0,2,3,5,7,9,11], degrees:['1','2','b3','4','5','6','7'],      formula:'W H W W W W H', hasDiatonicChords:true,  type:'melodic_minor' },
+};
+
+const DIATONIC_QUALITIES = {
+  'ionian':         ['M','m','m','M','M','m','d'],
+  'dorian':         ['m','m','M','M','m','d','M'],
+  'phrygian':       ['m','M','M','m','d','M','m'],
+  'lydian':         ['M','M','m','d','M','m','m'],
+  'mixolydian':     ['M','m','d','M','m','m','M'],
+  'aeolian':        ['m','d','M','m','m','M','M'],
+  'locrian':        ['d','M','m','m','M','M','m'],
+  'harmonic_minor': ['m','d','A','m','M','M','d'],
+  'melodic_minor':  ['m','m','A','M','M','d','d'],
+};
+const ROMAN = ['I','II','III','IV','V','VI','VII'];
+
+function qualityToRoman(q,i) {
+  const r = ROMAN[i];
+  if (q==='M') return r;
+  if (q==='m') return r.toLowerCase();
+  if (q==='d') return r.toLowerCase()+'°';
+  if (q==='A') return r+'+';
+  return r;
+}
+function qualityToSymbol(root,q) {
+  if (q==='M') return root;
+  if (q==='m') return root+'m';
+  if (q==='d') return root+'°';
+  if (q==='A') return root+'+';
+  return root;
+}
+
+function resolveScale(name) {
+  const k = name.trim().toLowerCase();
+  const s = SCALES[k];
+  if (!s) return null;
+  if (s.alias) return SCALES[s.alias];
+  return s;
+}
+
+function parseInput(raw) {
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  const match = trimmed.match(/^([A-Ga-g][#b]?)\s+(.+)$/);
+  if (!match) return null;
+  const root = match[1].charAt(0).toUpperCase() + match[1].slice(1);
+  const scaleName = match[2].toLowerCase();
+  if (noteIndex(root) === -1) return null;
+  const scaleDef = resolveScale(scaleName);
+  if (!scaleDef) return null;
+  let canonicalName = scaleName;
+  for (const [k,v] of Object.entries(SCALES)) {
+    if (v === scaleDef) { canonicalName = k; break; }
+  }
+  return { root, scaleName: canonicalName, scaleDef };
+}
+
+function buildNotes(root, scaleDef) {
+  const rootIdx = noteIndex(root);
+  const flat = preferFlat(root);
+  return scaleDef.intervals.map((iv,i) => ({
+    semitone: rootIdx + iv,
+    note: noteAt(rootIdx + iv, flat),
+    degree: scaleDef.degrees[i],
+    isRoot: i === 0
+  }));
+}
+
+function buildChords(root, scaleName, scaleDef) {
+  const rootIdx = noteIndex(root);
+  const flat = preferFlat(root);
+  const qualityKey = scaleDef.type === 'harmonic_minor' ? 'harmonic_minor'
+    : scaleDef.type === 'melodic_minor' ? 'melodic_minor' : scaleName;
+  const qualities = DIATONIC_QUALITIES[qualityKey];
+  if (!qualities) return null;
+  return scaleDef.intervals.map((iv,i) => {
+    const chordRoot = noteAt(rootIdx + iv, flat);
+    const q = qualities[i];
+    return { roman: qualityToRoman(q,i), symbol: qualityToSymbol(chordRoot,q), quality: q };
+  });
+}
+
+// ============================================================
+// FRETBOARD ENGINE
+// ============================================================
+//
+// String layout: index 0 = low E (top of diagram), 5 = high e (bottom)
+// Open string pitches in semitones above low E open (E2):
+//   String 0 (E): 0
+//   String 1 (A): 5
+//   String 2 (D): 10
+//   String 3 (G): 15
+//   String 4 (B): 19   <-- note: 19 not 20 (standard tuning)
+//   String 5 (e): 24
+//
+// All fret positions are semitones above the open low E string.
+//
+// Rules:
+//   1. First note = root on low E, lowest playable fret (0–12).
+//   2. Max 3 notes per string.
+//   3. Scales in TWO_ON_LOW_E set: only 2 notes on low E.
+//   4. Never exceed 3 notes on any string.
+//   5. When moving to next string, pick the fret that gives the
+//      target pitch with the lowest possible fret number >= 0,
+//      staying within 4 frets of the previous note's fret when possible.
+
+const OPEN_ABS = [0, 5, 10, 15, 19, 24]; // semitones above low-E open
+
+// Scales using 2 notes on low E string
+const TWO_ON_LOW_E = new Set(['ionian','mixolydian','major pentatonic','minor pentatonic','blues']);
+
+function buildFingering(root, scaleDef, scaleName) {
+  const rootIdx = noteIndex(root);      // 0–11 pitch class
+  const flat = preferFlat(root);
+  const intervals = scaleDef.intervals; // e.g. [0,2,4,5,7,9,11]
+
+  // Build full 2-octave interval sequence (semitones above root):
+  //   pass 1: intervals[0..n-1]
+  //   pass 2: intervals[1..n-1] + 12
+  //   final:  24 (root two octaves up)
+  const seq = [];
+  for (const iv of intervals) seq.push(iv);
+  for (const iv of intervals.slice(1)) seq.push(iv + 12);
+  seq.push(24);
+
+  // Find root on low E string
+  // low E open = 0 above itself.  Pitch class of low E open = rootIdx (mod 12)?
+  // We need: (OPEN_ABS[0] + fret) mod 12 == rootIdx mod 12
+  // But OPEN_ABS[0] = 0 means pitch class of open low E = 4 (E).
+  // So: (4 + fret) mod 12 == rootIdx  =>  fret = (rootIdx - 4 + 12) mod 12
+  // The pitch of the root in absolute semitones above low-E open = rootFret
+  const rootFret = ((rootIdx - 4) + 48) % 12; // always 0..11, gives lowest fret for root on low E
+
+  // lowELimit: how many notes to place on string 0
+  const lowELimit = TWO_ON_LOW_E.has(scaleName) ? 2 : 3;
+
+  const placed = []; // { string, fret, noteName, isRoot }
+
+  let strIdx = 0;          // current string (0=low E)
+  let notesOnStr = 0;      // notes placed on current string
+  let strLimit = lowELimit; // note limit for current string
+
+  // Absolute pitch of root = rootFret (semitones above low-E open)
+  // For each scale tone, absolute pitch = rootFret + interval
+  for (let i = 0; i < seq.length; i++) {
+    const absPitch = rootFret + seq[i]; // semitones above low-E open
+
+    // Compute fret on current string
+    let fret = absPitch - OPEN_ABS[strIdx];
+
+    // If fret is out of range or we've hit the string's note limit, advance string
+    if (fret < 0 || fret > 17 || notesOnStr >= strLimit) {
+      strIdx++;
+      if (strIdx > 5) break;
+      strLimit = 3;
+      notesOnStr = 0;
+      fret = absPitch - OPEN_ABS[strIdx];
+      // Ensure fret is non-negative (pitch too low for this string — shouldn't happen in normal range)
+      if (fret < 0) fret += 12;
+    }
+
+    const noteName = noteAt(rootIdx + seq[i], flat);
+    placed.push({
+      string: strIdx,
+      fret,
+      noteName,
+      isRoot: (seq[i] % 12 === 0)
+    });
+    notesOnStr++;
+  }
+
+  // Display range
+  const allFrets = placed.map(p => p.fret);
+  const minFret = Math.min(...allFrets);
+  const maxFret = Math.max(...allFrets);
+  // Always show from nut if root is open or fret 1-3, else from minFret-1
+  const displayMin = minFret <= 2 ? 0 : minFret - 1;
+  const displayMax = Math.max(maxFret + 1, displayMin + 7);
+
+  return { placed, displayMin, displayMax };
+}
+
+// ============================================================
+// SVG RENDERER
+// ============================================================
+
+function renderFretboard(root, scaleDef, scaleName) {
+  const { placed, displayMin, displayMax } = buildFingering(root, scaleDef, scaleName);
+
+  const numStrings = 6;
+  const numFrets = displayMax - displayMin;
+
+  const leftPad = 48;
+  const rightPad = 22;
+  const topPad = 32;
+  const bottomPad = 30;
+  const stringSpacing = 32;
+  const fretWidth = 54;
+  const dotR = 11;
+
+  const W = leftPad + numFrets * fretWidth + rightPad;
+  const H = topPad + (numStrings - 1) * stringSpacing + bottomPad;
+
+  const STRING_NAMES = ['E','A','D','G','B','e'];
+
+  let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">`;
+
+  // Background
+  svg += `<rect x="0" y="0" width="${W}" height="${H}" fill="#1c1a18" rx="6"/>`;
+
+  // Nut or position marker
+  if (displayMin === 0) {
+    svg += `<rect x="${leftPad-4}" y="${topPad-6}" width="7" height="${(numStrings-1)*stringSpacing+12}" fill="#a07830" rx="2"/>`;
+  } else {
+    svg += `<text x="${leftPad-8}" y="${topPad + (numStrings-1)*stringSpacing/2 + 4}" text-anchor="end" font-family="IBM Plex Mono,monospace" font-size="9" fill="#6a6050">${displayMin+1}fr</text>`;
+  }
+
+  // Fret lines + numbers
+  for (let f = 0; f <= numFrets; f++) {
+    const x = leftPad + f * fretWidth;
+    if (!(f === 0 && displayMin === 0)) {
+      svg += `<line x1="${x}" y1="${topPad}" x2="${x}" y2="${topPad+(numStrings-1)*stringSpacing}" stroke="#3a3530" stroke-width="1.5"/>`;
+    }
+    if (f < numFrets) {
+      const fn = displayMin + f + 1;
+      svg += `<text x="${x+fretWidth/2}" y="${topPad-10}" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#4a4438">${fn}</text>`;
+    }
+  }
+
+  // Position markers (dots below bottom string)
+  const markers = [3,5,7,9,12,15,17];
+  for (const mf of markers) {
+    if (mf > displayMin && mf <= displayMax) {
+      const f = mf - displayMin - 1;
+      const x = leftPad + f * fretWidth + fretWidth/2;
+      const y = topPad + (numStrings-1)*stringSpacing + 18;
+      if (mf === 12) {
+        svg += `<circle cx="${x-7}" cy="${y}" r="3" fill="#2e2a26"/>`;
+        svg += `<circle cx="${x+7}" cy="${y}" r="3" fill="#2e2a26"/>`;
+      } else {
+        svg += `<circle cx="${x}" cy="${y}" r="3" fill="#2e2a26"/>`;
+      }
+    }
+  }
+
+  // Strings
+  for (let s = 0; s < numStrings; s++) {
+    const y = topPad + s * stringSpacing;
+    const thickness = 0.8 + (numStrings - 1 - s) * 0.38;
+    svg += `<line x1="${leftPad}" y1="${y}" x2="${leftPad+numFrets*fretWidth}" y2="${y}" stroke="#4a4438" stroke-width="${thickness}"/>`;
+    svg += `<text x="${leftPad-12}" y="${y+4}" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#5a5040">${STRING_NAMES[s]}</text>`;
+  }
+
+  // Note dots
+  for (const n of placed) {
+    const y = topPad + n.string * stringSpacing;
+    let x;
+    if (n.fret === 0 && displayMin === 0) {
+      x = leftPad - 26; // open string, left of nut
+    } else {
+      x = leftPad + (n.fret - displayMin - 0.5) * fretWidth;
+    }
+
+    const fill = n.isRoot ? '#a07830' : '#4a90b8';
+    const textFill = '#ffffff';
+
+    svg += `<circle cx="${x}" cy="${y}" r="${dotR+4}" fill="${fill}" opacity="0.2"/>`;
+    svg += `<circle cx="${x}" cy="${y}" r="${dotR}" fill="${fill}"/>`;
+
+    const label = n.noteName;
+    const fs = label.length > 1 ? 7.5 : 8.5;
+    svg += `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="middle" font-family="IBM Plex Sans,sans-serif" font-size="${fs}" font-weight="700" fill="${textFill}">${label}</text>`;
+  }
+
+  svg += `</svg>`;
+  return svg;
+}
+
+// ============================================================
+// UI
+// ============================================================
+
+const SCALE_DISPLAY_NAMES = {
+  'ionian':           'Ionian (Major)',
+  'dorian':           'Dorian',
+  'phrygian':         'Phrygian',
+  'lydian':           'Lydian',
+  'mixolydian':       'Mixolydian',
+  'aeolian':          'Aeolian (Natural Minor)',
+  'locrian':          'Locrian',
+  'major pentatonic': 'Major Pentatonic',
+  'minor pentatonic': 'Minor Pentatonic',
+  'blues':            'Blues',
+  'major blues':      'Major Blues',
+  'harmonic minor':   'Harmonic Minor',
+  'melodic minor':    'Melodic Minor (Ascending)',
+};
+
+function showError(msg) {
+  const el = document.getElementById('errorMsg');
+  el.textContent = msg; el.classList.add('visible');
+}
+function hideError() { document.getElementById('errorMsg').classList.remove('visible'); }
+
+function generate() {
+  hideError();
+  const raw = document.getElementById('scaleInput').value;
+  if (!raw.trim()) { showError('Please enter a scale, e.g. C Ionian'); return; }
+  const parsed = parseInput(raw);
+  if (!parsed) {
+    showError('Scale not recognized. Try: C Ionian, A Dorian, E Minor Pentatonic, A Blues…');
+    return;
+  }
+
+  const { root, scaleName, scaleDef } = parsed;
+  const notes = buildNotes(root, scaleDef);
+  const displayName = SCALE_DISPLAY_NAMES[scaleName] || scaleName.charAt(0).toUpperCase() + scaleName.slice(1);
+
+  document.getElementById('scaleTitle').textContent = `${root} ${displayName}`;
+  document.getElementById('scaleSubtitle').textContent = `${notes.length}-note scale · Standard Tuning · EADGBe`;
+
+  const formulaEl = document.getElementById('formulaRow');
+  formulaEl.innerHTML = scaleDef.formula
+    ? `Formula: <span>${scaleDef.formula}</span>&nbsp;&nbsp;·&nbsp;&nbsp;W = whole step &nbsp; H = half step &nbsp; WH = 1½ steps`
+    : '';
+
+  document.getElementById('fretboardContainer').innerHTML = renderFretboard(root, scaleDef, scaleName);
+
+  // Scale degrees table
+  const notesTbody = document.querySelector('#notesTable tbody');
+  notesTbody.innerHTML = '';
+  notes.forEach(n => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td class="degree-cell">${n.degree}</td><td class="note-cell${n.isRoot?' is-root':''}">${n.note}</td>`;
+    notesTbody.appendChild(tr);
+  });
+
+  // Chords table
+  const chordsLabel = document.getElementById('chordsLabel');
+  const chordsTbody = document.querySelector('#chordsTable tbody');
+  chordsTbody.innerHTML = '';
+
+  if (scaleDef.hasDiatonicChords) {
+    chordsLabel.textContent = `Chords of ${root} ${displayName.split(' ')[0]}`;
+    const chords = buildChords(root, scaleName, scaleDef);
+    if (chords) {
+      chords.forEach(c => {
+        const qClass = c.quality==='M' ? 'chord-major' : c.quality==='m' ? 'chord-minor' : c.quality==='d' ? 'chord-dim' : '';
+        const rClass = c.quality==='M' ? 'roman-major' : c.quality==='m' ? 'roman-minor' : c.quality==='d' ? 'roman-dim' : '';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td class="roman-cell ${rClass}">${c.roman}</td><td class="chord-cell ${qClass}">${c.symbol}</td>`;
+        chordsTbody.appendChild(tr);
+      });
+    }
+  } else {
+    chordsLabel.textContent = 'Chords';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td colspan="2" style="color:var(--text-muted);font-style:italic;padding:1rem 0.75rem;font-family:'IBM Plex Mono',monospace;font-size:0.76rem;">Chord harmony not applicable for pentatonic / blues scales</td>`;
+    chordsTbody.appendChild(tr);
+  }
+
+  document.getElementById('output').classList.add('visible');
+  document.getElementById('output').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function quick(name) {
+  document.getElementById('scaleInput').value = name;
+  generate();
+}
+
+document.getElementById('scaleInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') generate();
+});
+</script>
+</body>
+</html>
