@@ -11,7 +11,6 @@
     --surface: #edeae3;
     --border: #c8c3b8;
     --accent: #8b6020;
-    --accent2: #1e6e96;
     --text: #1a1814;
     --text-muted: #6a6358;
     --major-color: #1a6a48;
@@ -20,37 +19,25 @@
     --aug-color: #a05010;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Inter', system-ui, sans-serif;
-    min-height: 100vh;
-  }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; min-height: 100vh; }
+
   header {
-    border-bottom: 2px solid var(--border);
-    padding: 1.3rem 2.5rem;
-    display: flex; align-items: baseline; gap: 1.2rem;
-    background: var(--surface);
+    border-bottom: 2px solid var(--border); padding: 1.3rem 2.5rem;
+    display: flex; align-items: baseline; gap: 1.2rem; background: var(--surface);
   }
   header h1 { font-size: 1.35rem; font-weight: 700; color: var(--accent); letter-spacing: -0.02em; }
   header span { font-size: 0.7rem; color: var(--text-muted); letter-spacing: 0.09em; text-transform: uppercase; font-weight: 500; }
 
   .input-section {
-    padding: 1.5rem 2.5rem;
-    border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
-    background: white;
+    padding: 1.5rem 2.5rem; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; background: white;
   }
   .input-label { font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); font-weight: 600; }
 
   select {
-    background: var(--bg);
-    border: 1.5px solid var(--border);
-    color: var(--text);
-    font-family: 'Inter', sans-serif;
-    font-size: 0.95rem; font-weight: 500;
-    padding: 0.52rem 2.2rem 0.52rem 0.8rem;
-    outline: none; cursor: pointer;
+    background: var(--bg); border: 1.5px solid var(--border); color: var(--text);
+    font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 500;
+    padding: 0.52rem 2.2rem 0.52rem 0.8rem; outline: none; cursor: pointer;
     appearance: none; -webkit-appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7' viewBox='0 0 10 7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238b6020' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
     background-repeat: no-repeat; background-position: right 0.65rem center;
@@ -70,8 +57,7 @@
 
   .quick-picks {
     padding: 0.8rem 2.5rem; border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;
-    background: var(--surface);
+    display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap; background: var(--surface);
   }
   .qp-label { font-size: 0.64rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); font-weight: 600; margin-right: 0.2rem; }
   .qp-btn {
@@ -94,7 +80,7 @@
   }
   .fretboard-section { margin-bottom: 2.5rem; }
   .fretboard-wrap { overflow-x: auto; }
-  .fretboard-svg-container { min-width: 700px; }
+  .fretboard-svg-container { min-width: 500px; }
 
   .legend { display: flex; gap: 1.3rem; margin-top: 0.7rem; flex-wrap: wrap; }
   .legend-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.7rem; color: var(--text-muted); font-weight: 500; }
@@ -133,6 +119,13 @@
   .chord-d { color: var(--dim-color); font-weight: 600; }
   .chord-A { color: var(--aug-color); font-weight: 600; }
   .no-chords td { color: var(--text-muted); font-style: italic; padding: 0.9rem 0.7rem; font-size: 0.77rem; }
+
+  .error-banner {
+    background: #fff3f3; border: 1px solid #f0b0b0; color: #a02020;
+    padding: 0.7rem 1rem; border-radius: 4px; font-size: 0.8rem;
+    margin-bottom: 1rem; display: none;
+  }
+  .error-banner.visible { display: block; }
 </style>
 </head>
 <body>
@@ -196,6 +189,7 @@
 <div id="output">
   <div class="scale-title" id="scaleTitle"></div>
   <div class="scale-subtitle" id="scaleSubtitle"></div>
+  <div class="error-banner" id="errorBanner"></div>
   <div class="fretboard-section">
     <div class="section-label">Fretboard · 2 Octaves</div>
     <div class="fretboard-wrap">
@@ -227,116 +221,45 @@
 
 <script>
 // ============================================================
-// ENHARMONIC SPELLING ENGINE
+// CONSTANTS
 // ============================================================
-// Letter names in order
-const LETTERS = ['C','D','E','F','G','A','B'];
 
-// Semitone value of each natural note
-const NATURAL_ST = { C:0, D:2, E:4, F:5, G:7, A:9, B:11 };
+const LETTERS     = ['C','D','E','F','G','A','B'];
+const NATURAL_ST  = { C:0, D:2, E:4, F:5, G:7, A:9, B:11 };
 
-// Given a root note name and an interval in semitones, return the properly
-// spelled note name so that each letter is used exactly once per octave.
-// rootDegreeIdx = which scale degree this is (0-based), rootLetterIdx = index into LETTERS for root
-function spellNote(rootLetter, scaleStepIndex, semitoneFromRoot) {
-  // The letter for this scale step is rootLetter + scaleStepIndex (mod 7)
-  const rootLetterIdx = LETTERS.indexOf(rootLetter);
-  const targetLetterIdx = (rootLetterIdx + scaleStepIndex) % 7;
-  const targetLetter = LETTERS[targetLetterIdx];
+// Open string pitches (semitones, C=0), physical index 0=low E ... 5=high e
+const OPEN_PITCH  = [4, 9, 2, 7, 11, 4];
+const STR_LABEL   = ['E','A','D','G','B','e'];
 
-  // Natural semitone of target letter relative to C
-  const targetNatural = NATURAL_ST[targetLetter];
-  // Actual semitone of the note relative to C (root pitch + interval, mod 12)
-  const rootPitch = NATURAL_ST[rootLetter]; // we'll add accidental below
-  // We need the pitch of THIS note mod 12
-  // But we don't know root accidental here — caller must pass absolute rootPitch
-  return targetLetter; // placeholder; real logic in buildDiatonicNotes
-}
+// Semitones to advance when crossing to the next higher string
+// Index i = interval from physical string i to string i+1
+// E->A=5, A->D=5, D->G=5, G->B=4, B->e=5
+const STRING_INTERVAL = [5, 5, 5, 4, 5];
 
-// Build properly spelled diatonic note names for a scale
-// rootName: e.g. "Bb", intervals: semitone offsets from root
-function buildDiatonicNotes(rootName, intervals) {
-  // Parse root
-  const rootLetter = rootName[0].toUpperCase();
-  const rootAccidental = rootName.slice(1); // '', '#', 'b', 'bb'
-  const rootLetterIdx = LETTERS.indexOf(rootLetter);
-
-  // Root pitch in semitones (0=C)
-  let rootPitch = NATURAL_ST[rootLetter];
-  if (rootAccidental === '#')  rootPitch += 1;
-  if (rootAccidental === '##') rootPitch += 2;
-  if (rootAccidental === 'b')  rootPitch -= 1;
-  if (rootAccidental === 'bb') rootPitch -= 2;
-  rootPitch = ((rootPitch % 12) + 12) % 12;
-
-  return intervals.map((iv, stepIdx) => {
-    const targetLetterIdx = (rootLetterIdx + stepIdx) % 7;
-    const targetLetter = LETTERS[targetLetterIdx];
-    const targetNatural = NATURAL_ST[targetLetter];
-
-    // Actual pitch of this note
-    const notePitch = ((rootPitch + iv) % 12 + 12) % 12;
-
-    // Difference: how much do we need to alter the natural letter?
-    let diff = notePitch - targetNatural;
-    // Wrap to -2..+2 range
-    if (diff >  6) diff -= 12;
-    if (diff < -6) diff += 12;
-    // Prefer accidentals within -2..+2
-    if (diff >  2) diff -= 12;
-    if (diff < -2) diff += 12;
-
-    let acc = '';
-    if (diff ===  2) acc = '##';
-    else if (diff ===  1) acc = '#';
-    else if (diff === -1) acc = 'b';
-    else if (diff === -2) acc = 'bb';
-
-    return targetLetter + acc;
-  });
-}
-
-// For blues/pentatonic scales that use chromatic intervals (not strictly diatonic),
-// spell using a simpler sharp/flat preference based on root key.
-// Flat keys prefer flats for accidentals; sharp keys prefer sharps.
-const FLAT_KEYS = new Set(['F','Bb','Eb','Ab','Db','Gb','Cb','Bb']);
-
-function spellChromatic(rootName, intervals) {
-  const rootLetter = rootName[0].toUpperCase();
-  let rootPitch = NATURAL_ST[rootLetter];
-  const acc = rootName.slice(1);
-  if (acc === '#') rootPitch += 1;
-  if (acc === 'b') rootPitch -= 1;
-  rootPitch = ((rootPitch % 12) + 12) % 12;
-
-  const useFlat = FLAT_KEYS.has(rootName);
-
-  const SHARP_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
-  const FLAT_NAMES  = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
-
-  return intervals.map(iv => {
-    const pitch = ((rootPitch + iv) % 12 + 12) % 12;
-    return useFlat ? FLAT_NAMES[pitch] : SHARP_NAMES[pitch];
-  });
-}
+// Root fret on low E string (no open strings — min fret 1)
+// C=8, C#=9, Db=9, D=10, Eb=11, E=12, F=1, F#=2, Gb=2, G=3, Ab=4, A=5, Bb=6, B=7
+const ROOT_FRET = {
+  'C':8,'C#':9,'Db':9,'D':10,'Eb':11,'E':12,
+  'F':1,'F#':2,'Gb':2,'G':3,'Ab':4,'A':5,'Bb':6,'B':7
+};
 
 // ============================================================
 // SCALE DEFINITIONS
 // ============================================================
 const SCALES = {
-  ionian:          { ivs:[0,2,4,5,7,9,11],  degs:['1','2','3','4','5','6','7'],         formula:'W – W – H – W – W – W – H',      chords:true,  diatonic:true  },
-  dorian:          { ivs:[0,2,3,5,7,9,10],  degs:['1','2','b3','4','5','6','b7'],        formula:'W – H – W – W – W – H – W',      chords:true,  diatonic:true  },
-  phrygian:        { ivs:[0,1,3,5,7,8,10],  degs:['1','b2','b3','4','5','b6','b7'],      formula:'H – W – W – W – H – W – W',      chords:true,  diatonic:true  },
-  lydian:          { ivs:[0,2,4,6,7,9,11],  degs:['1','2','3','#4','5','6','7'],         formula:'W – W – W – H – W – W – H',      chords:true,  diatonic:true  },
-  mixolydian:      { ivs:[0,2,4,5,7,9,10],  degs:['1','2','3','4','5','6','b7'],         formula:'W – W – H – W – W – H – W',      chords:true,  diatonic:true  },
-  aeolian:         { ivs:[0,2,3,5,7,8,10],  degs:['1','2','b3','4','5','b6','b7'],       formula:'W – H – W – W – H – W – W',      chords:true,  diatonic:true  },
-  locrian:         { ivs:[0,1,3,5,6,8,10],  degs:['1','b2','b3','4','b5','b6','b7'],     formula:'H – W – W – H – W – W – W',      chords:true,  diatonic:true  },
-  major_pentatonic:{ ivs:[0,2,4,7,9],       degs:['1','2','3','5','6'],                  formula:'W – W – W½ – W – W½',            chords:false, diatonic:false },
-  minor_pentatonic:{ ivs:[0,3,5,7,10],      degs:['1','b3','4','5','b7'],                formula:'W½ – W – W – W½ – W',            chords:false, diatonic:false },
-  blues:           { ivs:[0,3,5,6,7,10],    degs:['1','b3','4','b5','5','b7'],           formula:'W½ – W – H – H – W½ – W',       chords:false, diatonic:false },
-  major_blues:     { ivs:[0,2,3,4,7,9],     degs:['1','2','b3','3','5','6'],             formula:'W – H – H – W½ – W – W½',       chords:false, diatonic:false },
-  harmonic_minor:  { ivs:[0,2,3,5,7,8,11],  degs:['1','2','b3','4','5','b6','7'],        formula:'W – H – W – W – H – W½ – H',    chords:true,  diatonic:true, chordKey:'harmonic_minor' },
-  melodic_minor:   { ivs:[0,2,3,5,7,9,11],  degs:['1','2','b3','4','5','6','7'],         formula:'W – H – W – W – W – W – H',     chords:true,  diatonic:true, chordKey:'melodic_minor'  },
+  ionian:          { ivs:[0,2,4,5,7,9,11],  degs:['1','2','3','4','5','6','7'],       formula:'W – W – H – W – W – W – H',     chords:true,  diatonic:true  },
+  dorian:          { ivs:[0,2,3,5,7,9,10],  degs:['1','2','b3','4','5','6','b7'],      formula:'W – H – W – W – W – H – W',     chords:true,  diatonic:true  },
+  phrygian:        { ivs:[0,1,3,5,7,8,10],  degs:['1','b2','b3','4','5','b6','b7'],    formula:'H – W – W – W – H – W – W',     chords:true,  diatonic:true  },
+  lydian:          { ivs:[0,2,4,6,7,9,11],  degs:['1','2','3','#4','5','6','7'],       formula:'W – W – W – H – W – W – H',     chords:true,  diatonic:true  },
+  mixolydian:      { ivs:[0,2,4,5,7,9,10],  degs:['1','2','3','4','5','6','b7'],       formula:'W – W – H – W – W – H – W',     chords:true,  diatonic:true  },
+  aeolian:         { ivs:[0,2,3,5,7,8,10],  degs:['1','2','b3','4','5','b6','b7'],     formula:'W – H – W – W – H – W – W',     chords:true,  diatonic:true  },
+  locrian:         { ivs:[0,1,3,5,6,8,10],  degs:['1','b2','b3','4','b5','b6','b7'],   formula:'H – W – W – H – W – W – W',     chords:true,  diatonic:true  },
+  major_pentatonic:{ ivs:[0,2,4,7,9],       degs:['1','2','3','5','6'],                formula:'W – W – W½ – W – W½',           chords:false, diatonic:false },
+  minor_pentatonic:{ ivs:[0,3,5,7,10],      degs:['1','b3','4','5','b7'],              formula:'W½ – W – W – W½ – W',           chords:false, diatonic:false },
+  blues:           { ivs:[0,3,5,6,7,10],    degs:['1','b3','4','b5','5','b7'],         formula:'W½ – W – H – H – W½ – W',      chords:false, diatonic:false },
+  major_blues:     { ivs:[0,2,3,4,7,9],     degs:['1','2','b3','3','5','6'],           formula:'W – H – H – W½ – W – W½',      chords:false, diatonic:false },
+  harmonic_minor:  { ivs:[0,2,3,5,7,8,11],  degs:['1','2','b3','4','5','b6','7'],      formula:'W – H – W – W – H – W½ – H',   chords:true,  diatonic:true, chordKey:'harmonic_minor' },
+  melodic_minor:   { ivs:[0,2,3,5,7,9,11],  degs:['1','2','b3','4','5','6','7'],       formula:'W – H – W – W – W – W – H',    chords:true,  diatonic:true, chordKey:'melodic_minor'  },
 };
 
 const QUALITIES = {
@@ -356,134 +279,200 @@ function toRoman(q,i){ const r=ROM[i]; return q==='M'?r:q==='m'?r.toLowerCase():
 function toSymbol(root,q){ return q==='M'?root:q==='m'?root+'m':q==='d'?root+'°':root+'+'; }
 
 // ============================================================
-// FRETBOARD ENGINE
-// Physical string index: 0 = low E, 5 = high e
-// Open string pitches (semitones, C=0): E=4, A=9, D=2, G=7, B=11, e=4
+// ENHARMONIC SPELLING
 // ============================================================
-const OPEN_PITCH  = [4, 9, 2, 7, 11, 4]; // phys 0=lowE .. phys 5=highe
-const STR_LABEL   = ['E','A','D','G','B','e'];
+function buildDiatonicNotes(rootName, intervals) {
+  const rootLetter = rootName[0].toUpperCase();
+  const rootAcc    = rootName.slice(1);
+  const rootLetterIdx = LETTERS.indexOf(rootLetter);
+  let rootPitch = NATURAL_ST[rootLetter];
+  if (rootAcc === '#')  rootPitch += 1;
+  if (rootAcc === '##') rootPitch += 2;
+  if (rootAcc === 'b')  rootPitch -= 1;
+  if (rootAcc === 'bb') rootPitch -= 2;
+  rootPitch = ((rootPitch % 12) + 12) % 12;
 
-// String thicknesses: phys 0 (low E) = thickest, phys 5 (high e) = thinnest
-// Row mapping: row 0 (top of diagram) = phys 5 (high e), row 5 (bottom) = phys 0 (low E)
-function physToRow(phys) { return 5 - phys; }
+  return intervals.map((iv, stepIdx) => {
+    const targetLetterIdx = (rootLetterIdx + stepIdx) % 7;
+    const targetLetter    = LETTERS[targetLetterIdx];
+    const targetNatural   = NATURAL_ST[targetLetter];
+    const notePitch       = ((rootPitch + iv) % 12 + 12) % 12;
+    let diff = notePitch - targetNatural;
+    if (diff >  6) diff -= 12;
+    if (diff < -6) diff += 12;
+    if (diff >  2) diff -= 12;
+    if (diff < -2) diff += 12;
+    const acc = diff === 2 ? '##' : diff === 1 ? '#' : diff === -1 ? 'b' : diff === -2 ? 'bb' : '';
+    return targetLetter + acc;
+  });
+}
 
-// Build a 2-octave note sequence as absolute semitone offsets from root:
-// root(0), note2..note7, octave_root(12), note2..note7 again (+12), final_root(24)
-function buildSeq(ivs) {
+const FLAT_KEYS = new Set(['F','Bb','Eb','Ab','Db','Gb']);
+function spellChromatic(rootName, intervals) {
+  const rootLetter = rootName[0];
+  let rootPitch = NATURAL_ST[rootLetter.toUpperCase()];
+  const acc = rootName.slice(1);
+  if (acc === '#') rootPitch++; if (acc === 'b') rootPitch--;
+  rootPitch = ((rootPitch % 12) + 12) % 12;
+  const useFlat = FLAT_KEYS.has(rootName);
+  const SHARP_N = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  const FLAT_N  = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
+  return intervals.map(iv => {
+    const p = ((rootPitch + iv) % 12 + 12) % 12;
+    return useFlat ? FLAT_N[p] : SHARP_N[p];
+  });
+}
+
+// ============================================================
+// FRETBOARD PLACEMENT ALGORITHM
+// Rules:
+//   - Root starts on low E (phys 0), fret = ROOT_FRET[root], no open strings
+//   - Max 3 notes per string, min 2
+//   - Span on any string: first_fret to first_fret+3 (4-fret window)
+//   - First note on new string: >= (first note of prev string - 1)
+//   - No open strings (fret >= 1)
+//   - Always ends on high e (phys 5) with final root
+// ============================================================
+
+function rootPitchOf(rootName) {
+  const letter = rootName[0].toUpperCase();
+  const acc    = rootName.slice(1);
+  let p = NATURAL_ST[letter];
+  if (acc === '#') p++; if (acc === 'b') p--;
+  return ((p % 12) + 12) % 12;
+}
+
+// Given a physical string and a minimum fret, find the lowest fret >= minFret
+// where the target pitch (mod 12) occurs. Returns -1 if none within fret 1..17.
+function findFret(physStr, targetPitchMod, minFret) {
+  const open = OPEN_PITCH[physStr];
+  // fret such that (open + fret) % 12 === targetPitchMod
+  let fret = ((targetPitchMod - open) % 12 + 12) % 12;
+  // Bring up to >= minFret
+  while (fret < minFret) fret += 12;
+  if (fret > 17) return -1;
+  return fret;
+}
+
+function buildPattern(rootName, scale) {
+  const rPitch   = rootPitchOf(rootName);
+  const startFret = ROOT_FRET[rootName];
+  if (startFret === undefined) return null;
+
+  // Build the full 2-octave interval sequence
+  // [0, iv1..ivN-1, 12, iv1..ivN-1 (+12), 24]
+  const ivs = scale.ivs;
   const seq = [0];
   for (let i = 1; i < ivs.length; i++) seq.push(ivs[i]);
   seq.push(12);
   for (let i = 1; i < ivs.length; i++) seq.push(12 + ivs[i]);
   seq.push(24);
-  return seq;
-}
 
-// Find root position: prefer low E or A string, fret 0–9
-function findStart(rootPitch) {
-  for (let phys = 0; phys <= 2; phys++) {
-    for (let fret = 0; fret <= 9; fret++) {
-      if (((OPEN_PITCH[phys] + fret) % 12 + 12) % 12 === rootPitch) {
-        return { phys, fret };
-      }
-    }
-  }
-  // fallback: any string
-  for (let phys = 0; phys <= 5; phys++) {
-    for (let fret = 0; fret <= 12; fret++) {
-      if (((OPEN_PITCH[phys] + fret) % 12 + 12) % 12 === rootPitch) {
-        return { phys, fret };
-      }
-    }
-  }
-  return { phys: 0, fret: 0 };
-}
+  // Target pitches mod 12 for each position in sequence
+  const targets = seq.map(iv => ((rPitch + iv) % 12 + 12) % 12);
 
-// Place each note of the sequence onto a string/fret
-// Uses absolute pitch tracking to avoid octave confusion
-function buildPattern(rootName, scale) {
-  const rootLetter = rootName[0].toUpperCase();
-  const rootAcc = rootName.slice(1);
-  let rootPitch = NATURAL_ST[rootLetter];
-  if (rootAcc === '#') rootPitch++; if (rootAcc === 'b') rootPitch--;
-  rootPitch = ((rootPitch % 12) + 12) % 12;
-
-  const seq = buildSeq(scale.ivs);
-  const { phys: startPhys, fret: startFret } = findStart(rootPitch);
-
+  // Place notes string by string
+  // placed[i] = { phys, fret, seqIdx, isRoot }
   const placed = [];
-  let curPhys = startPhys;
+  let seqIdx   = 0;
+  let physStr  = 0; // start on low E
 
-  // Track the absolute pitch (not mod 12) as we go, so we can handle octave crossings properly
-  // The starting absolute pitch of the open string at startPhys:
-  // We define absolute pitch such that the start note = OPEN_PITCH[curPhys] + startFret
-  // We'll track the previous fret on the current string.
+  // Track first fret of previous string (for crossing rule)
+  let prevStringFirstFret = null;
 
-  let prevAbsFret = startFret; // fret on current string for the previous note
+  while (seqIdx < targets.length && physStr <= 5) {
+    const stringFirstFretMin = prevStringFirstFret !== null
+      ? prevStringFirstFret - 1   // new string can start no more than 1 back
+      : startFret;                // first string: must start at root fret
 
-  for (let i = 0; i < seq.length; i++) {
-    // The target pitch mod 12
-    const targetPitchMod = ((rootPitch + seq[i]) % 12 + 12) % 12;
-
-    // How many semitones above the open string is this note?
-    // We want the fret such that (OPEN_PITCH[curPhys] + fret) % 12 === targetPitchMod
-    // and fret >= 0 and close to prevAbsFret
-    const openMod = OPEN_PITCH[curPhys] % 12;
-    let fret = ((targetPitchMod - openMod) % 12 + 12) % 12;
-
-    // Adjust to be close to prevAbsFret (within ±5 semitones preferred)
-    while (fret < prevAbsFret - 1) fret += 12;
-    while (fret > prevAbsFret + 5) fret -= 12;
-    if (fret < 0) fret += 12;
-
-    // If fret is still too high (e.g. > 17) or too far from prev, move to next string
-    if ((fret > prevAbsFret + 5 || fret > 15) && curPhys < 5) {
-      curPhys++;
-      const newOpenMod = OPEN_PITCH[curPhys] % 12;
-      fret = ((targetPitchMod - newOpenMod) % 12 + 12) % 12;
-      // Align close to prevAbsFret on new string
-      while (fret < prevAbsFret - 6) fret += 12;
-      while (fret > prevAbsFret + 6) fret -= 12;
-      if (fret < 0) fret += 12;
+    // For the very first string, first note MUST be the root at startFret
+    let stringFirstFret;
+    if (physStr === 0) {
+      stringFirstFret = startFret;
+    } else {
+      // Find the first note of this string: lowest fret >= stringFirstFretMin
+      // that matches targets[seqIdx], fret >= 1
+      const minF = Math.max(1, stringFirstFretMin);
+      stringFirstFret = findFret(physStr, targets[seqIdx], minF);
+      if (stringFirstFret === -1) {
+        // Can't place — try one fret higher minimum
+        // This shouldn't happen with well-formed scales but guard anyway
+        break;
+      }
     }
 
-    prevAbsFret = fret;
-    placed.push({
-      phys: curPhys,
-      fret,
-      seqIdx: i,
-      isRoot: seq[i] % 12 === 0,
-    });
+    const windowMax = stringFirstFret + 3; // 4-fret span: first..first+3
+
+    // Place up to 3 notes on this string within [stringFirstFret, stringFirstFret+3]
+    let notesOnString = 0;
+    let tempSeqIdx = seqIdx;
+
+    while (notesOnString < 3 && tempSeqIdx < targets.length) {
+      // Find fret for this target on current string, within window
+      const minF = notesOnString === 0 ? stringFirstFret : stringFirstFret;
+      let fret = findFret(physStr, targets[tempSeqIdx], stringFirstFret);
+
+      if (fret === -1 || fret > windowMax) {
+        // This note doesn't fit on this string within the window
+        break;
+      }
+
+      // Check: is this the last note (final root on high e)?
+      const isFinalNote = tempSeqIdx === targets.length - 1;
+      const isHighE     = physStr === 5;
+
+      placed.push({
+        phys: physStr,
+        fret,
+        seqIdx: tempSeqIdx,
+        isRoot: seq[tempSeqIdx] % 12 === 0,
+      });
+      notesOnString++;
+      tempSeqIdx++;
+
+      // If we just placed the final note on high e, we're done
+      if (isFinalNote && isHighE) {
+        seqIdx = tempSeqIdx;
+        break;
+      }
+    }
+
+    prevStringFirstFret = stringFirstFret;
+    seqIdx = tempSeqIdx;
+    physStr++;
   }
 
-  // Determine display fret range
-  const frets = placed.map(n => n.fret);
-  const minF = Math.min(...frets);
-  const maxF = Math.max(...frets);
-  const dispMin = Math.max(0, minF);
-  const dispMax = Math.min(17, Math.max(maxF, dispMin + 6));
+  // Compute display fret range: exactly the frets used
+  const frets  = placed.map(n => n.fret);
+  const minFret = Math.min(...frets);
+  const maxFret = Math.max(...frets);
 
-  return { placed, dispMin, dispMax, seq };
+  return { placed, minFret, maxFret, seq };
 }
 
 // ============================================================
 // SVG FRETBOARD RENDERER
 // ============================================================
 function renderFretboard(rootName, scale, noteLabels) {
-  const rootLetter = rootName[0].toUpperCase();
-  const rootAcc = rootName.slice(1);
-  let rootPitch = NATURAL_ST[rootLetter];
-  if (rootAcc === '#') rootPitch++; if (rootAcc === 'b') rootPitch--;
-  rootPitch = ((rootPitch % 12) + 12) % 12;
+  const result = buildPattern(rootName, scale);
+  if (!result) return '<p style="color:red">Could not build pattern for this scale/root.</p>';
 
-  const { placed, dispMin, dispMax, seq } = buildPattern(rootName, scale);
-  const numFrets = dispMax - dispMin;
+  const { placed, minFret, maxFret, seq } = result;
+
+  // Display range: minFret to maxFret (tight fit)
+  const dispMin  = minFret;
+  const dispMax  = maxFret;
+  const numFrets = dispMax - dispMin + 1; // number of fret slots shown
+
   const NUM_STR = 6;
+  const leftPad = 52, rightPad = 24, topPad = 32, bottomPad = 24;
+  const strSp = 32, fretW = 58;
 
-  // Layout
-  const leftPad=40, rightPad=16, topPad=28, bottomPad=28;
-  const strSp=32, fretW=56;
   const W = leftPad + numFrets * fretW + rightPad;
-  const H = topPad + (NUM_STR-1) * strSp + bottomPad;
+  const H = topPad + (NUM_STR - 1) * strSp + bottomPad;
+
+  // Row mapping: row 0 (top) = phys 5 (high e), row 5 (bottom) = phys 0 (low E)
+  function physToRow(p) { return 5 - p; }
 
   let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">`;
   svg += `<defs>
@@ -496,86 +485,83 @@ function renderFretboard(rootName, scale, noteLabels) {
     </filter>
   </defs>`;
 
-  // Fretboard body
+  // Fretboard body — spans all displayed fret slots
   const fbX = leftPad, fbY = topPad;
-  const fbW = numFrets * fretW, fbH = (NUM_STR-1) * strSp;
+  const fbW = numFrets * fretW, fbH = (NUM_STR - 1) * strSp;
   svg += `<rect x="${fbX}" y="${fbY}" width="${fbW}" height="${fbH}" fill="url(#mg)" rx="2"/>`;
 
-  // Nut
-  if (dispMin === 0) {
-    svg += `<rect x="${leftPad-5}" y="${topPad-2}" width="5" height="${fbH+4}" fill="#5a4820" rx="1"/>`;
-  }
-
-  // Fret lines
-  for (let f = 1; f <= numFrets; f++) {
+  // Fret lines — one at the left edge of each slot, plus the right edge
+  for (let f = 0; f <= numFrets; f++) {
     const x = leftPad + f * fretW;
     svg += `<line x1="${x}" y1="${topPad}" x2="${x}" y2="${topPad+fbH}" stroke="#b8a060" stroke-width="1.8"/>`;
   }
 
-  // Fret numbers above
+  // Fret number labels — centered in each slot, above the board
+  // Label every slot with its fret number
   for (let f = 0; f < numFrets; f++) {
-    const fn = dispMin + f + 1;
-    const x = leftPad + f * fretW + fretW / 2;
-    svg += `<text x="${x}" y="${topPad-9}" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#9a8050" font-weight="500">${fn}</text>`;
+    const fn = dispMin + f;
+    const cx = leftPad + f * fretW + fretW / 2;
+    svg += `<text x="${cx}" y="${topPad - 10}" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#7a6840" font-weight="600">${fn}</text>`;
   }
-  if (dispMin === 0) {
-    svg += `<text x="${leftPad-22}" y="${topPad-9}" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#9a8050" font-weight="500">open</text>`;
-  }
+  // Also label the right edge fret number
+  svg += `<text x="${leftPad + numFrets * fretW}" y="${topPad - 10}" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#7a6840" font-weight="600">${dispMax + 1}</text>`;
 
-  // Position markers (inlays)
-  const markers = [3,5,7,9,12,15,17];
-  for (const mf of markers) {
-    if (mf > dispMin && mf <= dispMax) {
-      const fi = mf - dispMin - 1;
-      const cx = leftPad + fi * fretW + fretW / 2;
-      const midY = topPad + fbH / 2;
-      if (mf === 12) {
-        svg += `<circle cx="${cx}" cy="${midY - strSp}" r="4" fill="#c8a860" opacity="0.5"/>`;
-        svg += `<circle cx="${cx}" cy="${midY + strSp}" r="4" fill="#c8a860" opacity="0.5"/>`;
-      } else {
-        svg += `<circle cx="${cx}" cy="${midY}" r="4" fill="#c8a860" opacity="0.5"/>`;
+  // Position markers (inlays) — only if they fall in range
+  const markerFrets = [3,5,7,9,12,15,17];
+  for (const mf of markerFrets) {
+    // marker sits in the slot BEFORE fret line mf, i.e. between fret lines mf-1 and mf
+    if (mf > dispMin && mf <= dispMax + 1) {
+      const slotIdx = mf - 1 - dispMin; // 0-based slot index
+      if (slotIdx >= 0 && slotIdx < numFrets) {
+        const cx = leftPad + slotIdx * fretW + fretW / 2;
+        const midY = topPad + fbH / 2;
+        if (mf === 12) {
+          svg += `<circle cx="${cx}" cy="${midY - strSp}" r="4" fill="#c8a860" opacity="0.5"/>`;
+          svg += `<circle cx="${cx}" cy="${midY + strSp}" r="4" fill="#c8a860" opacity="0.5"/>`;
+        } else {
+          svg += `<circle cx="${cx}" cy="${midY}" r="4" fill="#c8a860" opacity="0.5"/>`;
+        }
       }
     }
   }
 
   // Strings
-  // row 0 (top) = phys 5 (high e), row 5 (bottom) = phys 0 (low E)
-  // String thickness: phys 0 (low E) = thickest = 3.5px, phys 5 (high e) = thinnest = 0.7px
-  // Linear scale: thickness = 3.5 - phys * 0.56  → phys0=3.5, phys5=0.7
+  // row 0=top=phys5(high e), row 5=bottom=phys0(low E)
+  // Thickness: phys 0 (low E) = thickest, phys 5 (high e) = thinnest
   for (let row = 0; row < NUM_STR; row++) {
-    const phys = 5 - row; // row 0 → phys 5 (high e), row 5 → phys 0 (low E)
+    const phys = 5 - row;
     const y = topPad + row * strSp;
-    const thickness = (3.5 - phys * 0.56).toFixed(2); // phys5=0.7, phys0=3.5
-    svg += `<line x1="${leftPad}" y1="${y}" x2="${leftPad+fbW}" y2="${y}" stroke="#6a5838" stroke-width="${thickness}" opacity="0.7"/>`;
-    // String label left of nut
-    svg += `<text x="${leftPad-12}" y="${y+4}" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#7a6040" font-weight="600">${STR_LABEL[phys]}</text>`;
+    // phys 0 → 3.5px, phys 5 → 0.7px
+    const thickness = (0.7 + phys * 0.56).toFixed(2);
+    svg += `<line x1="${leftPad}" y1="${y}" x2="${leftPad + fbW}" y2="${y}" stroke="#6a5838" stroke-width="${thickness}" opacity="0.75"/>`;
+    svg += `<text x="${leftPad - 12}" y="${y + 4}" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#7a6040" font-weight="600">${STR_LABEL[phys]}</text>`;
   }
 
   // Note dots
+  // A note at fret F sits in the slot between fret line (F-1) and fret line F.
+  // Slot index = F - dispMin - 1 (0-based), center = leftPad + slotIdx*fretW + fretW/2
+  // Exception: if dispMin === F (first fret shown = this fret), the note sits in slot 0.
   for (const n of placed) {
-    const row = physToRow(n.phys); // phys0→row5 (bottom=low E), phys5→row0 (top=high e)
-    const y = topPad + row * strSp;
+    const row  = physToRow(n.phys);
+    const y    = topPad + row * strSp;
 
-    let x;
-    if (n.fret === 0 && dispMin === 0) {
-      x = leftPad - 22;
-    } else {
-      // Center dot between fret lines: fret N is between line N-1 and line N
-      // Line for fret F is at x = leftPad + (F - dispMin) * fretW
-      const leftLine  = leftPad + (n.fret - dispMin - 1) * fretW;
-      const rightLine = leftPad + (n.fret - dispMin)     * fretW;
-      x = (leftLine + rightLine) / 2;
-    }
+    // Slot: fret n.fret occupies the space between fret lines (n.fret - dispMin - 1) and (n.fret - dispMin)
+    // But our leftmost fret line is at x=leftPad representing fret dispMin.
+    // So fret dispMin sits in slot 0 (between x=leftPad and x=leftPad+fretW).
+    const slotIdx = n.fret - dispMin; // slot 0 = between dispMin and dispMin+1
+    const x = leftPad + slotIdx * fretW - fretW / 2;
 
-    const isRoot = n.isRoot;
-    const fill   = isRoot ? '#8b6020' : '#1e6e96';
-    const label  = noteLabels[n.seqIdx];
-    const fs     = label.length > 1 ? 7.5 : 9;
+    // Guard: if slotIdx === 0 the note would be left of the board — put it in slot 0 center
+    const cx = slotIdx === 0 ? leftPad + fretW / 2 : x;
 
-    svg += `<circle cx="${x}" cy="${y}" r="14" fill="${fill}" opacity="0.13"/>`;
-    svg += `<circle cx="${x}" cy="${y}" r="11" fill="${fill}" filter="url(#ds)"/>`;
-    svg += `<circle cx="${x-2}" cy="${y-3}" r="3.5" fill="white" opacity="0.22"/>`;
-    svg += `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-family="Inter,sans-serif" font-size="${fs}" font-weight="700" fill="white">${label}</text>`;
+    const fill  = n.isRoot ? '#8b6020' : '#1e6e96';
+    const label = noteLabels[n.seqIdx];
+    const fs    = label.length > 1 ? 7.5 : 9.5;
+
+    svg += `<circle cx="${cx}" cy="${y}" r="14" fill="${fill}" opacity="0.13"/>`;
+    svg += `<circle cx="${cx}" cy="${y}" r="11" fill="${fill}" filter="url(#ds)"/>`;
+    svg += `<circle cx="${cx - 2}" cy="${y - 3}" r="3.5" fill="white" opacity="0.22"/>`;
+    svg += `<text x="${cx}" y="${y}" text-anchor="middle" dominant-baseline="central" font-family="Inter,sans-serif" font-size="${fs}" font-weight="700" fill="white">${label}</text>`;
   }
 
   svg += `</svg>`;
@@ -599,20 +585,17 @@ function generate() {
   const scale = SCALES[sk];
   if (!scale) return;
 
-  // Build properly spelled note names for the scale degrees
   const noteNames = scale.diatonic
     ? buildDiatonicNotes(root, scale.ivs)
     : spellChromatic(root, scale.ivs);
 
-  // Build 2-octave label sequence matching buildSeq()
-  // seq = [0, iv1..ivN-1, 12, iv1+12..ivN-1+12, 24]
-  // Labels repeat: noteNames[0], noteNames[1..N-1], noteNames[0](octave), noteNames[1..N-1], noteNames[0]
+  // Build 2-octave label sequence matching buildSeq in buildPattern
   const seqLabels = [];
   seqLabels.push(noteNames[0]);
   for (let i = 1; i < noteNames.length; i++) seqLabels.push(noteNames[i]);
-  seqLabels.push(noteNames[0]); // octave root
+  seqLabels.push(noteNames[0]);
   for (let i = 1; i < noteNames.length; i++) seqLabels.push(noteNames[i]);
-  seqLabels.push(noteNames[0]); // final root
+  seqLabels.push(noteNames[0]);
 
   const dn = DISPLAY[sk] || sk;
   document.getElementById('scaleTitle').textContent    = `${root} ${dn}`;
@@ -623,10 +606,10 @@ function generate() {
     ? `Formula: <strong>${scale.formula}</strong> &nbsp;·&nbsp; W = whole step, H = half step, W½ = 1½ steps`
     : '';
 
-  // Fretboard
-  document.getElementById('fretboardContainer').innerHTML = renderFretboard(root, scale, seqLabels);
+  document.getElementById('fretboardContainer').innerHTML =
+    renderFretboard(root, scale, seqLabels);
 
-  // Notes table (single octave, properly spelled)
+  // Notes table
   const nb = document.querySelector('#notesTable tbody');
   nb.innerHTML = '';
   noteNames.forEach((note, i) => {
