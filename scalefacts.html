@@ -386,13 +386,15 @@ function buildParentChords(root, sk) {
     symbol: toSymbol7(cr, qs[i], i, parentKey),
     q:      qs[i],
   }));
-  const parentDisplayName = DISPLAY[parentKey] || parentKey;
+  // Use friendly parent name
+  const parentFriendly = parentKey==='aeolian' ? `${root} Minor (Aeolian)` : `${root} Major (Ionian)`;
+  const parentDisplayName = parentKey==='aeolian' ? 'Minor (Aeolian)' : 'Major (Ionian)';
   const scaleDn = DISPLAY[sk] || sk;
-  const footnote = `Lead guitar and melodies using the ${root} ${scaleDn} sound great over these chords — because every chord is built entirely from notes of the parent ${root} ${parentDisplayName} key.`;
+  const footnote = `Lead guitar and melodies using the ${root} ${scaleDn} sound great over these chords — because every chord is built entirely from notes of the parent ${parentFriendly} key.`;
   const bluesNote = (sk === 'blues' || sk === 'major_blues')
     ? `Blues players also commonly use ${root}7, ${parentNotes[3]}7 and ${parentNotes[4]}7 — dominant 7th chords on the I, IV and V — for a classic blues shuffle sound.`
     : null;
-  return { parentDisplayName, parentNotes, chords, footnote, bluesNote };
+  return { parentKey, parentDisplayName, parentFriendly, parentNotes, chords, footnote, bluesNote };
 }
 
 // ============================================================
@@ -503,12 +505,11 @@ function renderFretboard(rootName, scale, noteLabels){
   const dispMin=minFret, dispMax=maxFret;
   const numSlots=dispMax-dispMin+1;
   const NUM_STR=6;
-  const leftPad=78,rightPad=36,topPad=48,bottomPad=36;
+  const leftPad=78,rightPad=36,topPad=72,bottomPad=52;
   const strSp=48,fretW=87;
   const svgW=leftPad+numSlots*fretW+rightPad;
   const svgH=topPad+(NUM_STR-1)*strSp+bottomPad;
 
-  // Note dots use brand blue for root, muted grey for scale tones
   const ROOT_FILL='#4A90E2';
   const NOTE_FILL='#667085';
 
@@ -536,10 +537,11 @@ function renderFretboard(rootName, scale, noteLabels){
     svg+=`<line x1="${x}" y1="${topPad}" x2="${x}" y2="${topPad+fbH}" stroke="#b8a060" stroke-width="1.8"/>`;
   }
 
-  // Fret number labels — centred in each slot
+  // Fret number labels — at BOTTOM, below the low E string (row 5), with enough clearance for note dots (r=16+buffer)
+  const fretLabelY = topPad + fbH + 38; // 38px below bottom string clears the dot radius
   for(let k=0;k<numSlots;k++){
     const cx=leftPad+k*fretW+fretW/2;
-    svg+=`<text x="${cx}" y="${topPad-14}" text-anchor="middle" font-family="ui-sans-serif,system-ui,sans-serif" font-size="14" fill="#667085" font-weight="600">${dispMin+k}</text>`;
+    svg+=`<text x="${cx}" y="${fretLabelY}" text-anchor="middle" font-family="ui-sans-serif,system-ui,sans-serif" font-size="14" fill="#7a6840" font-weight="600">${dispMin+k}</text>`;
   }
 
   // Position marker inlays
@@ -586,8 +588,8 @@ function renderFretboard(rootName, scale, noteLabels){
 // UI
 // ============================================================
 const DISPLAY={
-  ionian:'Ionian (Major)',dorian:'Dorian',phrygian:'Phrygian',lydian:'Lydian',
-  mixolydian:'Mixolydian',aeolian:'Aeolian (Natural Minor)',locrian:'Locrian',
+  ionian:'Major (Ionian)',dorian:'Dorian',phrygian:'Phrygian',lydian:'Lydian',
+  mixolydian:'Mixolydian',aeolian:'Minor (Aeolian)',locrian:'Locrian',
   major_pentatonic:'Major Pentatonic',minor_pentatonic:'Minor Pentatonic',
   blues:'Blues',major_blues:'Major Blues',
   harmonic_minor:'Harmonic Minor',melodic_minor:'Melodic Minor',
@@ -621,6 +623,13 @@ function generate(){
     nb.appendChild(tr);
   });
 
+  // Build chord section label — "Chords in X Major (Ionian)" style
+  function chordsInLabel(rootNote, scaleKey, displayName) {
+    if(scaleKey==='ionian')  return `Chords in ${rootNote} Major (Ionian)`;
+    if(scaleKey==='aeolian') return `Chords in ${rootNote} Minor (Aeolian)`;
+    return `Chords in ${rootNote} ${displayName}`;
+  }
+
   const cb=document.querySelector('#chordsTable tbody'); cb.innerHTML='';
   // Remove any previous footnote
   const prevFn = document.getElementById('chordsFootnote');
@@ -630,8 +639,7 @@ function generate(){
   let chordsData = null;
 
   if(scale.chords){
-    // Standard diatonic scale — regular chord table
-    document.getElementById('chordsLabel').textContent=`Chords of ${root} ${dn.split(' ')[0]}`;
+    document.getElementById('chordsLabel').textContent = chordsInLabel(root, sk, dn);
     const qs=QUALITIES[scale.chordKey||sk];
     if(qs){
       noteNames.forEach((cr,i)=>{
@@ -651,7 +659,8 @@ function generate(){
     // Pentatonic / blues — show parent key chords with 7ths
     const pc = buildParentChords(root, sk);
     if(pc){
-      document.getElementById('chordsLabel').textContent=`Chords of ${root} ${pc.parentDisplayName} (parent key of ${root} ${dn})`;
+      const parentLabel = chordsInLabel(root, pc.parentKey||'', pc.parentDisplayName);
+      document.getElementById('chordsLabel').textContent=`${parentLabel} (parent key of ${root} ${dn})`;
       pc.chords.forEach((ch)=>{
         const tr=document.createElement('tr');
         tr.innerHTML=`<td class="roman-cell roman-${ch.q}">${ch.roman}</td><td class="chord-${ch.q}" style="padding-left:2rem">${ch.symbol}</td>`;
@@ -748,25 +757,20 @@ function fitText(ctx, text, maxW, size, weight) {
   return s;
 }
 
-// Unified title block — identical across all 3 images
-// line1 = scale name (auto-shrinks if needed), line2 = subtitle
+// Unified title block — identical across all 3 images, no pill (item 2)
 function drawTitle(ctx, line1, line2) {
-  const PAD = 80, maxW = IG_W - PAD*2;
-  // Pill
-  ctx.save();
-  roundRect(ctx, PAD-20, 82, IG_W-(PAD-20)*2, 118, 59);
-  ctx.fillStyle = 'rgba(255,255,255,0.13)';
-  ctx.fill();
-  ctx.restore();
+  const PAD = 70, maxW = IG_W - PAD*2;
+  ctx.textAlign = 'center';
   // Title — auto-fit
-  ctx.textAlign = 'center';
-  const titleSize = fitText(ctx, line1, maxW, T.TITLE.size, T.TITLE.weight);
+  fitText(ctx, line1, maxW, T.TITLE.size, T.TITLE.weight);
   ctx.fillStyle = T.TITLE.color;
-  ctx.fillText(line1, IG_W/2, 162);
-  // Subtitle
-  setFont(ctx, T.SUBTITLE);
-  ctx.textAlign = 'center';
-  ctx.fillText(line2, IG_W/2, 222);
+  ctx.fillText(line1, IG_W/2, 158);
+  // Subtitle — only if provided
+  if(line2){
+    setFont(ctx, T.SUBTITLE);
+    ctx.textAlign = 'center';
+    ctx.fillText(line2, IG_W/2, 218);
+  }
 }
 
 function drawHRule(ctx, y) {
@@ -777,7 +781,7 @@ function drawHRule(ctx, y) {
   ctx.restore();
 }
 
-// Fretboard image keeps the CTA; scale/chord images get a subtle watermark instead
+// Fretboard image keeps the CTA box
 function drawCTABox(ctx) {
   const boxY = IG_H - 210;
   drawHRule(ctx, boxY - 18);
@@ -793,12 +797,13 @@ function drawCTABox(ctx) {
   ctx.fillText('500 backing tracks.', IG_W/2, boxY + 140);
 }
 
+// Scale and chords images use a subtle white watermark (item 8)
 function drawWatermark(ctx) {
   ctx.save();
-  ctx.fillStyle = 'rgba(255,255,255,0.30)';
-  ctx.font = `500 28px ${FONT}`;
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = `500 30px ${FONT}`;
   ctx.textAlign = 'center';
-  ctx.fillText('FretTracks', IG_W/2, IG_H - 48);
+  ctx.fillText('FretTracks.com', IG_W/2, IG_H - 44);
   ctx.restore();
 }
 
@@ -838,11 +843,10 @@ function buildFretboardImage(state) {
     const c = igCanvas();
     const ctx = c.getContext('2d');
     drawBackground(ctx);
-    drawTitle(ctx,
-      `${state.root} ${state.displayName}`,
-      `${state.noteNames.length}-Note Scale  ·  Standard Tuning EADGBe`
-    );
-    drawHRule(ctx, 252);
+
+    // Title only — no subtitle (item 4)
+    drawTitle(ctx, `${state.root} ${state.displayName}`, '');
+    drawHRule(ctx, 220);
 
     const svgEl = document.querySelector('#fretboardContainer svg');
     if(!svgEl){ drawCTABox(ctx); resolve(c); return; }
@@ -852,7 +856,8 @@ function buildFretboardImage(state) {
     const url = URL.createObjectURL(svgBlob);
     const img = new Image();
     img.onload = () => {
-      const cardX=50, cardY=274, cardW=IG_W-100;
+      // More space above card (item 6) — start lower
+      const cardX=50, cardY=320, cardW=IG_W-100;
       const aspect = svgEl.viewBox.baseVal.height / svgEl.viewBox.baseVal.width;
       const cardH = Math.round(cardW * aspect);
 
@@ -865,30 +870,7 @@ function buildFretboardImage(state) {
       ctx.drawImage(img, cardX+14, cardY+26, cardW-28, cardH);
       URL.revokeObjectURL(url);
 
-      // Legend
-      const legY = cardY + cardH + 88;
-      ctx.save();
-      ctx.beginPath(); ctx.arc(90, legY, 22, 0, Math.PI*2);
-      ctx.fillStyle='#4A90E2'; ctx.fill(); ctx.restore();
-      setFont(ctx, T.DATA_MD); ctx.textAlign='left';
-      ctx.fillStyle='#FFFFFF';
-      ctx.font=`bold 42px ${FONT}`;
-      ctx.fillText('Root note', 126, legY+15);
-
-      ctx.save();
-      ctx.beginPath(); ctx.arc(460, legY, 22, 0, Math.PI*2);
-      ctx.fillStyle='rgba(255,255,255,0.50)'; ctx.fill(); ctx.restore();
-      ctx.fillText('Scale note', 496, legY+15);
-
-      // Formula
-      if(state.formula){
-        setFont(ctx, T.FORMULA);
-        ctx.textAlign='center';
-        ctx.fillText(`Formula:  ${state.formula}`, IG_W/2, legY+80);
-        setFont(ctx, T.STEP_KEY);
-        ctx.fillText('W = whole step  ·  H = half step  ·  W½ = 1½ steps', IG_W/2, legY+124);
-      }
-
+      // No legend, no formula (items 4 & 5) — just CTA at bottom
       drawCTABox(ctx);
       resolve(c);
     };
@@ -904,10 +886,10 @@ function buildScaleImage(state) {
   const ctx = c.getContext('2d');
   drawBackground(ctx);
   drawTitle(ctx, `${state.root} ${state.displayName}`, 'Scale Degrees');
-  drawHRule(ctx, 252);
+  drawHRule(ctx, 220);
 
   const rows = state.noteNames.length;
-  const tableTop = 274;
+  const tableTop = 244;
   const tableBot = IG_H - 100; // watermark only — use full space
   const rowH = Math.floor((tableBot - tableTop) / (rows + 1));
 
@@ -971,24 +953,30 @@ function buildChordsImage(state) {
   const cd = state.chordsData;
   const isParent = cd && cd.type === 'parent';
 
-  // Title — same unified drawTitle, but chords may need a two-liner subtitle
-  const titleLine1 = isParent
-    ? `Chords of ${state.root} ${cd.parentDisplayName}`
-    : `Chords of ${state.root} ${state.displayName}`;
-  const titleLine2 = isParent
-    ? `Parent key of ${state.root} ${state.displayName}`
-    : 'Key Harmony';
+  // Title: "Chords in A Minor (Aeolian)" style — no subtitle (item 7)
+  let chordsImgTitle;
+  if(isParent){
+    const parentKey = cd.parentKey || '';
+    if(parentKey==='aeolian') chordsImgTitle = `Chords in ${state.root} Minor (Aeolian)`;
+    else if(parentKey==='ionian') chordsImgTitle = `Chords in ${state.root} Major (Ionian)`;
+    else chordsImgTitle = `Chords in ${state.root} ${cd.parentDisplayName}`;
+  } else {
+    const sk = state.sk;
+    if(sk==='ionian')  chordsImgTitle = `Chords in ${state.root} Major (Ionian)`;
+    else if(sk==='aeolian') chordsImgTitle = `Chords in ${state.root} Minor (Aeolian)`;
+    else chordsImgTitle = `Chords in ${state.root} ${state.displayName}`;
+  }
 
-  drawTitle(ctx, titleLine1, titleLine2);
-  drawHRule(ctx, 252);
+  drawTitle(ctx, chordsImgTitle, '');  // no subtitle
+  drawHRule(ctx, 190);
 
   const chords = cd ? cd.chords : [];
-  const tableTop = 274;
-  // Reserve space for footnote at bottom
-  const footnoteLines = cd && cd.footnote ? Math.ceil(cd.footnote.length / 55) : 0;
-  const bluesLines    = cd && cd.bluesNote ? Math.ceil(cd.bluesNote.length / 55) : 0;
-  const footnoteH     = (footnoteLines + bluesLines) * 44 + 80;
-  const tableBot      = IG_H - footnoteH - 80;
+  const tableTop = 210;  // higher — no subtitle line
+  const FOOTNOTE_SIZE = Math.round(T.FOOTNOTE.size * 1.5); // 1.5x = 51px
+  const footnoteLines = cd && cd.footnote ? Math.ceil(cd.footnote.length / 48) : 0;
+  const bluesLines    = cd && cd.bluesNote ? Math.ceil(cd.bluesNote.length / 48) : 0;
+  const footnoteH     = (footnoteLines + bluesLines) * (FOOTNOTE_SIZE + 12) + 80;
+  const tableBot      = IG_H - footnoteH - 100;
   const rowH          = Math.floor((tableBot - tableTop) / (chords.length + 1));
 
   const colNash  = 100;
@@ -1026,17 +1014,18 @@ function buildChordsImage(state) {
     ctx.fillText(ch.symbol, colChord, textY);
   });
 
-  // Footnote — large, white, full-bleed (no box)
+  // Footnote — 1.5x larger, white, full-bleed (item 6)
   if(cd && cd.footnote){
     const fnY = tableBot + 30;
     drawHRule(ctx, fnY - 16);
-    setFont(ctx, T.FOOTNOTE);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = `400 ${FOOTNOTE_SIZE}px ${FONT}`;
     ctx.textAlign = 'left';
-    let lastY = canvasWrapText(ctx, cd.footnote, 60, fnY + 44, IG_W-120, T.FOOTNOTE.size + 10);
+    let lastY = canvasWrapText(ctx, cd.footnote, 60, fnY + FOOTNOTE_SIZE + 16, IG_W-120, FOOTNOTE_SIZE + 14);
     if(cd.bluesNote){
-      ctx.fillStyle = 'rgba(255,255,255,0.65)';
-      ctx.font = `italic ${T.FOOTNOTE.size}px ${FONT}`;
-      canvasWrapText(ctx, cd.bluesNote, 60, lastY + 48, IG_W-120, T.FOOTNOTE.size + 8);
+      ctx.fillStyle = 'rgba(255,255,255,0.70)';
+      ctx.font = `italic ${FOOTNOTE_SIZE}px ${FONT}`;
+      canvasWrapText(ctx, cd.bluesNote, 60, lastY + FOOTNOTE_SIZE + 10, IG_W-120, FOOTNOTE_SIZE + 12);
     }
   }
 
@@ -1082,7 +1071,7 @@ document.addEventListener('keydown', e => {
   }
 });
 
-window.addEventListener('load',()=>generate());
+window.addEventListener('load',()=>quick('A','minor_pentatonic'));
 </script>
 <!-- INSTAGRAM EXPORT POPUP -->
 <div id="igPopup" class="ig-overlay" onclick="if(event.target===this)hideExportPopup()">
