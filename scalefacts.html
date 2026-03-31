@@ -975,22 +975,16 @@ function buildFretboardImage(state,tone){
         ctx.fillText('Signature tone',SAFE+324,legY+11);
       }
 
-      // Short insight — amber italic
-      const shortInsight = SHORT_INSIGHTS[state.sk]||'';
-      if(shortInsight){
-        ctx.fillStyle='rgba(240,160,48,0.95)';
-        ctx.font=`600 italic 32px ${FONT}`; ctx.textAlign='center';
-        ctx.fillText(shortInsight,IG_W/2,legY+56);
-      }
+      // Short insight removed from export — covered by full insight below
 
-      drawHRule(ctx,legY+84);
+      drawHRule(ctx,legY+36);
 
-      // Full insight paragraph
+      // Full insight paragraph — larger font for readability
       const fullInsight = FULL_INSIGHTS[state.sk]||'';
       if(fullInsight){
-        ctx.fillStyle='rgba(255,255,255,0.88)';
-        ctx.font=`400 32px ${FONT}`; ctx.textAlign='left';
-        canvasWrapText(ctx,fullInsight,SAFE,legY+124,IG_W-SAFE*2,46);
+        ctx.fillStyle='rgba(255,255,255,0.90)';
+        ctx.font=`400 40px ${FONT}`; ctx.textAlign='left';
+        canvasWrapText(ctx,fullInsight,SAFE,legY+90,IG_W-SAFE*2,56);
       }
 
       drawHRule(ctx,IG_H-SAFE-70);
@@ -1090,10 +1084,10 @@ function buildChordsImage(state,tone){
 
   const chords=cd?cd.chords:[];
   const rowH=Math.floor((tableBot-tableTop)/(chords.length+1));
-  const colNash=SAFE+72, colChord=SAFE+432;
+  const colNash=SAFE+36, colChord=SAFE+380;
 
   setFont(ctx,T.COL_HDR); ctx.textAlign='left';
-  ctx.fillText('NASHVILLE',colNash,tableTop+46);
+  ctx.fillText('ROMAN NUMERALS',colNash,tableTop+46);
   ctx.fillText('CHORD',colChord,tableTop+46);
   drawHRule(ctx,tableTop+64);
 
@@ -1108,13 +1102,15 @@ function buildChordsImage(state,tone){
     ctx.fillText(ch.symbol,colChord,textY);
   });
 
-  // Footnote
+  // Footnote — scale-specific approved phrasing
+  const fnFn = CHORD_FOOTNOTES[state.sk] || ((r,d)=>`${r} ${d} sounds great over these chords.`);
+  const fnText = fnFn(state.root, state.displayName);
   const fnY=tableBot+30;
   drawHRule(ctx,fnY-16);
   ctx.fillStyle='#FFFFFF';
   ctx.font=`400 ${FN_SIZE}px ${FONT}`;
   ctx.textAlign='left';
-  canvasWrapText(ctx,footnoteText,SAFE,fnY+FN_SIZE+10,FN_MAX_W,FN_LINE_H);
+  canvasWrapText(ctx,fnText,SAFE,fnY+FN_SIZE+10,FN_MAX_W,FN_LINE_H);
 
   drawHRule(ctx, IG_H-SAFE-70);
   drawWatermark(ctx);
@@ -1131,29 +1127,29 @@ function buildVideoImage(state,tone){
   const VIDEO_TITLE_Y = SAFE + ACCENT_BAND_H + 90;
   ctx.textAlign='center';
 
-  // Line 1 — "The Sound" — bold title, same size as other images
+  // Line 1 — "The Sound" — bold title
   ctx.fillStyle='#FFFFFF';
   ctx.font=`bold 96px ${FONT}`;
   ctx.fillText('The Sound',IG_W/2,VIDEO_TITLE_Y);
 
-  // Line 2 — "[Scale Name] with Backing Tracks"
+  // Line 2 — "[Scale Name] with Backing Tracks" — now bold, with extra padding below
   ctx.fillStyle='rgba(255,255,255,0.75)';
-  fitText(ctx,`${scaleName} with Backing Tracks`,maxW,52,'500');
+  fitText(ctx,`${scaleName} with Backing Tracks`,maxW,52,'bold');
   ctx.fillStyle='rgba(255,255,255,0.75)';
-  ctx.fillText(`${scaleName} with Backing Tracks`,IG_W/2,VIDEO_TITLE_Y+72);
+  ctx.fillText(`${scaleName} with Backing Tracks`,IG_W/2,VIDEO_TITLE_Y+80);
 
-  // Line 3 — "You. Sooner Than You Think." — the hook
+  // Line 3 — "You. Sooner Than You Think." — hook, bold, extra top padding
   ctx.fillStyle='rgba(255,255,255,0.92)';
   fitText(ctx,'You. Sooner Than You Think.',maxW,62,'bold');
   ctx.fillStyle='rgba(255,255,255,0.92)';
-  ctx.fillText('You. Sooner Than You Think.',IG_W/2,VIDEO_TITLE_Y+152);
+  ctx.fillText('You. Sooner Than You Think.',IG_W/2,VIDEO_TITLE_Y+172);
 
-  // Line 4 — "With FretTracks." — brand closer, own line
+  // Line 4 — "With FretTracks." — brand closer, bold
   ctx.fillStyle='rgba(255,255,255,0.65)';
-  ctx.font=`500 54px ${FONT}`;
-  ctx.fillText('With FretTracks.',IG_W/2,VIDEO_TITLE_Y+222);
+  ctx.font=`bold 54px ${FONT}`;
+  ctx.fillText('With FretTracks.',IG_W/2,VIDEO_TITLE_Y+242);
 
-  drawHRule(ctx,VIDEO_TITLE_Y+268);
+  drawHRule(ctx,VIDEO_TITLE_Y+290);
 
   // CTA box — consistent font size with other images
   const boxY=IG_H-SAFE-280;
