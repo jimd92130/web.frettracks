@@ -957,7 +957,7 @@ function buildFretboardImage(state,tone){
       ctx.save();
       ctx.shadowColor='rgba(0,0,0,0.28)'; ctx.shadowBlur=36; ctx.shadowOffsetY=10;
       roundRect(ctx,cardX,cardY,cardW,cardH+52,28);
-      ctx.fillStyle='#f7e8c2'; ctx.fill(); ctx.restore();
+      ctx.fillStyle='#FFFFFF'; ctx.fill(); ctx.restore();
       ctx.drawImage(img,cardX+14,cardY+26,cardW-28,cardH);
       URL.revokeObjectURL(url);
 
@@ -1157,11 +1157,10 @@ function buildVideoImage(state,tone){
   ctx.font=`bold 96px ${FONT}`;
   ctx.fillText('The Sound',IG_W/2,VIDEO_TITLE_Y);
 
-  // Line 2 — "You Can Be Playing X." — bold, same size as 3 & 4
+  // Line 2 — fixed across all scales — video thumbnail shows scale name
   ctx.fillStyle=LINE_COLOR;
-  fitText(ctx,`You Can Be Playing ${shortName}.`,maxW,LINE_SIZE,'bold');
-  ctx.fillStyle=LINE_COLOR;
-  ctx.fillText(`You Can Be Playing ${shortName}.`,IG_W/2,VIDEO_TITLE_Y+110);
+  ctx.font=`bold ${LINE_SIZE}px ${FONT}`;
+  ctx.fillText('You Can Be Jamming Like This.',IG_W/2,VIDEO_TITLE_Y+110);
 
   // Line 3 — "Sooner Than You Think."
   ctx.fillStyle=LINE_COLOR;
