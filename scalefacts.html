@@ -979,12 +979,12 @@ function buildFretboardImage(state,tone){
 
       drawHRule(ctx,legY+36);
 
-      // Full insight paragraph — larger font for readability
+      // Full insight paragraph — 52px for readability and impact
       const fullInsight = FULL_INSIGHTS[state.sk]||'';
       if(fullInsight){
         ctx.fillStyle='rgba(255,255,255,0.90)';
-        ctx.font=`400 40px ${FONT}`; ctx.textAlign='left';
-        canvasWrapText(ctx,fullInsight,SAFE,legY+90,IG_W-SAFE*2,56);
+        ctx.font=`400 52px ${FONT}`; ctx.textAlign='left';
+        canvasWrapText(ctx,fullInsight,SAFE,legY+90,IG_W-SAFE*2,72);
       }
 
       drawHRule(ctx,IG_H-SAFE-70);
@@ -1127,29 +1127,36 @@ function buildVideoImage(state,tone){
   const VIDEO_TITLE_Y = SAFE + ACCENT_BAND_H + 90;
   ctx.textAlign='center';
 
-  // Line 1 — "The Sound" — bold title
+  // Short scale name — no parenthetical for this panel
+  const shortName = (()=>{
+    if(state.sk==='ionian')  return `${state.root} Major`;
+    if(state.sk==='aeolian') return `${state.root} Minor`;
+    return `${state.root} ${state.displayName}`;
+  })();
+
+  const LINE_SIZE = 58; // uniform size for lines 2-4
+  const LINE_COLOR = 'rgba(255,255,255,0.82)';
+
+  // Line 1 — "The Sound" — matches other panel titles exactly
   ctx.fillStyle='#FFFFFF';
   ctx.font=`bold 96px ${FONT}`;
   ctx.fillText('The Sound',IG_W/2,VIDEO_TITLE_Y);
 
-  // Line 2 — "[Scale Name] with Backing Tracks" — now bold, with extra padding below
-  ctx.fillStyle='rgba(255,255,255,0.75)';
-  fitText(ctx,`${scaleName} with Backing Tracks`,maxW,52,'bold');
-  ctx.fillStyle='rgba(255,255,255,0.75)';
-  ctx.fillText(`${scaleName} with Backing Tracks`,IG_W/2,VIDEO_TITLE_Y+80);
+  // Line 2 — "You Can Be Playing X. Like This." — bold, same size as 3 & 4
+  ctx.fillStyle=LINE_COLOR;
+  fitText(ctx,`You Can Be Playing ${shortName}. Like This.`,maxW,LINE_SIZE,'bold');
+  ctx.fillStyle=LINE_COLOR;
+  ctx.fillText(`You Can Be Playing ${shortName}. Like This.`,IG_W/2,VIDEO_TITLE_Y+110);
 
-  // Line 3 — "You. Sooner Than You Think." — hook, bold, extra top padding
-  ctx.fillStyle='rgba(255,255,255,0.92)';
-  fitText(ctx,'You. Sooner Than You Think.',maxW,62,'bold');
-  ctx.fillStyle='rgba(255,255,255,0.92)';
-  ctx.fillText('You. Sooner Than You Think.',IG_W/2,VIDEO_TITLE_Y+172);
+  // Line 3 — "Sooner Than You Think."
+  ctx.fillStyle=LINE_COLOR;
+  ctx.font=`bold ${LINE_SIZE}px ${FONT}`;
+  ctx.fillText('Sooner Than You Think.',IG_W/2,VIDEO_TITLE_Y+190);
 
-  // Line 4 — "With FretTracks." — brand closer, bold
-  ctx.fillStyle='rgba(255,255,255,0.65)';
-  ctx.font=`bold 54px ${FONT}`;
-  ctx.fillText('With FretTracks.',IG_W/2,VIDEO_TITLE_Y+242);
+  // Line 4 — "With FretTracks."
+  ctx.fillText('With FretTracks.',IG_W/2,VIDEO_TITLE_Y+270);
 
-  drawHRule(ctx,VIDEO_TITLE_Y+290);
+  drawHRule(ctx,VIDEO_TITLE_Y+310);
 
   // CTA box — consistent font size with other images
   const boxY=IG_H-SAFE-280;
