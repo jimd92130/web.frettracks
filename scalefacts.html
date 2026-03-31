@@ -410,18 +410,18 @@ const SHORT_INSIGHTS = {
   blues:           'The b5 blue note is where the soul lives.',
 };
 
-// Full insight — shown on Panel 1 export (below short insight, replaces CTA box)
+// Full insight — shown on Panel 1 export (below legend, vertically centered)
 const FULL_INSIGHTS = {
-  ionian:         'This is the reference scale — the one everything else is measured against. When someone says a song is "in C," they mean C Ionian. Learn this scale and you have the foundation for understanding every other scale on this list.',
-  dorian:         'Dorian is a minor scale with one note raised — the 6th. That single change lifts the mood just enough to give it a sophisticated, slightly happy feel that pure minor doesn\'t have. It\'s why Dorian works so well in jazz, funk and blues-rock.',
-  phrygian:       'Phrygian is a minor scale with a flattened 2nd — the note right above the root. That one step down creates an immediately dark, exotic sound. You hear it in flamenco, metal and Middle Eastern music. It\'s unmistakable the moment you play it.',
-  lydian:         'Lydian is a major scale with a raised 4th. That one note creates a floating, unresolved feeling that sounds cinematic and dreamy. Film composers reach for Lydian constantly. Play it over a major chord and you\'ll hear exactly why.',
-  mixolydian:     'Mixolydian is a major scale with a flattened 7th. That one note is the difference between bright and bluesy. Almost every classic rock riff you\'ve ever heard lives in Mixolydian. It\'s the sound of the electric guitar finding its natural home.',
-  aeolian:        'Natural minor has three notes flattened compared to major — the 3rd, 6th and 7th. Those three changes are responsible for most of the emotional, melancholic music ever written. If major is daylight, minor is everything else.',
-  locrian:        'Locrian has a flattened 2nd and a flattened 5th — the most unstable scale in common use. The b5 creates tension that almost never resolves comfortably. Most guitarists use it sparingly for effect. Bold choice.',
-  major_pentatonic:'Major pentatonic is the major scale with the 4th and 7th removed — the two notes most likely to clash. What\'s left is pure, versatile melody. It\'s the scale behind country leads, pop hooks and feel-good rock solos. No wrong notes.',
-  minor_pentatonic:'Minor pentatonic is minor stripped to 5 notes — removing the two most tension-creating intervals. What remains works over almost any minor or blues chord progression. It\'s the first scale most guitarists learn and the one they never stop using.',
-  blues:          'The blues scale is minor pentatonic with one note added — the b5, called the blue note. That one addition creates all the tension and release that defines blues, rock and soul. It\'s a small change with an enormous sound.',
+  ionian:         'This is the reference scale. When someone says a song is \'in C,\' they mean C major. Learn this and you have a strong foundation for understanding other scales.',
+  dorian:         'Dorian is a minor scale with the 6th note raised. That one note adds a brighter, more sophisticated edge. It\'s the sound of jazz, funk and blues-rock.',
+  phrygian:       'Phrygian is a minor scale with the 2nd note lowered. That one note creates a dark, exotic sound heard in flamenco and metal. Instantly recognizable.',
+  lydian:         'Lydian is a major scale with the 4th note raised. That one note creates a floating, cinematic feel. Play it over a major chord and you\'ll hear it immediately.',
+  mixolydian:     'Mixolydian is a major scale with the 7th note lowered. That one note makes it bluesy instead of bright. It\'s the sound of classic rock guitar.',
+  aeolian:        'Natural minor lowers the 3rd, 6th and 7th notes compared to major. These changes create a darker, more emotional sound used in countless songs.',
+  locrian:        'Locrian lowers the 2nd and 5th notes, making it the most unstable scale. The lowered 5th creates constant tension. Used sparingly — bold choice.',
+  major_pentatonic:'Major pentatonic removes the 4th and 7th notes from the major scale. What\'s left is smooth, versatile and hard to clash. It\'s used in country, pop and rock.',
+  minor_pentatonic:'Minor pentatonic removes two notes from the minor scale, leaving five that work over many minor and blues progressions. Simple, flexible and essential.',
+  blues:          'The blues scale adds a lowered 5th note to minor pentatonic. That one note creates the tension that defines blues and rock. Small change, big sound.',
 };
 
 // Chord panel footnotes — confidence-building, scale-specific
@@ -984,7 +984,7 @@ function buildFretboardImage(state,tone){
       // Full insight paragraph — vertically centered between the two rules
       const fullInsight = FULL_INSIGHTS[state.sk]||'';
       if(fullInsight){
-        const FONT_SIZE = 52, LINE_H = 72;
+        const FONT_SIZE = 62, LINE_H = 84;
         ctx.font=`400 ${FONT_SIZE}px ${FONT}`;
         // Measure how many lines the paragraph needs
         const words = fullInsight.split(' ');
