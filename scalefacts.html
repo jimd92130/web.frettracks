@@ -706,8 +706,27 @@ function downloadCanvas(canvas,filename){
   const link=document.createElement('a'); link.download=filename; link.href=canvas.toDataURL('image/png'); link.click();
 }
 
-function safeFilename(root,sk,type,suffix=''){
-  return `frettracks-${type}-${root}-${sk}${suffix}`.replace(/[^a-zA-Z0-9-]/g,'_')+'.png';
+// Naming: AMinorPentatonic_panel1.png / AMinorPentatonic_thumb1.png
+const PANEL_NUMBER = { fretboard:1, scale:2, chords:3, video:4 };
+const SCALE_DISPLAY_NAME = {
+  ionian:'Major', dorian:'Dorian', phrygian:'Phrygian', lydian:'Lydian',
+  mixolydian:'Mixolydian', aeolian:'Minor', locrian:'Locrian',
+  major_pentatonic:'MajorPentatonic', minor_pentatonic:'MinorPentatonic', blues:'Blues',
+};
+function formatRoot(root) {
+  return root
+    .replace('##','DoubleSharp')
+    .replace('#','Sharp')
+    .replace('bb','DoubleFlat')
+    .replace('b','Flat');
+}
+function buildFilename(root, sk, type, isThumb) {
+  const rootPart  = formatRoot(root);
+  const scalePart = SCALE_DISPLAY_NAME[sk] || sk;
+  const base      = `${rootPart}${scalePart}`;
+  const num       = PANEL_NUMBER[type] || 0;
+  const kind      = isThumb ? 'thumb' : 'panel';
+  return `${base}_${kind}${num}.png`;
 }
 
 // ============================================================
@@ -857,7 +876,7 @@ function buildVideoImage(state,tone){
 function buildGridThumbnail(fullCanvas) {
   const GRID_W = IG_W;       // 1080
   const GRID_H = IG_GRID_H;  // 1350
-  const BLUR_START = 0.85;   // blur begins at 85% of GRID_H = ~1147px
+  const BLUR_START = 0.78;   // blur begins at 78% of GRID_H = ~1053px
 
   const thumb = document.createElement('canvas');
   thumb.width  = GRID_W;
@@ -895,26 +914,19 @@ function buildGridThumbnail(fullCanvas) {
   ctx.fillStyle = scrim;
   ctx.fillRect(0, scrimStart, GRID_W, GRID_H - scrimStart);
 
-  // 4. CTA — "Tap for the full guitar reveal..."
-  const CTA_Y      = GRID_H - 96;
-  const CTA_SIZE   = 54;
-  const SUB_SIZE   = 32;
+  // 4. CTA — single clean line, vertically centered in the blur zone
+  const blurMidY = blurZoneTop + (GRID_H - blurZoneTop) / 2;
+  const CTA_SIZE = 54;
+  const CTA_Y    = blurMidY + CTA_SIZE * 0.35; // optical center
 
-  // Glow pass (shadow for depth)
   ctx.save();
-  ctx.shadowColor  = 'rgba(0,0,0,0.9)';
-  ctx.shadowBlur   = 30;
-  ctx.fillStyle    = '#FFFFFF';
-  ctx.font         = `bold ${CTA_SIZE}px ${FONT}`;
-  ctx.textAlign    = 'center';
+  ctx.shadowColor = 'rgba(0,0,0,0.9)';
+  ctx.shadowBlur  = 30;
+  ctx.fillStyle   = '#FFFFFF';
+  ctx.font        = `bold ${CTA_SIZE}px ${FONT}`;
+  ctx.textAlign   = 'center';
   ctx.fillText('Tap for the full guitar reveal...', GRID_W / 2, CTA_Y);
   ctx.restore();
-
-  // Sub-label
-  ctx.fillStyle = 'rgba(255,255,255,0.60)';
-  ctx.font      = `500 ${SUB_SIZE}px ${FONT}`;
-  ctx.textAlign = 'center';
-  ctx.fillText('↓  tap to see the complete breakdown  ↓', GRID_W / 2, CTA_Y + CTA_SIZE + 10);
 
   return thumb;
 }
@@ -950,33 +962,33 @@ async function exportImage(type){
   const g4=buildGridThumbnail(c4);
 
   if(type==='fretboard'){
-    downloadCanvas(c1, safeFilename(s.root,s.sk,'fretboard'));
-    downloadCanvas(g1, safeFilename(s.root,s.sk,'fretboard','-grid'));
+    downloadCanvas(c1, buildFilename(s.root,s.sk,'fretboard',false));
+    downloadCanvas(g1, buildFilename(s.root,s.sk,'fretboard',true));
   }
   if(type==='scale'){
-    downloadCanvas(c2, safeFilename(s.root,s.sk,'scale'));
-    downloadCanvas(g2, safeFilename(s.root,s.sk,'scale','-grid'));
+    downloadCanvas(c2, buildFilename(s.root,s.sk,'scale',false));
+    downloadCanvas(g2, buildFilename(s.root,s.sk,'scale',true));
   }
   if(type==='chords'){
-    downloadCanvas(c3, safeFilename(s.root,s.sk,'chords'));
-    downloadCanvas(g3, safeFilename(s.root,s.sk,'chords','-grid'));
+    downloadCanvas(c3, buildFilename(s.root,s.sk,'chords',false));
+    downloadCanvas(g3, buildFilename(s.root,s.sk,'chords',true));
   }
   if(type==='video'){
-    downloadCanvas(c4, safeFilename(s.root,s.sk,'video'));
-    downloadCanvas(g4, safeFilename(s.root,s.sk,'video','-grid'));
+    downloadCanvas(c4, buildFilename(s.root,s.sk,'video',false));
+    downloadCanvas(g4, buildFilename(s.root,s.sk,'video',true));
   }
 
   if(type==='all'){
     // All 4 full Reels
-    downloadCanvas(c1, safeFilename(s.root,s.sk,'fretboard'));
-    downloadCanvas(c2, safeFilename(s.root,s.sk,'scale'));
-    downloadCanvas(c3, safeFilename(s.root,s.sk,'chords'));
-    downloadCanvas(c4, safeFilename(s.root,s.sk,'video'));
+    downloadCanvas(c1, buildFilename(s.root,s.sk,'fretboard',false));
+    downloadCanvas(c2, buildFilename(s.root,s.sk,'scale',false));
+    downloadCanvas(c3, buildFilename(s.root,s.sk,'chords',false));
+    downloadCanvas(c4, buildFilename(s.root,s.sk,'video',false));
     // All 4 grid thumbnails
-    downloadCanvas(g1, safeFilename(s.root,s.sk,'fretboard','-grid'));
-    downloadCanvas(g2, safeFilename(s.root,s.sk,'scale','-grid'));
-    downloadCanvas(g3, safeFilename(s.root,s.sk,'chords','-grid'));
-    downloadCanvas(g4, safeFilename(s.root,s.sk,'video','-grid'));
+    downloadCanvas(g1, buildFilename(s.root,s.sk,'fretboard',true));
+    downloadCanvas(g2, buildFilename(s.root,s.sk,'scale',true));
+    downloadCanvas(g3, buildFilename(s.root,s.sk,'chords',true));
+    downloadCanvas(g4, buildFilename(s.root,s.sk,'video',true));
     hideExportPopup();
   }
 }
