@@ -199,11 +199,11 @@ tbody tr:hover{background:var(--bg);}
       <div class="fretboard-wrap">
         <div class="fretboard-svg-container" id="fretboardContainer"></div>
       </div>
-      <div class="legend">
+      <div class="legend" id="fretboardLegend">
         <div class="legend-item"><div class="legend-dot" style="background:var(--brand)"></div>Root note</div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--muted)"></div>Scale note</div>
       </div>
       <div class="formula-row" id="formulaRow"></div>
+      <div class="formula-row" id="scaleInsight" style="margin-top:6px;font-style:italic;color:#f0a030;font-weight:600;"></div>
     </div>
     <div class="tables-grid">
       <div class="table-card">
@@ -216,7 +216,7 @@ tbody tr:hover{background:var(--bg);}
       <div class="table-card">
         <div class="section-label" id="chordsLabel">Chords of the Key</div>
         <table id="chordsTable">
-          <thead><tr><th>Nashville</th><th style="padding-left:2rem">Chord</th></tr></thead>
+          <thead><tr><th style="width:200px">Roman Numerals</th><th style="padding-left:2.5rem">Chord</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
@@ -382,7 +382,61 @@ const HOOKS = {
   blues:           'Jump in. One extra note changes everything.',
 };
 
-// All tones use the dark gradient — only border color varies
+// Signature tone semitone offsets (intervals from root) — null means none
+const SIGNATURE_TONES = {
+  ionian:          null,          // gold standard — no characteristic tones
+  dorian:          [9],           // raised 6th
+  phrygian:        [1],           // b2
+  lydian:          [6],           // #4
+  mixolydian:      [10],          // b7
+  aeolian:         [3,8,10],      // b3, b6, b7
+  locrian:         [1,6],         // b2, b5
+  major_pentatonic:null,          // no wrong notes
+  minor_pentatonic:null,          // no wrong notes
+  blues:           [6],           // b5 blue note
+};
+
+// Short insight — one line, shown on Panel 1 (web + export)
+const SHORT_INSIGHTS = {
+  ionian:          'The gold standard. All scales start here.',
+  dorian:          'Minor scale with a raised 6 — a little happier.',
+  phrygian:        'The b2 creates that dark, exotic edge.',
+  lydian:          'The raised 4 is the note that floats.',
+  mixolydian:      'The b7 gives classic rock its swagger.',
+  aeolian:         'Three flatted notes — that\'s the emotion.',
+  locrian:         'The b5 creates tension that won\'t resolve.',
+  major_pentatonic:'No wrong notes. Pure melody.',
+  minor_pentatonic:'5 notes. No wrong answers.',
+  blues:           'The b5 blue note is where the soul lives.',
+};
+
+// Full insight — shown on Panel 1 export (below short insight, replaces CTA box)
+const FULL_INSIGHTS = {
+  ionian:         'This is the reference scale — the one everything else is measured against. When someone says a song is "in C," they mean C Ionian. Learn this scale and you have the foundation for understanding every other scale on this list.',
+  dorian:         'Dorian is a minor scale with one note raised — the 6th. That single change lifts the mood just enough to give it a sophisticated, slightly happy feel that pure minor doesn\'t have. It\'s why Dorian works so well in jazz, funk and blues-rock.',
+  phrygian:       'Phrygian is a minor scale with a flattened 2nd — the note right above the root. That one step down creates an immediately dark, exotic sound. You hear it in flamenco, metal and Middle Eastern music. It\'s unmistakable the moment you play it.',
+  lydian:         'Lydian is a major scale with a raised 4th. That one note creates a floating, unresolved feeling that sounds cinematic and dreamy. Film composers reach for Lydian constantly. Play it over a major chord and you\'ll hear exactly why.',
+  mixolydian:     'Mixolydian is a major scale with a flattened 7th. That one note is the difference between bright and bluesy. Almost every classic rock riff you\'ve ever heard lives in Mixolydian. It\'s the sound of the electric guitar finding its natural home.',
+  aeolian:        'Natural minor has three notes flattened compared to major — the 3rd, 6th and 7th. Those three changes are responsible for most of the emotional, melancholic music ever written. If major is daylight, minor is everything else.',
+  locrian:        'Locrian has a flattened 2nd and a flattened 5th — the most unstable scale in common use. The b5 creates tension that almost never resolves comfortably. Most guitarists use it sparingly for effect. Bold choice.',
+  major_pentatonic:'Major pentatonic is the major scale with the 4th and 7th removed — the two notes most likely to clash. What\'s left is pure, versatile melody. It\'s the scale behind country leads, pop hooks and feel-good rock solos. No wrong notes.',
+  minor_pentatonic:'Minor pentatonic is minor stripped to 5 notes — removing the two most tension-creating intervals. What remains works over almost any minor or blues chord progression. It\'s the first scale most guitarists learn and the one they never stop using.',
+  blues:          'The blues scale is minor pentatonic with one note added — the b5, called the blue note. That one addition creates all the tension and release that defines blues, rock and soul. It\'s a small change with an enormous sound.',
+};
+
+// Chord panel footnotes — confidence-building, scale-specific
+const CHORD_FOOTNOTES = {
+  ionian:          (r,d) => `These chords were made for ${r} Major. Play freely — every note lands.`,
+  dorian:          (r,d) => `${r} Dorian sounds great over these chords. That slightly happy minor feel will come through instantly.`,
+  phrygian:        (r,d) => `These chords set you up perfectly for ${r} Phrygian leads. That dark edge will cut right through.`,
+  lydian:          (r,d) => `${r} Lydian floats beautifully over these chords. Let the raised 4 do its thing.`,
+  mixolydian:      (r,d) => `These chords were made for ${r} Mixolydian. That bluesy swagger comes right through.`,
+  aeolian:         (r,d) => `${r} Minor sounds great over these chords. Play expressively — the emotion is built in.`,
+  locrian:         (r,d) => `These chords set you up for ${r} Locrian's tension. Lean into the discomfort.`,
+  major_pentatonic:(r,d) => `These chords were made for ${r} Major Pentatonic. No wrong notes — just play.`,
+  minor_pentatonic:(r,d) => `${r} Minor Pentatonic sounds great over these chords. This is where solos are born.`,
+  blues:           (r,d) => `These chords were made for ${r} Blues. They make it easy to be expressive — that's what the blues is all about.`,
+};
 const IG_GRADIENT_DARK = ['#3a7acc','#1f5aaa','#0a3070'];
 const IG_GRADIENTS = {
   light: IG_GRADIENT_DARK,
@@ -525,7 +579,7 @@ function buildPattern(rootName, scale) {
 // ============================================================
 // SVG FRETBOARD RENDERER
 // ============================================================
-function renderFretboard(rootName, scale, noteLabels) {
+function renderFretboard(rootName, scale, noteLabels, sk) {
   const result = buildPattern(rootName, scale);
   if(!result) return '<p style="color:red">Could not build pattern.</p>';
   const { placed, minFret, maxFret } = result;
@@ -534,7 +588,13 @@ function renderFretboard(rootName, scale, noteLabels) {
   const strSp=48, fretW=87;
   const svgW=leftPad+numSlots*fretW+rightPad;
   const svgH=topPad+(NUM_STR-1)*strSp+bottomPad;
-  const ROOT_FILL='#4A90E2', NOTE_FILL='#667085';
+  const ROOT_FILL='#4A90E2', NOTE_FILL='#667085', SIG_FILL='#f0a030';
+
+  // Build set of signature tone pitches (mod 12) for this scale
+  const rPitch = rootPitchOf(rootName);
+  const sigIntervals = SIGNATURE_TONES[sk] || [];
+  const sigPitches = new Set(sigIntervals.map(iv=>((rPitch+iv)%12+12)%12));
+
   function physToRow(p){ return 5-p; }
   function slotCx(fretN){ return leftPad+(fretN-dispMin)*fretW+fretW/2; }
   const svgStyle=`max-width:${svgW}px;width:calc(100vw - 100px);height:auto;display:block;`;
@@ -574,10 +634,14 @@ function renderFretboard(rootName, scale, noteLabels) {
     svg+=`<line x1="${leftPad}" y1="${y}" x2="${leftPad+fbW}" y2="${y}" stroke="#6a5838" stroke-width="${thickness}" opacity="0.75"/>`;
     svg+=`<text x="${leftPad-16}" y="${y+5}" text-anchor="middle" font-family="ui-sans-serif,sans-serif" font-size="13" fill="#667085" font-weight="600">${STR_LABEL[phys]}</text>`;
   }
-  // Note dots
+  // Note dots — root=blue, signature=gold, other=gray
   for(const n of placed){
     const row=physToRow(n.phys), y=topPad+row*strSp, cx=slotCx(n.fret);
-    const fill=n.isRoot?ROOT_FILL:NOTE_FILL;
+    const notePitch = ((rPitch + (n.isRoot ? 0 : 0)) + 12)%12;
+    // Determine actual pitch of this note from the fret
+    const actualPitch = ((OPEN_PITCH[n.phys] + n.fret)%12+12)%12;
+    const isSig = !n.isRoot && sigPitches.has(actualPitch);
+    const fill = n.isRoot ? ROOT_FILL : isSig ? SIG_FILL : NOTE_FILL;
     const label=noteLabels[n.seqIdx], fs=label.length>1?11.5:14;
     svg+=`<circle cx="${cx}" cy="${y}" r="21" fill="${fill}" opacity="0.13"/>`;
     svg+=`<circle cx="${cx}" cy="${y}" r="16" fill="${fill}" filter="url(#ds)"/>`;
@@ -619,7 +683,21 @@ function generate() {
   fEl.innerHTML = scale.formula
     ? `Formula: <strong>${scale.formula}</strong> &nbsp;·&nbsp; W = whole step, H = half step, W½ = 1½ steps` : '';
 
-  document.getElementById('fretboardContainer').innerHTML = renderFretboard(root, scale, seqLabels);
+  document.getElementById('fretboardContainer').innerHTML = renderFretboard(root, scale, seqLabels, sk);
+
+  // Legend — update based on whether scale has signature tones
+  const hasSig = SIGNATURE_TONES[sk] && SIGNATURE_TONES[sk].length > 0;
+  const legEl = document.getElementById('fretboardLegend');
+  if(legEl){
+    legEl.innerHTML = `
+      <div class="legend-item"><div class="legend-dot" style="background:var(--brand)"></div>Root note</div>
+      ${hasSig ? '<div class="legend-item"><div class="legend-dot" style="background:#f0a030"></div>Signature tone</div>' : ''}
+    `;
+  }
+
+  // Short insight line
+  const insightEl = document.getElementById('scaleInsight');
+  if(insightEl) insightEl.textContent = SHORT_INSIGHTS[sk] || '';
 
   // Notes table
   const nb = document.querySelector('#notesTable tbody'); nb.innerHTML='';
@@ -635,6 +713,10 @@ function generate() {
   if(prevFn) prevFn.remove();
   let chordsData = null;
 
+  // Chord footnote — use scale-specific confidence line
+  const chordFootnoteFn = CHORD_FOOTNOTES[sk] || ((r,d)=>`${r} ${d} sounds great over these chords.`);
+  const chordFootnoteText = chordFootnoteFn(root, DISPLAY[sk]||sk);
+
   if(scale.chords){
     document.getElementById('chordsLabel').textContent = chordsInLabel(root, sk, dn);
     const qs = QUALITIES[scale.chordKey||sk];
@@ -642,15 +724,14 @@ function generate() {
       noteNames.forEach((cr,i)=>{
         const q=qs[i];
         const tr=document.createElement('tr');
-        tr.innerHTML=`<td class="roman-cell roman-${q}">${toRoman(q,i)}</td><td class="chord-${q}" style="padding-left:2rem">${toSymbol(cr,q)}</td>`;
+        tr.innerHTML=`<td class="roman-cell roman-${q}">${toRoman(q,i)}</td><td class="chord-${q}" style="padding-left:2.5rem">${toSymbol(cr,q)}</td>`;
         cb.appendChild(tr);
       });
-      const footnote=`Lead guitar and melodies using the ${root} ${dn} sound great over these chords — because every chord is built entirely from notes of that scale.`;
       const fnDiv=document.createElement('div');
       fnDiv.id='chordsFootnote'; fnDiv.className='chords-footnote';
-      fnDiv.innerHTML=footnote;
+      fnDiv.innerHTML=chordFootnoteText;
       document.querySelector('.table-card:last-child').appendChild(fnDiv);
-      chordsData={type:'diatonic',chords:noteNames.map((cr,i)=>({roman:toRoman(qs[i],i),symbol:toSymbol(cr,qs[i]),q:qs[i]})),footnote,bluesNote:null};
+      chordsData={type:'diatonic',chords:noteNames.map((cr,i)=>({roman:toRoman(qs[i],i),symbol:toSymbol(cr,qs[i]),q:qs[i]})),footnote:chordFootnoteText,bluesNote:null};
     }
   } else {
     const pc = buildParentChords(root, sk);
@@ -659,14 +740,14 @@ function generate() {
       document.getElementById('chordsLabel').textContent=`${parentLabel} (parent key of ${root} ${dn})`;
       pc.chords.forEach(ch=>{
         const tr=document.createElement('tr');
-        tr.innerHTML=`<td class="roman-cell roman-${ch.q}">${ch.roman}</td><td class="chord-${ch.q}" style="padding-left:2rem">${ch.symbol}</td>`;
+        tr.innerHTML=`<td class="roman-cell roman-${ch.q}">${ch.roman}</td><td class="chord-${ch.q}" style="padding-left:2.5rem">${ch.symbol}</td>`;
         cb.appendChild(tr);
       });
       const fnDiv=document.createElement('div');
       fnDiv.id='chordsFootnote'; fnDiv.className='chords-footnote';
-      fnDiv.innerHTML=pc.footnote;
+      fnDiv.innerHTML=chordFootnoteText;
       document.querySelector('.table-card:last-child').appendChild(fnDiv);
-      chordsData={type:'parent',parentKey:pc.parentKey,parentDisplayName:pc.parentDisplayName,chords:pc.chords,footnote:pc.footnote,bluesNote:null};
+      chordsData={type:'parent',parentKey:pc.parentKey,parentDisplayName:pc.parentDisplayName,chords:pc.chords,footnote:chordFootnoteText,bluesNote:null};
     }
   }
 
@@ -862,7 +943,7 @@ function buildFretboardImage(state,tone){
     drawHRule(ctx,TITLE_Y+92);
 
     const svgEl=document.querySelector('#fretboardContainer svg');
-    if(!svgEl){ drawCTABox(ctx); resolve(c); return; }
+    if(!svgEl){ drawWatermark(ctx); resolve(c); return; }
 
     const svgData=new XMLSerializer().serializeToString(svgEl);
     const svgBlob=new Blob([svgData],{type:'image/svg+xml;charset=utf-8'});
@@ -880,17 +961,43 @@ function buildFretboardImage(state,tone){
       ctx.drawImage(img,cardX+14,cardY+26,cardW-28,cardH);
       URL.revokeObjectURL(url);
 
-      // Hook — top padding of 60px above the hook text
-      const hookY=cardY+cardH+80;
-      ctx.fillStyle='rgba(255,255,255,0.92)';
-      ctx.font=`600 44px ${FONT}`;
-      ctx.textAlign='center';
-      ctx.fillText(HOOKS[state.sk]||'',IG_W/2,hookY+60);
+      // Legend
+      const legY=cardY+cardH+70;
+      ctx.save(); ctx.beginPath(); ctx.arc(SAFE+20,legY,14,0,Math.PI*2);
+      ctx.fillStyle='#4A90E2'; ctx.fill(); ctx.restore();
+      ctx.fillStyle='#FFFFFF'; ctx.font=`600 32px ${FONT}`; ctx.textAlign='left';
+      ctx.fillText('Root note',SAFE+44,legY+11);
 
-      drawCTABox(ctx);
+      const hasSig = SIGNATURE_TONES[state.sk] && SIGNATURE_TONES[state.sk].length>0;
+      if(hasSig){
+        ctx.save(); ctx.beginPath(); ctx.arc(SAFE+300,legY,14,0,Math.PI*2);
+        ctx.fillStyle='#f0a030'; ctx.fill(); ctx.restore();
+        ctx.fillText('Signature tone',SAFE+324,legY+11);
+      }
+
+      // Short insight — amber italic
+      const shortInsight = SHORT_INSIGHTS[state.sk]||'';
+      if(shortInsight){
+        ctx.fillStyle='rgba(240,160,48,0.95)';
+        ctx.font=`600 italic 32px ${FONT}`; ctx.textAlign='center';
+        ctx.fillText(shortInsight,IG_W/2,legY+56);
+      }
+
+      drawHRule(ctx,legY+84);
+
+      // Full insight paragraph
+      const fullInsight = FULL_INSIGHTS[state.sk]||'';
+      if(fullInsight){
+        ctx.fillStyle='rgba(255,255,255,0.88)';
+        ctx.font=`400 32px ${FONT}`; ctx.textAlign='left';
+        canvasWrapText(ctx,fullInsight,SAFE,legY+124,IG_W-SAFE*2,46);
+      }
+
+      drawHRule(ctx,IG_H-SAFE-70);
+      drawWatermark(ctx);
       resolve(c);
     };
-    img.onerror=()=>{ drawCTABox(ctx); resolve(c); };
+    img.onerror=()=>{ drawWatermark(ctx); resolve(c); };
     img.src=url;
   });
 }
