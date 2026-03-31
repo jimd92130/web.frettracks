@@ -977,14 +977,29 @@ function buildFretboardImage(state,tone){
 
       // Short insight removed from export — covered by full insight below
 
-      drawHRule(ctx,legY+36);
+      const ruleAbove = legY+36;
+      const ruleBelow = IG_H-SAFE-70;
+      drawHRule(ctx, ruleAbove);
 
-      // Full insight paragraph — 52px for readability and impact
+      // Full insight paragraph — vertically centered between the two rules
       const fullInsight = FULL_INSIGHTS[state.sk]||'';
       if(fullInsight){
+        const FONT_SIZE = 52, LINE_H = 72;
+        ctx.font=`400 ${FONT_SIZE}px ${FONT}`;
+        // Measure how many lines the paragraph needs
+        const words = fullInsight.split(' ');
+        let line='', lines=1;
+        for(const w of words){
+          const test = line ? line+' '+w : w;
+          if(ctx.measureText(test).width > IG_W-SAFE*2 && line){ lines++; line=w; }
+          else line=test;
+        }
+        const paraH = lines * LINE_H;
+        const availH = ruleBelow - ruleAbove;
+        const startY = ruleAbove + (availH - paraH) / 2 + FONT_SIZE;
         ctx.fillStyle='rgba(255,255,255,0.90)';
-        ctx.font=`400 52px ${FONT}`; ctx.textAlign='left';
-        canvasWrapText(ctx,fullInsight,SAFE,legY+90,IG_W-SAFE*2,72);
+        ctx.textAlign='left';
+        canvasWrapText(ctx, fullInsight, SAFE, startY, IG_W-SAFE*2, LINE_H);
       }
 
       drawHRule(ctx,IG_H-SAFE-70);
@@ -1084,7 +1099,7 @@ function buildChordsImage(state,tone){
 
   const chords=cd?cd.chords:[];
   const rowH=Math.floor((tableBot-tableTop)/(chords.length+1));
-  const colNash=SAFE+36, colChord=SAFE+380;
+  const colNash=SAFE+36, colChord=SAFE+500;
 
   setFont(ctx,T.COL_HDR); ctx.textAlign='left';
   ctx.fillText('ROMAN NUMERALS',colNash,tableTop+46);
@@ -1142,11 +1157,11 @@ function buildVideoImage(state,tone){
   ctx.font=`bold 96px ${FONT}`;
   ctx.fillText('The Sound',IG_W/2,VIDEO_TITLE_Y);
 
-  // Line 2 — "You Can Be Playing X. Like This." — bold, same size as 3 & 4
+  // Line 2 — "You Can Be Playing X." — bold, same size as 3 & 4
   ctx.fillStyle=LINE_COLOR;
-  fitText(ctx,`You Can Be Playing ${shortName}. Like This.`,maxW,LINE_SIZE,'bold');
+  fitText(ctx,`You Can Be Playing ${shortName}.`,maxW,LINE_SIZE,'bold');
   ctx.fillStyle=LINE_COLOR;
-  ctx.fillText(`You Can Be Playing ${shortName}. Like This.`,IG_W/2,VIDEO_TITLE_Y+110);
+  ctx.fillText(`You Can Be Playing ${shortName}.`,IG_W/2,VIDEO_TITLE_Y+110);
 
   // Line 3 — "Sooner Than You Think."
   ctx.fillStyle=LINE_COLOR;
