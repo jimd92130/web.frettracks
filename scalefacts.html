@@ -818,18 +818,19 @@ function buildFretboardImage(state,tone){
       const cardY=subBottom+56;
       const maxCardW=IG_W-SAFE*2;
 
-      // Measure how much space the insight paragraph needs
+      // Measure insight lines at actual draw width
       const fullInsight=FULL_INSIGHTS[state.sk]||'';
       const FONT_SIZE=52, LINE_H=70;
+      const insightMaxW=IG_W-LP-SAFE;
       ctx.font=`italic 400 ${FONT_SIZE}px ${FONT}`;
       let insightLines=0;
       if(fullInsight){
         const words=fullInsight.split(' '); let ln='';
-        for(const w of words){ const t=ln?ln+' '+w:w; if(ctx.measureText(t).width>IG_W-LP-SAFE&&ln){insightLines++;ln=w;}else ln=t; }
+        for(const w of words){ const t=ln?ln+' '+w:w; if(ctx.measureText(t).width>insightMaxW&&ln){insightLines++;ln=w;}else ln=t; }
         insightLines++;
       }
-      // Space needed below card: legend(50) + legRule(20) + insight(lines*LINE_H) + botRule(20) + wm(60)
-      const RESERVE=50+20+(insightLines*LINE_H)+20+60;
+      // RESERVE: legend(50) + rule(16) + insight(lines*LINE_H) + rule(16) + wm(50)
+      const RESERVE=50+16+(insightLines*LINE_H)+16+50;
       const maxCardH=CONTENT_BOT-cardY-RESERVE;
       let cardW=maxCardW, cardH=Math.round(cardW*aspect);
       if(cardH>maxCardH){ cardH=maxCardH; cardW=Math.round(cardH/aspect); }
@@ -966,15 +967,31 @@ function buildChordsImage(state,tone){
   return Promise.resolve(c);
 }
 
+// Panel 4 display name — Ionian→Major, Aeolian→Minor, everything else as-is
+const VIDEO_SCALE_NAME = {
+  ionian:'Major', dorian:'Dorian', phrygian:'Phrygian', lydian:'Lydian',
+  mixolydian:'Mixolydian', aeolian:'Minor', locrian:'Locrian',
+  major_pentatonic:'Minor Pentatonic', minor_pentatonic:'Minor Pentatonic', blues:'Blues',
+};
+// Fix major_pentatonic display
+VIDEO_SCALE_NAME['major_pentatonic'] = 'Major Pentatonic';
+
 function buildVideoImage(state,tone){
   const c=igCanvas(), ctx=c.getContext('2d');
   drawBackground(ctx,tone);
   const LP=50;
   const VIDEO_TITLE_Y=CONTENT_TOP+80;
-  ctx.textAlign='left'; ctx.fillStyle='#FFFFFF'; ctx.font=`bold 96px ${FONT}`;
-  ctx.fillText('The Sound',LP,VIDEO_TITLE_Y);
-  // Subtitle — 64px, wrap if needed, 5px min right padding
-  const vidSub='You can jam like this with FretTracks.';
+
+  // Dynamic title: "The [Root] [ScaleName] Sound"
+  const vidScaleName = VIDEO_SCALE_NAME[state.sk] || state.displayName;
+  const vidTitle = `The ${state.root} ${vidScaleName} Sound`;
+  const maxW = IG_W - LP - 5;
+  ctx.textAlign='left';
+  fitText(ctx, vidTitle, maxW, T.TITLE.size, T.TITLE.weight);
+  ctx.fillStyle='#FFFFFF'; ctx.fillText(vidTitle, LP, VIDEO_TITLE_Y);
+
+  // Subtitle — two natural lines, wrap if needed
+  const vidSub='Imagine playing like this. With FretTracks — you can!';
   ctx.fillStyle='rgba(255,255,255,0.82)'; ctx.font=`500 64px ${FONT}`; ctx.textAlign='left';
   const vidMaxW=IG_W-LP-5;
   const vidLineH=76;
