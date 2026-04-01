@@ -232,7 +232,7 @@ tbody tr:hover{background:var(--bg);}
     <div class="ig-modal-header">
       <div>
         <div class="ig-modal-title">Export Instagram Images</div>
-        <div class="ig-modal-sub">Each image downloads as a pair — full content panel + cover thumbnail (both 1080×1920)</div>
+        <div class="ig-modal-sub">1080×1440 · PNG · Scale name visible in 1350 crop · All content in 1080 safe zone</div>
       </div>
       <button class="ig-close" onclick="hideExportPopup()">✕</button>
     </div>
@@ -250,35 +250,36 @@ tbody tr:hover{background:var(--bg);}
     <div class="ig-modal-body">
       <button class="ig-export-btn" onclick="exportImage('fretboard')">
         <span class="ig-btn-text">
-          <strong>1 — Fretboard Diagram <span class="ig-badge">full + grid</span></strong>
-          <span>Tab diagram · benefit headline · insight</span>
+          <strong>1 — The Tab</strong>
+          <span>Fretboard diagram · tagline · insight paragraph</span>
         </span>
         <span class="ig-arrow">↓</span>
       </button>
       <button class="ig-export-btn" onclick="exportImage('scale')">
         <span class="ig-btn-text">
-          <strong>2 — Scale Degrees <span class="ig-badge">full + grid</span></strong>
-          <span>Note names and scale degrees</span>
+          <strong>2 — The Notes</strong>
+          <span>Scale degrees · note names</span>
         </span>
         <span class="ig-arrow">↓</span>
       </button>
       <button class="ig-export-btn" onclick="exportImage('chords')">
         <span class="ig-btn-text">
-          <strong>3 — Chords of the Key <span class="ig-badge">full + grid</span></strong>
+          <strong>3 — The Chords</strong>
           <span>Nashville chart · footnote</span>
         </span>
         <span class="ig-arrow">↓</span>
       </button>
       <button class="ig-export-btn" onclick="exportImage('video')">
         <span class="ig-btn-text">
-          <strong>4 — Video Placeholder <span class="ig-badge">full + grid</span></strong>
-          <span>Overlay your video on this</span>
+          <strong>4 — The Sound</strong>
+          <span>Overlay your video on this in CapCut</span>
         </span>
         <span class="ig-arrow">↓</span>
       </button>
     </div>
-    <button class="ig-all-btn" onclick="exportImage('all')">⬇ Download All 8 Images</button>
-    <p class="ig-all-note">4 full content panels + 4 cover thumbnails · All 1080×1920<br>Thumbnails: scale name · panel title · teaser content · pill CTA</p>
+    <button class="ig-all-btn" onclick="exportImage('all')">⬇ Download All 4 Images</button>
+    <button class="ig-all-btn" style="margin-top:8px;background:#444e60;" onclick="exportImage('proof')">🗂 Download Proof Sheet</button>
+    <p class="ig-all-note">All images 1080×1440 · Post in reverse order (4→3→2→1) for correct grid sequence</p>
   </div>
 </div>
 
@@ -630,7 +631,18 @@ function quick(root,sk){
 // ============================================================
 // CANVAS UTILITIES
 // ============================================================
-const IG_W=1080, IG_H=1920, IG_GRID_H=1350;
+// 1080×1440 — native 4:5 feed post
+// Zone layout:
+//   y=0–45    : bleed (cropped when grid shows 1350)
+//   y=45–90   : SCALE NAME lives here — visible in 1350, hidden in 1080 square
+//   y=90–225  : top bleed for 1080 square crop
+//   y=225–1215: SAFE ZONE — all critical content here
+//   y=1215–1395: bottom bleed
+//   y=1395–1440: bleed (cropped when grid shows 1350)
+const IG_W=1080, IG_H=1440;
+const SCALE_NAME_Y = 88;   // scale name baseline — visible in 1350 crop, hidden in square
+const CONTENT_TOP  = 225;  // safe zone top
+const CONTENT_BOT  = 1215; // safe zone bottom
 const FONT='ui-sans-serif,system-ui,sans-serif';
 
 const T={
@@ -653,7 +665,7 @@ function drawBackground(ctx, tone){
   const grad=ctx.createLinearGradient(0,0,IG_W*0.3,IG_H);
   grad.addColorStop(0,'#3a7acc'); grad.addColorStop(0.5,'#1f5aaa'); grad.addColorStop(1,'#0a3070');
   ctx.fillStyle=grad; ctx.fillRect(0,0,IG_W,IG_H);
-  const hl=ctx.createRadialGradient(160,180,0,160,180,650);
+  const hl=ctx.createRadialGradient(160,140,0,160,140,550);
   hl.addColorStop(0,'rgba(255,255,255,0.13)'); hl.addColorStop(1,'rgba(255,255,255,0)');
   ctx.fillStyle=hl; ctx.fillRect(0,0,IG_W,IG_H);
   const b=IG_BORDERS[tone]||IG_BORDERS.light;
@@ -664,9 +676,18 @@ function drawBackground(ctx, tone){
   ctx.restore();
 }
 
+// Draw scale name in the bleed zone — visible in 1350 crop, hidden in 1080 square
+function drawScaleName(ctx, state) {
+  const maxW = IG_W - SAFE*2 - 40;
+  ctx.textAlign = 'center';
+  fitText(ctx, `${state.root} ${state.displayName}`, maxW, 58, '600');
+  ctx.fillStyle = 'rgba(255,255,255,0.90)';
+  ctx.fillText(`${state.root} ${state.displayName}`, IG_W/2, SCALE_NAME_Y);
+}
+
 function drawTitle(ctx,line1,line2){
   const maxW=IG_W-SAFE*2-40;
-  const TITLE_Y=SAFE+ACCENT_BAND_H+90;
+  const TITLE_Y=CONTENT_TOP+80;
   ctx.textAlign='center';
   fitText(ctx,line1,maxW,T.TITLE.size,T.TITLE.weight);
   ctx.fillStyle=T.TITLE.color; ctx.fillText(line1,IG_W/2,TITLE_Y);
@@ -677,6 +698,11 @@ function drawTitle(ctx,line1,line2){
 function drawHRule(ctx,y){
   ctx.save(); ctx.strokeStyle='rgba(255,255,255,0.20)'; ctx.lineWidth=1.5;
   ctx.beginPath(); ctx.moveTo(SAFE,y); ctx.lineTo(IG_W-SAFE,y); ctx.stroke(); ctx.restore();
+}
+
+function drawWatermark(ctx){
+  ctx.save(); ctx.fillStyle='rgba(255,255,255,0.55)'; ctx.font=`500 28px ${FONT}`; ctx.textAlign='center';
+  ctx.fillText('Try FretTracks free. Link in Bio.',IG_W/2,CONTENT_BOT+60); ctx.restore();
 }
 
 function roundRect(ctx,x,y,w,h,r){
@@ -697,39 +723,6 @@ function canvasWrapText(ctx,text,x,y,maxW,lineH){
   if(line) ctx.fillText(line,x,cy); return cy;
 }
 
-function drawDotsAndLabel(ctx, state, panelNum) {
-  // Sits in bottom zone — below SQ_BOT, above watermark
-  const DOT_R   = 14, DOT_GAP = 48;
-  const dotsY   = IG_H - SAFE - 110;
-  const totalDotW = 4 * DOT_R * 2 + 3 * DOT_GAP;
-  const dotX    = (IG_W - totalDotW) / 2;
-  const active  = panelNum - 1; // 0-indexed
-
-  for (let i = 0; i < 4; i++) {
-    const cx = dotX + i * (DOT_R * 2 + DOT_GAP) + DOT_R;
-    const cy = dotsY + DOT_R;
-    if (i === active) {
-      ctx.fillStyle = '#FFFFFF';
-      ctx.beginPath(); ctx.arc(cx, cy, DOT_R, 0, Math.PI * 2); ctx.fill();
-    } else {
-      ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,0.45)'; ctx.lineWidth = 3;
-      ctx.beginPath(); ctx.arc(cx, cy, DOT_R, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
-    }
-  }
-
-  // Label under dots
-  const label = `Post ${panelNum} of 4  ·  ${state.root} ${state.displayName}`;
-  ctx.fillStyle = 'rgba(255,255,255,0.45)';
-  ctx.font      = `500 30px ${FONT}`;
-  ctx.textAlign = 'center';
-  ctx.fillText(label, IG_W / 2, dotsY + DOT_R * 2 + 36);
-}
-
-function drawWatermark(ctx){
-  ctx.save(); ctx.fillStyle='#FFFFFF'; ctx.font=`bold 36px ${FONT}`; ctx.textAlign='center';
-  ctx.fillText('Try FretTracks free. Link in Bio.',IG_W/2,IG_H-SAFE-4); ctx.restore();
-}
-
 function downloadCanvas(canvas,filename){
   const link=document.createElement('a'); link.download=filename; link.href=canvas.toDataURL('image/png'); link.click();
 }
@@ -748,30 +741,34 @@ function formatRoot(root) {
     .replace('bb','DoubleFlat')
     .replace('b','Flat');
 }
-function buildFilename(root, sk, type, isThumb) {
+function buildFilename(root, sk, type) {
   const rootPart  = formatRoot(root);
   const scalePart = SCALE_DISPLAY_NAME[sk] || sk;
   const base      = `${rootPart}${scalePart}`;
   const num       = PANEL_NUMBER[type] || 0;
-  const kind      = isThumb ? 'thumb' : 'panel';
-  return `${base}_${kind}${num}.png`;
+  const suffix    = num > 0 ? `_panel${num}` : `_${type}`;
+  return `${base}${suffix}.png`;
 }
 
 // ============================================================
-// FULL IMAGE BUILDERS (1080×1920)
+// PANEL BUILDERS (1080×1440)
 // ============================================================
 
 function buildFretboardImage(state,tone){
   return new Promise(resolve=>{
     const c=igCanvas(), ctx=c.getContext('2d');
     drawBackground(ctx,tone);
-    const TITLE_Y=SAFE+ACCENT_BAND_H+90, maxW=IG_W-SAFE*2-40;
+    drawScaleName(ctx,state);
+
+    // Panel title + tagline inside safe zone
+    const TITLE_Y=CONTENT_TOP+80;
+    const maxW=IG_W-SAFE*2-40;
     ctx.textAlign='center';
     fitText(ctx,`${state.root} ${state.displayName}`,maxW,T.TITLE.size,T.TITLE.weight);
     ctx.fillStyle=T.TITLE.color; ctx.fillText(`${state.root} ${state.displayName}`,IG_W/2,TITLE_Y);
     ctx.fillStyle='rgba(255,255,255,0.88)'; ctx.font=`500 46px ${FONT}`; ctx.textAlign='center';
     ctx.fillText(TAGLINES[state.sk]||'',IG_W/2,TITLE_Y+62);
-    drawHRule(ctx,TITLE_Y+92);
+    drawHRule(ctx,TITLE_Y+96);
 
     const svgEl=document.querySelector('#fretboardContainer svg');
     if(!svgEl){ drawWatermark(ctx); resolve(c); return; }
@@ -780,7 +777,7 @@ function buildFretboardImage(state,tone){
     const url=URL.createObjectURL(svgBlob);
     const img=new Image();
     img.onload=()=>{
-      const cardX=SAFE, cardY=TITLE_Y+110, cardW=IG_W-SAFE*2;
+      const cardX=SAFE, cardY=TITLE_Y+116, cardW=IG_W-SAFE*2;
       const aspect=svgEl.viewBox.baseVal.height/svgEl.viewBox.baseVal.width;
       const cardH=Math.round(cardW*aspect);
       ctx.save(); ctx.shadowColor='rgba(0,0,0,0.28)'; ctx.shadowBlur=36; ctx.shadowOffsetY=10;
@@ -788,9 +785,9 @@ function buildFretboardImage(state,tone){
       ctx.drawImage(img,cardX+14,cardY+26,cardW-28,cardH);
       URL.revokeObjectURL(url);
 
-      // Legend — centered as a group with proper padding below card
+      // Legend — centered as a group
       const hasSig=SIGNATURE_TONES[state.sk]&&SIGNATURE_TONES[state.sk].length>0;
-      const legY=cardY+cardH+90;  // more padding below card
+      const legY=cardY+cardH+90;
       const DOT_R=14, DOT_GAP=12;
       const rootLabel='Root note', sigLabel='Signature tone';
       ctx.font=`600 32px ${FONT}`;
@@ -800,26 +797,23 @@ function buildFretboardImage(state,tone){
       const itemGap=60;
       const totalW=hasSig?itemW+itemGap+DOT_R*2+DOT_GAP+sigLabelW:itemW;
       let legX=(IG_W-totalW)/2;
-
-      // Root dot + label
       ctx.save(); ctx.beginPath(); ctx.arc(legX+DOT_R,legY,DOT_R,0,Math.PI*2);
       ctx.fillStyle='#4A90E2'; ctx.fill(); ctx.restore();
       ctx.fillStyle='#FFFFFF'; ctx.textAlign='left';
       ctx.fillText(rootLabel,legX+DOT_R*2+DOT_GAP,legY+11);
-
       if(hasSig){
         legX+=itemW+itemGap;
         ctx.save(); ctx.beginPath(); ctx.arc(legX+DOT_R,legY,DOT_R,0,Math.PI*2);
         ctx.fillStyle='#f0a030'; ctx.fill(); ctx.restore();
-        ctx.fillStyle='#FFFFFF';
-        ctx.fillText(sigLabel,legX+DOT_R*2+DOT_GAP,legY+11);
+        ctx.fillStyle='#FFFFFF'; ctx.fillText(sigLabel,legX+DOT_R*2+DOT_GAP,legY+11);
       }
 
-      const ruleAbove=legY+46, ruleBelow=IG_H-SAFE-70;
+      // Insight paragraph — fills remaining space between legend and watermark
+      const ruleAbove=legY+46, ruleBelow=CONTENT_BOT-10;
       drawHRule(ctx,ruleAbove);
       const fullInsight=FULL_INSIGHTS[state.sk]||'';
       if(fullInsight){
-        const FONT_SIZE=62, LINE_H=84;
+        const FONT_SIZE=56, LINE_H=76;
         ctx.font=`400 ${FONT_SIZE}px ${FONT}`;
         const words=fullInsight.split(' '); let line='', lines=1;
         for(const w of words){ const test=line?line+' '+w:w; if(ctx.measureText(test).width>IG_W-SAFE*2&&line){lines++;line=w;}else line=test; }
@@ -828,7 +822,7 @@ function buildFretboardImage(state,tone){
         ctx.fillStyle='rgba(255,255,255,0.90)'; ctx.textAlign='left';
         canvasWrapText(ctx,fullInsight,SAFE,startY,IG_W-SAFE*2,LINE_H);
       }
-      drawHRule(ctx,IG_H-SAFE-70); drawWatermark(ctx); resolve(c);
+      drawHRule(ctx,CONTENT_BOT-10); drawWatermark(ctx); resolve(c);
     };
     img.onerror=()=>{ drawWatermark(ctx); resolve(c); };
     img.src=url;
@@ -838,10 +832,12 @@ function buildFretboardImage(state,tone){
 function buildScaleImage(state,tone){
   const c=igCanvas(), ctx=c.getContext('2d');
   drawBackground(ctx,tone);
-  drawTitle(ctx,'The Notes',`${state.root} ${state.displayName} Uses These Notes`);
-  const tableTop=SAFE+ACCENT_BAND_H+90+62+30;
+  drawScaleName(ctx,state);
+  const titleY=drawTitle(ctx,'The Notes',`${state.root} ${state.displayName} Uses These Notes`);
+  const tableTop=titleY+36;
   drawHRule(ctx,tableTop-14);
-  const rows=state.noteNames.length, tableBot=IG_H-SAFE-80;
+  const rows=state.noteNames.length;
+  const tableBot=CONTENT_BOT-10;
   const rowH=Math.floor((tableBot-tableTop)/(rows+1));
   const colDeg=SAFE+72, colNote=SAFE+412;
   setFont(ctx,T.COL_HDR); ctx.textAlign='left';
@@ -855,25 +851,25 @@ function buildScaleImage(state,tone){
     ctx.fillStyle='#FFFFFF'; ctx.font=`bold ${T.DATA_LG.size}px ${FONT}`; ctx.textAlign='left'; ctx.fillText(note,colNote,textY);
     if(i===0){ ctx.save(); ctx.strokeStyle='rgba(255,255,255,0.55)'; ctx.lineWidth=4; const tw=ctx.measureText(note).width; ctx.beginPath(); ctx.moveTo(colNote,textY+10); ctx.lineTo(colNote+tw,textY+10); ctx.stroke(); ctx.restore(); }
   });
-  drawHRule(ctx,IG_H-SAFE-70); drawWatermark(ctx);
+  drawHRule(ctx,CONTENT_BOT-10); drawWatermark(ctx);
   return Promise.resolve(c);
 }
 
 function buildChordsImage(state,tone){
   const c=igCanvas(), ctx=c.getContext('2d');
   drawBackground(ctx,tone);
-  const cd=state.chordsData, isParent=cd&&cd.type==='parent';
-  drawTitle(ctx,'The Chords',`Play ${state.root} ${state.displayName} Over These Chords`);
-  const chordsTableTop=SAFE+ACCENT_BAND_H+90+62+30;
+  drawScaleName(ctx,state);
+  const cd=state.chordsData;
+  const titleY=drawTitle(ctx,'The Chords',`Play ${state.root} ${state.displayName} Over These Chords`);
+  const chordsTableTop=titleY+36;
   drawHRule(ctx,chordsTableTop-14);
-  const parentDN=isParent?cd.parentDisplayName:null;
   const footnoteText=(CHORD_FOOTNOTES[state.sk]||(r=>r))(state.root);
-  const FN_SIZE=46, FN_LINE_H=FN_SIZE+14, FN_MAX_W=IG_W-SAFE*2;
+  const FN_SIZE=42, FN_LINE_H=FN_SIZE+12, FN_MAX_W=IG_W-SAFE*2;
   ctx.font=`400 ${FN_SIZE}px ${FONT}`;
   const words=footnoteText.split(' '); let fnLines=1, testLine='';
   for(const w of words){ const test=testLine?testLine+' '+w:w; if(ctx.measureText(test).width>FN_MAX_W&&testLine){fnLines++;testLine=w;}else testLine=test; }
-  const fnBlockH=fnLines*FN_LINE_H+80, WM_RESERVE=SAFE+80;
-  const tableTop=chordsTableTop, tableBot=IG_H-fnBlockH-WM_RESERVE;
+  const fnBlockH=fnLines*FN_LINE_H+70;
+  const tableTop=chordsTableTop, tableBot=CONTENT_BOT-fnBlockH-20;
   const chords=cd?cd.chords:[];
   const rowH=Math.floor((tableBot-tableTop)/(chords.length+1));
   const colNash=SAFE+36, colChord=SAFE+500;
@@ -887,291 +883,84 @@ function buildChordsImage(state,tone){
     ctx.fillStyle='#FFFFFF'; ctx.font=`${T.DATA_MD.weight} ${T.DATA_MD.size}px ${FONT}`; ctx.textAlign='left'; ctx.fillText(ch.roman,colNash,textY);
     ctx.font=`bold ${T.DATA_LG.size}px ${FONT}`; ctx.fillText(ch.symbol,colChord,textY);
   });
-  const fnY=tableBot+30;
+  const fnY=tableBot+20;
   drawHRule(ctx,fnY-16); ctx.fillStyle='#FFFFFF'; ctx.font=`400 ${FN_SIZE}px ${FONT}`; ctx.textAlign='left';
-  canvasWrapText(ctx,footnoteText,SAFE,fnY+FN_SIZE+10,FN_MAX_W,FN_LINE_H);
-  drawHRule(ctx,IG_H-SAFE-70); drawWatermark(ctx);
+  canvasWrapText(ctx,footnoteText,SAFE,fnY+FN_SIZE+8,FN_MAX_W,FN_LINE_H);
+  drawHRule(ctx,CONTENT_BOT-10); drawWatermark(ctx);
   return Promise.resolve(c);
 }
 
 function buildVideoImage(state,tone){
   const c=igCanvas(), ctx=c.getContext('2d');
   drawBackground(ctx,tone);
-  const LINE_SIZE=58, LINE_COLOR='rgba(255,255,255,0.82)';
-  const VIDEO_TITLE_Y=SAFE+ACCENT_BAND_H+90;
+  drawScaleName(ctx,state);
+  const LINE_SIZE=56, LINE_COLOR='rgba(255,255,255,0.82)';
+  const VIDEO_TITLE_Y=CONTENT_TOP+100;
   ctx.textAlign='center'; ctx.fillStyle='#FFFFFF'; ctx.font=`bold 96px ${FONT}`;
   ctx.fillText('The Sound',IG_W/2,VIDEO_TITLE_Y);
   ctx.fillStyle=LINE_COLOR; ctx.font=`bold ${LINE_SIZE}px ${FONT}`;
   ctx.fillText('You Can Be Jamming Like This.',IG_W/2,VIDEO_TITLE_Y+110);
-  ctx.fillText('Sooner Than You Think.',IG_W/2,VIDEO_TITLE_Y+190);
-  ctx.fillText('With FretTracks.',IG_W/2,VIDEO_TITLE_Y+270);
-  drawHRule(ctx,VIDEO_TITLE_Y+310);
-  const CTA_BOX_SIZE=38, boxY=IG_H-SAFE-280;
-  ctx.save(); roundRect(ctx,SAFE,boxY,IG_W-SAFE*2,240,24); ctx.fillStyle='rgba(0,0,0,0.22)'; ctx.fill(); ctx.restore();
+  ctx.fillText('Sooner Than You Think.',IG_W/2,VIDEO_TITLE_Y+185);
+  ctx.fillText('With FretTracks.',IG_W/2,VIDEO_TITLE_Y+260);
+  drawHRule(ctx,VIDEO_TITLE_Y+300);
+  const CTA_BOX_SIZE=36;
+  const boxH=220, boxY=CONTENT_BOT-boxH-20;
+  ctx.save(); roundRect(ctx,SAFE,boxY,IG_W-SAFE*2,boxH,24); ctx.fillStyle='rgba(0,0,0,0.22)'; ctx.fill(); ctx.restore();
   ctx.fillStyle='#FFFFFF'; ctx.font=`bold ${CTA_BOX_SIZE}px ${FONT}`; ctx.textAlign='center';
-  ctx.fillText('This is just one of the 500+ backing',IG_W/2,boxY+68);
-  ctx.fillText('tracks from FretTracks.',IG_W/2,boxY+118);
-  ctx.fillText('Try it free. Link in Bio.',IG_W/2,boxY+186);
+  ctx.fillText('This is just one of the 500+ backing',IG_W/2,boxY+62);
+  ctx.fillText('tracks from FretTracks.',IG_W/2,boxY+108);
+  ctx.fillText('Try it free. Link in Bio.',IG_W/2,boxY+170);
+  drawHRule(ctx,CONTENT_BOT-10); drawWatermark(ctx);
   return Promise.resolve(c);
 }
 
 // ============================================================
-// THUMB BUILDERS — cover-style 1080×1920 images
-// Each thumb is a full 1080×1920 canvas with:
-//   • Same background + border as full panels
-//   • All content inside the center 1080×1080 square (y 435–1515)
-//   • Top/bottom 435px = background only
-//   • Scale name + hero title + tagline at top of square
-//   • Teaser content (real rows) fading to solid bg by y=1415
-//   • Pill CTA just inside bottom of square
-//   • NO dots, NO series label (those live on full panels)
+// PROOF SHEET — 4 panels side by side
 // ============================================================
+async function buildProofSheet(canvases, state) {
+  const THUMB_W  = 360;
+  const THUMB_H  = Math.round(THUMB_W * IG_H / IG_W); // maintain aspect ratio
+  const MARGIN   = 32;
+  const GAP      = 20;
+  const LABEL_H  = 48;
+  const HEADER_H = 68;
+  const FOOTER_H = 44;
+  const cols     = canvases.length;
+  const totalW   = MARGIN*2 + THUMB_W*cols + GAP*(cols-1);
+  const totalH   = MARGIN + HEADER_H + THUMB_H + LABEL_H + FOOTER_H + MARGIN;
 
-const SQ_TOP  = 435;   // center square top
-const SQ_BOT  = 1515;  // center square bottom (435+1080)
-const FADE_START_Y   = 960;   // halfway down full image
-const FADE_COMPLETE_Y= 1415;  // fully opaque bg by here (SQ_TOP+980)
+  const c = document.createElement('canvas');
+  c.width = totalW; c.height = totalH;
+  const ctx = c.getContext('2d');
 
-// Interpolate the background gradient color at a given y
-function bgColorAt(y) {
-  const t = y / IG_H;
-  const r = Math.round(58  + (10  - 58)  * t);
-  const g = Math.round(122 + (48  - 122) * t);
-  const b = Math.round(204 + (112 - 204) * t);
-  return { r, g, b };
-}
+  ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0,0,totalW,totalH);
 
-// Draw the cover background (same as full panels)
-function drawThumbBackground(ctx, tone) {
-  const grad = ctx.createLinearGradient(0, 0, IG_W * 0.3, IG_H);
-  grad.addColorStop(0,   '#3a7acc');
-  grad.addColorStop(0.5, '#1f5aaa');
-  grad.addColorStop(1,   '#0a3070');
-  ctx.fillStyle = grad; ctx.fillRect(0, 0, IG_W, IG_H);
-  const hl = ctx.createRadialGradient(160, 180, 0, 160, 180, 650);
-  hl.addColorStop(0, 'rgba(255,255,255,0.13)'); hl.addColorStop(1, 'rgba(255,255,255,0)');
-  ctx.fillStyle = hl; ctx.fillRect(0, 0, IG_W, IG_H);
-  const b = IG_BORDERS[tone] || IG_BORDERS.light;
-  ctx.fillStyle = b.color; ctx.fillRect(b.width, b.width, IG_W - b.width * 2, ACCENT_BAND_H);
-  const inset = b.width / 2;
-  ctx.save(); ctx.strokeStyle = b.color; ctx.lineWidth = b.width;
-  ctx.strokeRect(inset, inset, IG_W - b.width, IG_H - b.width); ctx.restore();
-}
+  // Header
+  const toneLabel = _igTone==='light'?'Blue Border':_igTone==='med'?'Green Border':'Gold Border';
+  ctx.fillStyle='#212121'; ctx.font=`bold 32px ui-sans-serif,system-ui,sans-serif`;
+  ctx.textAlign='center';
+  ctx.fillText(`${state.root} ${state.displayName}  ·  ${toneLabel}  ·  Proof Sheet`, totalW/2, MARGIN+42);
+  ctx.strokeStyle='#E0E0E0'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(MARGIN,MARGIN+HEADER_H-8); ctx.lineTo(totalW-MARGIN,MARGIN+HEADER_H-8); ctx.stroke();
 
-// Draw the fade — transparent→solid bg, from FADE_START_Y to FADE_COMPLETE_Y
-function drawThumbFade(ctx) {
-  const fadeH = FADE_COMPLETE_Y - FADE_START_Y;
-  // Draw line by line matching bg gradient color
-  for (let fy = 0; fy < fadeH; fy++) {
-    const absY = FADE_START_Y + fy;
-    const t    = fy / fadeH;
-    const ease = t * t; // quadratic
-    const { r, g, b } = bgColorAt(absY);
-    ctx.fillStyle = `rgba(${r},${g},${b},${ease.toFixed(3)})`;
-    ctx.fillRect(0, absY, IG_W, 1);
-  }
-  // Solid fill from FADE_COMPLETE_Y all the way to bottom of image
-  for (let y = FADE_COMPLETE_Y; y < IG_H; y++) {
-    const { r, g, b } = bgColorAt(y);
-    ctx.fillStyle = `rgb(${r},${g},${b})`;
-    ctx.fillRect(0, y, IG_W, 1);
-  }
-  // Redraw border on top since we painted over it
-  const b = { width: 16, color: '#4A90E2' };
-  const inset = b.width / 2;
-  ctx.save(); ctx.strokeStyle = b.color; ctx.lineWidth = b.width;
-  ctx.strokeRect(inset, inset, IG_W - b.width, IG_H - b.width); ctx.restore();
-}
+  const LABELS=['1 — The Tab','2 — The Notes','3 — The Chords','4 — The Sound'];
+  const thumbY=MARGIN+HEADER_H;
 
-// Draw the pill CTA badge
-function drawThumbPill(ctx, text) {
-  const PILL_FONT_SIZE = 42;
-  ctx.font = `bold ${PILL_FONT_SIZE}px ${FONT}`;
-  const tw = ctx.measureText(text).width;
-  const padX = 52, padY = 24;
-  const pw = tw + padX * 2, ph = PILL_FONT_SIZE + padY * 2;
-  const px = (IG_W - pw) / 2;
-  const py = SQ_BOT - ph - 44; // just inside bottom of center square
-
-  ctx.save();
-  roundRect(ctx, px, py, pw, ph, ph / 2);
-  ctx.fillStyle = 'rgba(255,255,255,0.92)'; ctx.fill();
-  ctx.restore();
-
-  ctx.fillStyle = 'rgb(15,50,120)';
-  ctx.font      = `bold ${PILL_FONT_SIZE}px ${FONT}`;
-  ctx.textAlign = 'left';
-  ctx.fillText(text, px + padX, py + padY + PILL_FONT_SIZE * 0.78);
-}
-
-// Draw scale name + hero title + tagline at top of center square
-function drawThumbHeader(ctx, state, heroTitle) {
-  const SAFE_T = 72;
-  let y = SQ_TOP + SAFE_T;
-
-  // Scale name
-  ctx.textAlign = 'center';
-  ctx.fillStyle = 'rgba(255,255,255,0.85)';
-  ctx.font      = `bold 54px ${FONT}`;
-  ctx.fillText(`${state.root} ${state.displayName}`, IG_W / 2, y);
-  y += 100;  // was 72 — more breathing room before hero title
-
-  // Hero title
-  ctx.fillStyle = '#FFFFFF';
-  ctx.font      = `bold 100px ${FONT}`;
-  ctx.fillText(heroTitle, IG_W / 2, y);
-  y += 128;
-
-  // Tagline
-  ctx.fillStyle = 'rgba(255,255,255,0.60)';
-  ctx.font      = `500 44px ${FONT}`;
-  ctx.fillText(TAGLINES[state.sk] || '', IG_W / 2, y);
-  y += 80;
-
-  // Rule BELOW tagline, before content
-  ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.moveTo(SAFE + 60, y); ctx.lineTo(IG_W - SAFE - 60, y); ctx.stroke(); ctx.restore();
-  y += 28;
-
-  return y; // return y cursor for content to start
-}
-
-// ── THUMB 1: FRETBOARD ───────────────────────────────────────
-function buildFretboardThumb(state, tone) {
-  return new Promise(resolve => {
-    const c = igCanvas(), ctx = c.getContext('2d');
-    drawThumbBackground(ctx, tone);
-    const contentY = drawThumbHeader(ctx, state, 'The Tab');
-
-    // Column headers
-    ctx.fillStyle = 'rgba(255,255,255,0.45)';
-    ctx.font      = `bold 32px ${FONT}`;
-    ctx.textAlign = 'left';
-    ctx.fillText('STRING', SAFE + 60, contentY + 36);
-    ctx.fillText('FRETS', SAFE + 380, contentY + 36);
-
-    // Draw actual fretboard SVG, then fade over it
-    const svgEl = document.querySelector('#fretboardContainer svg');
-    if (!svgEl) { drawThumbFade(ctx); drawThumbPill(ctx, 'Tap to see the full tab →'); resolve(c); return; }
-
-    const svgData = new XMLSerializer().serializeToString(svgEl);
-    const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-    const url     = URL.createObjectURL(svgBlob);
-    const img     = new Image();
-    img.onload = () => {
-      const cardX = SAFE, cardW = IG_W - SAFE * 2;
-      const aspect = svgEl.viewBox.baseVal.height / svgEl.viewBox.baseVal.width;
-      const cardH  = Math.round(cardW * aspect);
-      const cardY  = contentY + 10;
-
-      // White card
-      ctx.save();
-      ctx.shadowColor = 'rgba(0,0,0,0.28)'; ctx.shadowBlur = 36; ctx.shadowOffsetY = 10;
-      roundRect(ctx, cardX, cardY, cardW, cardH + 52, 28);
-      ctx.fillStyle = '#FFFFFF'; ctx.fill(); ctx.restore();
-      ctx.drawImage(img, cardX + 14, cardY + 26, cardW - 28, cardH);
-      URL.revokeObjectURL(url);
-
-      drawThumbFade(ctx);
-      drawThumbPill(ctx, 'Tap to see the full tab →');
-      resolve(c);
-    };
-    img.onerror = () => { drawThumbFade(ctx); drawThumbPill(ctx, 'Tap to see the full tab →'); resolve(c); };
-    img.src = url;
-  });
-}
-
-// ── THUMB 2: NOTES ───────────────────────────────────────────
-function buildScaleThumb(state, tone) {
-  const c = igCanvas(), ctx = c.getContext('2d');
-  drawThumbBackground(ctx, tone);
-  const contentY = drawThumbHeader(ctx, state, 'The Notes');
-
-  const COL_DEG  = SAFE + 80;
-  const COL_NOTE = SAFE + 400;
-  const ROW_H    = 118;
-
-  // Column headers
-  ctx.fillStyle = 'rgba(255,255,255,0.45)'; ctx.font = `bold 32px ${FONT}`; ctx.textAlign = 'left';
-  ctx.fillText('DEGREE', COL_DEG, contentY + 36);
-  ctx.fillText('NOTE',   COL_NOTE, contentY + 36);
-  ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,0.20)'; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(SAFE, contentY + 52); ctx.lineTo(IG_W - SAFE, contentY + 52); ctx.stroke(); ctx.restore();
-
-  let rowY = contentY + 60;
-  state.noteNames.forEach((note, i) => {
-    if (i % 2 === 0) {
-      ctx.fillStyle = 'rgba(255,255,255,0.07)';
-      ctx.fillRect(SAFE, rowY, IG_W - SAFE * 2, ROW_H - 4);
-    }
-    if (i > 0) {
-      ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(SAFE + 40, rowY); ctx.lineTo(IG_W - SAFE - 40, rowY); ctx.stroke(); ctx.restore();
-    }
-    const textY = rowY + ROW_H * 0.28;
-    ctx.fillStyle = 'rgba(255,255,255,0.65)'; ctx.font = `bold 50px ${FONT}`; ctx.textAlign = 'left';
-    ctx.fillText(state.scale.degs[i], COL_DEG, textY + 30);
-    const noteColor = i === 0 ? 'rgb(74,180,226)' : '#FFFFFF';
-    ctx.fillStyle = noteColor; ctx.font = `bold 88px ${FONT}`;
-    ctx.fillText(note, COL_NOTE, textY + 10);
-    rowY += ROW_H;
+  canvases.forEach((thumb,i)=>{
+    const thumbX=MARGIN+i*(THUMB_W+GAP);
+    ctx.save(); ctx.shadowColor='rgba(0,0,0,0.15)'; ctx.shadowBlur=10; ctx.shadowOffsetY=3;
+    ctx.fillStyle='#FFFFFF'; ctx.fillRect(thumbX,thumbY,THUMB_W,THUMB_H); ctx.restore();
+    ctx.drawImage(thumb,thumbX,thumbY,THUMB_W,THUMB_H);
+    ctx.strokeStyle='#CCCCCC'; ctx.lineWidth=1;
+    ctx.strokeRect(thumbX,thumbY,THUMB_W,THUMB_H);
+    ctx.fillStyle='#444e60'; ctx.font=`600 20px ui-sans-serif,system-ui,sans-serif`;
+    ctx.textAlign='center';
+    ctx.fillText(LABELS[i],thumbX+THUMB_W/2,thumbY+THUMB_H+32);
   });
 
-  drawThumbFade(ctx);
-  drawThumbPill(ctx, `Tap to see all ${state.noteNames.length} notes →`);
-  return Promise.resolve(c);
-}
-
-// ── THUMB 3: CHORDS ──────────────────────────────────────────
-function buildChordsThumb(state, tone) {
-  const c = igCanvas(), ctx = c.getContext('2d');
-  drawThumbBackground(ctx, tone);
-  const contentY = drawThumbHeader(ctx, state, 'The Chords');
-
-  const cd     = state.chordsData;
-  const chords = cd ? cd.chords : [];
-  const COL_ROM  = SAFE + 50;
-  const COL_CHORD= SAFE + 460;
-  const ROW_H    = 118;
-
-  ctx.fillStyle = 'rgba(255,255,255,0.45)'; ctx.font = `bold 32px ${FONT}`; ctx.textAlign = 'left';
-  ctx.fillText('ROMAN', COL_ROM, contentY + 36);
-  ctx.fillText('CHORD', COL_CHORD, contentY + 36);
-  ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,0.20)'; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(SAFE, contentY + 52); ctx.lineTo(IG_W - SAFE, contentY + 52); ctx.stroke(); ctx.restore();
-
-  let rowY = contentY + 60;
-  chords.forEach((ch, i) => {
-    if (i % 2 === 0) {
-      ctx.fillStyle = 'rgba(255,255,255,0.07)';
-      ctx.fillRect(SAFE, rowY, IG_W - SAFE * 2, ROW_H - 4);
-    }
-    if (i > 0) {
-      ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(SAFE + 40, rowY); ctx.lineTo(IG_W - SAFE - 40, rowY); ctx.stroke(); ctx.restore();
-    }
-    const textY = rowY + ROW_H * 0.28;
-    ctx.fillStyle = 'rgba(255,255,255,0.65)'; ctx.font = `bold 50px ${FONT}`; ctx.textAlign = 'left';
-    ctx.fillText(ch.roman, COL_ROM, textY + 30);
-    ctx.fillStyle = '#FFFFFF'; ctx.font = `bold 88px ${FONT}`;
-    ctx.fillText(ch.symbol, COL_CHORD, textY + 10);
-    rowY += ROW_H;
-  });
-
-  drawThumbFade(ctx);
-  drawThumbPill(ctx, `Tap to see all ${chords.length} chords →`);
-  return Promise.resolve(c);
-}
-
-// ── THUMB 4: SOUND ───────────────────────────────────────────
-function buildVideoThumb(state, tone) {
-  const c = igCanvas(), ctx = c.getContext('2d');
-  drawThumbBackground(ctx, tone);
-  drawThumbHeader(ctx, state, 'The Sound');
-  // Center square left clean for video overlay — just fade + pill
-  drawThumbFade(ctx);
-  drawThumbPill(ctx, 'Tap to hear it in action →');
-  return Promise.resolve(c);
+  ctx.fillStyle='#AAAAAA'; ctx.font=`400 16px ui-sans-serif,system-ui,sans-serif`; ctx.textAlign='center';
+  ctx.fillText('FretTracks Scale Explorer  ·  1080×1440px  ·  proof sheet', totalW/2, totalH-MARGIN-8);
+  return c;
 }
 
 // ============================================================
@@ -1191,47 +980,27 @@ function hideExportPopup(){ document.getElementById('igPopup').classList.remove(
 
 async function exportImage(type){
   const s=_exportState, tone=_igTone;
-
-  // Build all 4 full-size canvases
   const c1=await buildFretboardImage(s,tone);
   const c2=await buildScaleImage(s,tone);
   const c3=await buildChordsImage(s,tone);
   const c4=await buildVideoImage(s,tone);
 
-  // Build matching cover thumbnails (1080×1920, cover-style)
-  const g1 = await buildFretboardThumb(s, tone);
-  const g2 = await buildScaleThumb(s, tone);
-  const g3 = await buildChordsThumb(s, tone);
-  const g4 = await buildVideoThumb(s, tone);
-
-  if(type==='fretboard'){
-    downloadCanvas(c1, buildFilename(s.root,s.sk,'fretboard',false));
-    downloadCanvas(g1, buildFilename(s.root,s.sk,'fretboard',true));
-  }
-  if(type==='scale'){
-    downloadCanvas(c2, buildFilename(s.root,s.sk,'scale',false));
-    downloadCanvas(g2, buildFilename(s.root,s.sk,'scale',true));
-  }
-  if(type==='chords'){
-    downloadCanvas(c3, buildFilename(s.root,s.sk,'chords',false));
-    downloadCanvas(g3, buildFilename(s.root,s.sk,'chords',true));
-  }
-  if(type==='video'){
-    downloadCanvas(c4, buildFilename(s.root,s.sk,'video',false));
-    downloadCanvas(g4, buildFilename(s.root,s.sk,'video',true));
-  }
+  if(type==='fretboard') downloadCanvas(c1, buildFilename(s.root,s.sk,'fretboard'));
+  if(type==='scale')     downloadCanvas(c2, buildFilename(s.root,s.sk,'scale'));
+  if(type==='chords')    downloadCanvas(c3, buildFilename(s.root,s.sk,'chords'));
+  if(type==='video')     downloadCanvas(c4, buildFilename(s.root,s.sk,'video'));
 
   if(type==='all'){
-    // All 4 full Reels
-    downloadCanvas(c1, buildFilename(s.root,s.sk,'fretboard',false));
-    downloadCanvas(c2, buildFilename(s.root,s.sk,'scale',false));
-    downloadCanvas(c3, buildFilename(s.root,s.sk,'chords',false));
-    downloadCanvas(c4, buildFilename(s.root,s.sk,'video',false));
-    // All 4 grid thumbnails
-    downloadCanvas(g1, buildFilename(s.root,s.sk,'fretboard',true));
-    downloadCanvas(g2, buildFilename(s.root,s.sk,'scale',true));
-    downloadCanvas(g3, buildFilename(s.root,s.sk,'chords',true));
-    downloadCanvas(g4, buildFilename(s.root,s.sk,'video',true));
+    downloadCanvas(c1, buildFilename(s.root,s.sk,'fretboard'));
+    downloadCanvas(c2, buildFilename(s.root,s.sk,'scale'));
+    downloadCanvas(c3, buildFilename(s.root,s.sk,'chords'));
+    downloadCanvas(c4, buildFilename(s.root,s.sk,'video'));
+    hideExportPopup();
+  }
+
+  if(type==='proof'){
+    const proof=await buildProofSheet([c1,c2,c3,c4],s);
+    downloadCanvas(proof, buildFilename(s.root,s.sk,'proof'));
     hideExportPopup();
   }
 }
@@ -1241,6 +1010,7 @@ document.addEventListener('keydown',e=>{
 });
 
 window.addEventListener('load',()=>quick('A','minor_pentatonic'));
+
 </script>
 </body>
 </html>
