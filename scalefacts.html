@@ -787,15 +787,35 @@ function buildFretboardImage(state,tone){
       roundRect(ctx,cardX,cardY,cardW,cardH+52,28); ctx.fillStyle='#FFFFFF'; ctx.fill(); ctx.restore();
       ctx.drawImage(img,cardX+14,cardY+26,cardW-28,cardH);
       URL.revokeObjectURL(url);
-      const legY=cardY+cardH+70;
-      ctx.save(); ctx.beginPath(); ctx.arc(SAFE+20,legY,14,0,Math.PI*2); ctx.fillStyle='#4A90E2'; ctx.fill(); ctx.restore();
-      ctx.fillStyle='#FFFFFF'; ctx.font=`600 32px ${FONT}`; ctx.textAlign='left'; ctx.fillText('Root note',SAFE+44,legY+11);
+
+      // Legend — centered as a group with proper padding below card
       const hasSig=SIGNATURE_TONES[state.sk]&&SIGNATURE_TONES[state.sk].length>0;
+      const legY=cardY+cardH+90;  // more padding below card
+      const DOT_R=14, DOT_GAP=12;
+      const rootLabel='Root note', sigLabel='Signature tone';
+      ctx.font=`600 32px ${FONT}`;
+      const rootLabelW=ctx.measureText(rootLabel).width;
+      const sigLabelW=hasSig?ctx.measureText(sigLabel).width:0;
+      const itemW=DOT_R*2+DOT_GAP+rootLabelW;
+      const itemGap=60;
+      const totalW=hasSig?itemW+itemGap+DOT_R*2+DOT_GAP+sigLabelW:itemW;
+      let legX=(IG_W-totalW)/2;
+
+      // Root dot + label
+      ctx.save(); ctx.beginPath(); ctx.arc(legX+DOT_R,legY,DOT_R,0,Math.PI*2);
+      ctx.fillStyle='#4A90E2'; ctx.fill(); ctx.restore();
+      ctx.fillStyle='#FFFFFF'; ctx.textAlign='left';
+      ctx.fillText(rootLabel,legX+DOT_R*2+DOT_GAP,legY+11);
+
       if(hasSig){
-        ctx.save(); ctx.beginPath(); ctx.arc(SAFE+300,legY,14,0,Math.PI*2); ctx.fillStyle='#f0a030'; ctx.fill(); ctx.restore();
-        ctx.fillText('Signature tone',SAFE+324,legY+11);
+        legX+=itemW+itemGap;
+        ctx.save(); ctx.beginPath(); ctx.arc(legX+DOT_R,legY,DOT_R,0,Math.PI*2);
+        ctx.fillStyle='#f0a030'; ctx.fill(); ctx.restore();
+        ctx.fillStyle='#FFFFFF';
+        ctx.fillText(sigLabel,legX+DOT_R*2+DOT_GAP,legY+11);
       }
-      const ruleAbove=legY+36, ruleBelow=IG_H-SAFE-70;
+
+      const ruleAbove=legY+46, ruleBelow=IG_H-SAFE-70;
       drawHRule(ctx,ruleAbove);
       const fullInsight=FULL_INSIGHTS[state.sk]||'';
       if(fullInsight){
@@ -994,24 +1014,24 @@ function drawThumbHeader(ctx, state, heroTitle) {
   ctx.fillStyle = 'rgba(255,255,255,0.85)';
   ctx.font      = `bold 54px ${FONT}`;
   ctx.fillText(`${state.root} ${state.displayName}`, IG_W / 2, y);
-  y += 72;
+  y += 100;  // was 72 — more breathing room before hero title
 
   // Hero title
   ctx.fillStyle = '#FFFFFF';
   ctx.font      = `bold 100px ${FONT}`;
   ctx.fillText(heroTitle, IG_W / 2, y);
-  y += 120;
+  y += 128;
 
   // Tagline
   ctx.fillStyle = 'rgba(255,255,255,0.60)';
   ctx.font      = `500 44px ${FONT}`;
   ctx.fillText(TAGLINES[state.sk] || '', IG_W / 2, y);
-  y += 72;
+  y += 80;
 
   // Rule BELOW tagline, before content
   ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth = 1.5;
   ctx.beginPath(); ctx.moveTo(SAFE + 60, y); ctx.lineTo(IG_W - SAFE - 60, y); ctx.stroke(); ctx.restore();
-  y += 24;
+  y += 28;
 
   return y; // return y cursor for content to start
 }
@@ -1094,11 +1114,6 @@ function buildScaleThumb(state, tone) {
     const noteColor = i === 0 ? 'rgb(74,180,226)' : '#FFFFFF';
     ctx.fillStyle = noteColor; ctx.font = `bold 88px ${FONT}`;
     ctx.fillText(note, COL_NOTE, textY + 10);
-    if (i === 0) {
-      const nw = ctx.measureText(note).width;
-      ctx.save(); ctx.strokeStyle = 'rgba(74,180,226,0.8)'; ctx.lineWidth = 4;
-      ctx.beginPath(); ctx.moveTo(COL_NOTE, textY + 96); ctx.lineTo(COL_NOTE + nw, textY + 96); ctx.stroke(); ctx.restore();
-    }
     rowY += ROW_H;
   });
 
