@@ -394,16 +394,16 @@ const FULL_INSIGHTS = {
 };
 
 const CHORD_FOOTNOTES = {
-  ionian:          (r) => `These chords were made for ${r} Major. Try different progressions using these chords. Then, target chord notes from the scale when soloing.`,
-  dorian:          (r) => `${r} Dorian sounds great over these chords. Try different progressions using these chords. Then, target chord notes from the scale when soloing.`,
-  phrygian:        (r) => `These chords set you up perfectly for ${r} Phrygian leads. Try different progressions using these chords. Then, target chord notes from the scale when soloing.`,
-  lydian:          (r) => `${r} Lydian floats beautifully over these chords. The #IV° is unusual — focus on I, II and V. Try different progressions using these chords. Then, target chord notes from the scale when soloing.`,
-  mixolydian:      (r) => `These chords were made for ${r} Mixolydian. Try different progressions using these chords. Then, target chord notes from the scale when soloing.`,
-  aeolian:         (r) => `${r} Minor sounds great over these chords. Try different progressions using these chords. Then, target chord notes from the scale when soloing.`,
-  locrian:         (r) => `These chords set you up for ${r} Locrian's tension. Try different progressions using these chords. Then, target chord notes from the scale when soloing.`,
-  major_pentatonic:(r) => `These chords were made for ${r} Major Pentatonic. Try different progressions using these chords. Then, target chord notes from the scale when soloing.`,
-  minor_pentatonic:(r) => `${r} Minor Pentatonic sounds great over these chords. Try different progressions using these chords. Then, target chord notes from the scale when soloing.`,
-  blues:           (r) => `These chords were made for ${r} Blues. Try different progressions using these chords. Then, target chord notes from the scale when soloing.`,
+  ionian:          (r) => `These chords were made for ${r} Major. Experiment with different progressions, then use scale notes to target chord tones when soloing.`,
+  dorian:          (r) => `${r} Dorian sounds great over these chords. Experiment with different progressions, then use scale notes to target chord tones when soloing.`,
+  phrygian:        (r) => `These chords set you up perfectly for ${r} Phrygian leads. Experiment with different progressions, then use scale notes to target chord tones when soloing.`,
+  lydian:          (r) => `${r} Lydian floats beautifully over these chords. The #IV° is unusual — focus on I, II and V. Experiment with different progressions, then use scale notes to target chord tones when soloing.`,
+  mixolydian:      (r) => `These chords were made for ${r} Mixolydian. Experiment with different progressions, then use scale notes to target chord tones when soloing.`,
+  aeolian:         (r) => `${r} Minor sounds great over these chords. Experiment with different progressions, then use scale notes to target chord tones when soloing.`,
+  locrian:         (r) => `These chords set you up for ${r} Locrian's tension. Experiment with different progressions, then use scale notes to target chord tones when soloing.`,
+  major_pentatonic:(r) => `These chords were made for ${r} Major Pentatonic. Experiment with different progressions, then use scale notes to target chord tones when soloing.`,
+  minor_pentatonic:(r) => `${r} Minor Pentatonic sounds great over these chords. Experiment with different progressions, then use scale notes to target chord tones when soloing.`,
+  blues:           (r) => `These chords were made for ${r} Blues. Experiment with different progressions, then use scale notes to target chord tones when soloing.`,
 };
 
 const IG_BORDERS = {
@@ -939,7 +939,7 @@ function buildChordsImage(state,tone){
   const chordsTableTop=titleY+36;
   drawHRule(ctx,chordsTableTop-14);
   const footnoteText=(CHORD_FOOTNOTES[state.sk]||(r=>r))(state.root);
-  const FN_SIZE=38, FN_LINE_H=FN_SIZE+12, FN_MAX_W=IG_W-LP-SAFE;
+  const FN_SIZE=42, FN_LINE_H=FN_SIZE+12, FN_MAX_W=IG_W-LP-SAFE;
   ctx.font=`400 ${FN_SIZE}px ${FONT}`;
   const words=footnoteText.split(' '); let fnLines=1, testLine='';
   for(const w of words){ const test=testLine?testLine+' '+w:w; if(ctx.measureText(test).width>FN_MAX_W&&testLine){fnLines++;testLine=w;}else testLine=test; }
