@@ -397,7 +397,7 @@ const CHORD_FOOTNOTES = {
   ionian:          (r) => `These chords were made for ${r} Major. Play freely — every note lands.`,
   dorian:          (r) => `${r} Dorian sounds great over these chords. That slightly happy minor feel will come through instantly.`,
   phrygian:        (r) => `These chords set you up perfectly for ${r} Phrygian leads. That dark edge will cut right through.`,
-  lydian:          (r) => `${r} Lydian floats beautifully over these chords. Let the raised 4 do its thing.`,
+  lydian:          (r) => `${r} Lydian floats beautifully over these chords. The #IV° is unusual — focus on I, II and V for the brightest Lydian sound.`,
   mixolydian:      (r) => `These chords were made for ${r} Mixolydian. That bluesy swagger comes right through.`,
   aeolian:         (r) => `${r} Minor sounds great over these chords. Play expressively — the emotion is built in.`,
   locrian:         (r) => `These chords set you up for ${r} Locrian's tension. Lean into the discomfort.`,
@@ -678,17 +678,35 @@ function drawBackground(ctx, tone){
 
 function drawTitle(ctx,line1,line2){
   const LP = 50;
-  const maxW = IG_W - LP - SAFE;
+  const maxW = IG_W - LP - 5; // 5px right padding minimum
   const TITLE_Y = CONTENT_TOP + 80;
   ctx.textAlign = 'left';
   fitText(ctx, line1, maxW, T.TITLE.size, T.TITLE.weight);
   ctx.fillStyle = T.TITLE.color;
   ctx.fillText(line1, LP, TITLE_Y);
   if(line2){
-    setFont(ctx, T.SUBTITLE);
+    ctx.font = `${T.SUBTITLE.weight} ${T.SUBTITLE.size}px ${FONT}`;
+    ctx.fillStyle = T.SUBTITLE.color;
     ctx.textAlign = 'left';
-    ctx.fillText(line2, LP, TITLE_Y + 82); // gap sized for 64px subtitle
-    return TITLE_Y + 82;
+    // Check if subtitle fits on one line
+    if(ctx.measureText(line2).width <= maxW){
+      ctx.fillText(line2, LP, TITLE_Y + 82);
+      return TITLE_Y + 82;
+    } else {
+      // Wrap to 2 lines
+      const words = line2.split(' ');
+      let line = '', lines = [], testLine;
+      for(const w of words){
+        testLine = line ? line + ' ' + w : w;
+        if(ctx.measureText(testLine).width > maxW && line){
+          lines.push(line); line = w;
+        } else { line = testLine; }
+      }
+      if(line) lines.push(line);
+      const LINE_H = T.SUBTITLE.size + 12;
+      lines.forEach((l, i) => ctx.fillText(l, LP, TITLE_Y + 82 + i * LINE_H));
+      return TITLE_Y + 82 + (lines.length - 1) * LINE_H;
+    }
   }
   return TITLE_Y;
 }
@@ -771,10 +789,22 @@ function buildFretboardImage(state,tone){
     ctx.textAlign='left';
     fitText(ctx,`${state.root} ${state.displayName}`,maxW,T.TITLE.size,T.TITLE.weight);
     ctx.fillStyle=T.TITLE.color; ctx.fillText(`${state.root} ${state.displayName}`,LP,TITLE_Y);
-    // Subtitle — 64px consistent with all panels
+    // Subtitle — 64px, wrap if needed, 5px min right padding
     ctx.fillStyle='rgba(255,255,255,0.82)'; ctx.font=`500 64px ${FONT}`; ctx.textAlign='left';
-    ctx.fillText(TAGLINES[state.sk]||'',LP,TITLE_Y+82);
-    drawHRule(ctx,TITLE_Y+116);
+    const subText=TAGLINES[state.sk]||'';
+    const subMaxW=IG_W-LP-5;
+    const subLineH=76;
+    let subBottom=TITLE_Y+82;
+    if(ctx.measureText(subText).width<=subMaxW){
+      ctx.fillText(subText,LP,subBottom);
+    } else {
+      const words=subText.split(' '); let ln='', subLines=[];
+      for(const w of words){ const t=ln?ln+' '+w:w; if(ctx.measureText(t).width>subMaxW&&ln){subLines.push(ln);ln=w;}else ln=t; }
+      if(ln) subLines.push(ln);
+      subLines.forEach((l,i)=>ctx.fillText(l,LP,TITLE_Y+82+i*subLineH));
+      subBottom=TITLE_Y+82+(subLines.length-1)*subLineH;
+    }
+    drawHRule(ctx,subBottom+36);
 
     const svgEl=document.querySelector('#fretboardContainer svg');
     if(!svgEl){ drawWatermark(ctx); resolve(c); return; }
@@ -787,7 +817,7 @@ function buildFretboardImage(state,tone){
       const aspect=vb.height/vb.width; // natural aspect ratio of fretboard
       // Reserve space: legend ~60px + rule ~20px + insight ~220px + watermark ~80px
       const RESERVE=380;
-      const cardY=TITLE_Y+136;
+      const cardY=subBottom+56;
       const maxCardH=CONTENT_BOT-cardY-RESERVE;
       const maxCardW=IG_W-SAFE*2;
       // Fit preserving aspect ratio within both maxCardW and maxCardH
@@ -853,7 +883,8 @@ function buildScaleImage(state,tone){
   drawHRule(ctx,tableTop-14);
   const rows=state.noteNames.length;
   const hasFlats=state.scale.degs.some(d=>d.includes('b'));
-  const FLAT_NOTE_H = hasFlats ? 90 : 0;
+  const hasSharps=state.scale.degs.some(d=>d.includes('#'));
+  const FLAT_NOTE_H = (hasFlats||hasSharps) ? 90 : 0;
   const tableBot=CONTENT_BOT - FLAT_NOTE_H - 20;
   const rowH=Math.floor((tableBot-tableTop)/(rows+1));
   const colDeg=LP+20, colNote=LP+380;
@@ -869,14 +900,21 @@ function buildScaleImage(state,tone){
     ctx.fillStyle='#FFFFFF'; ctx.font=`bold ${T.DATA_LG.size}px ${FONT}`; ctx.textAlign='left'; ctx.fillText(note,colNote,textY);
     if(i===0){ ctx.save(); ctx.strokeStyle='rgba(255,255,255,0.55)'; ctx.lineWidth=4; const tw=ctx.measureText(note).width; ctx.beginPath(); ctx.moveTo(colNote,textY+10); ctx.lineTo(colNote+tw,textY+10); ctx.stroke(); ctx.restore(); }
   });
-  // Flat note footnote — same style as insight paragraph on panel 1
-  if(hasFlats){
+  // Footnote — only if scale has flat or sharp degrees
+  if(hasFlats || hasSharps){
     const fnY=tableBot+10;
     drawHRule(ctx,fnY);
     ctx.fillStyle='rgba(255,255,255,0.90)';
     ctx.font=`italic 400 52px ${FONT}`;
     ctx.textAlign='left';
-    ctx.fillText('A note referenced as "b" or flat, is flat compared to the major scale.',LP,fnY+62);
+    let fnText='';
+    if(hasFlats && hasSharps)
+      fnText='Notes marked "b" are flat and "#" are sharp, relative to the major scale.';
+    else if(hasFlats)
+      fnText='A note referenced as "b" or flat, is flat compared to the major scale.';
+    else
+      fnText='A note referenced as "#" or sharp, is sharp compared to the major scale.';
+    ctx.fillText(fnText,LP,fnY+62);
   }
   drawHRule(ctx,CONTENT_BOT-10); drawWatermark(ctx);
   return Promise.resolve(c);
@@ -926,10 +964,22 @@ function buildVideoImage(state,tone){
   const VIDEO_TITLE_Y=CONTENT_TOP+80;
   ctx.textAlign='left'; ctx.fillStyle='#FFFFFF'; ctx.font=`bold 96px ${FONT}`;
   ctx.fillText('The Sound',LP,VIDEO_TITLE_Y);
-  // Single subtitle line — 64px consistent with all panels
+  // Subtitle — 64px, wrap if needed, 5px min right padding
+  const vidSub='You can jam like this, with FretTracks.';
   ctx.fillStyle='rgba(255,255,255,0.82)'; ctx.font=`500 64px ${FONT}`; ctx.textAlign='left';
-  ctx.fillText('You can jam like this, with FretTracks.',LP,VIDEO_TITLE_Y+82);
-  drawHRule(ctx,VIDEO_TITLE_Y+122);
+  const vidMaxW=IG_W-LP-5;
+  const vidLineH=76;
+  let vidSubBottom=VIDEO_TITLE_Y+82;
+  if(ctx.measureText(vidSub).width<=vidMaxW){
+    ctx.fillText(vidSub,LP,vidSubBottom);
+  } else {
+    const words=vidSub.split(' '); let ln='', vidLines=[];
+    for(const w of words){ const t=ln?ln+' '+w:w; if(ctx.measureText(t).width>vidMaxW&&ln){vidLines.push(ln);ln=w;}else ln=t; }
+    if(ln) vidLines.push(ln);
+    vidLines.forEach((l,i)=>ctx.fillText(l,LP,VIDEO_TITLE_Y+82+i*vidLineH));
+    vidSubBottom=VIDEO_TITLE_Y+82+(vidLines.length-1)*vidLineH;
+  }
+  drawHRule(ctx,vidSubBottom+36);
   // Open middle — clean background for video overlay
   drawWatermark(ctx);
   return Promise.resolve(c);
