@@ -394,16 +394,16 @@ const FULL_INSIGHTS = {
 };
 
 const CHORD_FOOTNOTES = {
-  ionian:          (r) => `These chords were made for ${r} Major. Play freely — every note lands.`,
-  dorian:          (r) => `${r} Dorian sounds great over these chords. That slightly happy minor feel will come through instantly.`,
-  phrygian:        (r) => `These chords set you up perfectly for ${r} Phrygian leads. That dark edge will cut right through.`,
-  lydian:          (r) => `${r} Lydian floats beautifully over these chords. The #IV° is unusual — focus on I, II and V for the brightest Lydian sound.`,
-  mixolydian:      (r) => `These chords were made for ${r} Mixolydian. That bluesy swagger comes right through.`,
-  aeolian:         (r) => `${r} Minor sounds great over these chords. Play expressively — the emotion is built in.`,
-  locrian:         (r) => `These chords set you up for ${r} Locrian's tension. Lean into the discomfort.`,
-  major_pentatonic:(r) => `These chords were made for ${r} Major Pentatonic. No wrong notes — just play.`,
-  minor_pentatonic:(r) => `${r} Minor Pentatonic sounds great over these chords. This is where solos are born.`,
-  blues:           (r) => `These chords were made for ${r} Blues. They make it easy to be expressive — that's what the blues is all about.`,
+  ionian:          (r) => `These chords were made for ${r} Major. Try different progressions using these chords. Then, target chord notes from the scale when soloing.`,
+  dorian:          (r) => `${r} Dorian sounds great over these chords. Try different progressions using these chords. Then, target chord notes from the scale when soloing.`,
+  phrygian:        (r) => `These chords set you up perfectly for ${r} Phrygian leads. Try different progressions using these chords. Then, target chord notes from the scale when soloing.`,
+  lydian:          (r) => `${r} Lydian floats beautifully over these chords. The #IV° is unusual — focus on I, II and V. Try different progressions using these chords. Then, target chord notes from the scale when soloing.`,
+  mixolydian:      (r) => `These chords were made for ${r} Mixolydian. Try different progressions using these chords. Then, target chord notes from the scale when soloing.`,
+  aeolian:         (r) => `${r} Minor sounds great over these chords. Try different progressions using these chords. Then, target chord notes from the scale when soloing.`,
+  locrian:         (r) => `These chords set you up for ${r} Locrian's tension. Try different progressions using these chords. Then, target chord notes from the scale when soloing.`,
+  major_pentatonic:(r) => `These chords were made for ${r} Major Pentatonic. Try different progressions using these chords. Then, target chord notes from the scale when soloing.`,
+  minor_pentatonic:(r) => `${r} Minor Pentatonic sounds great over these chords. Try different progressions using these chords. Then, target chord notes from the scale when soloing.`,
+  blues:           (r) => `These chords were made for ${r} Blues. Try different progressions using these chords. Then, target chord notes from the scale when soloing.`,
 };
 
 const IG_BORDERS = {
@@ -512,7 +512,7 @@ function renderFretboard(rootName, scale, noteLabels, sk) {
   const { placed, minFret, maxFret } = result;
   const dispMin=minFret, dispMax=maxFret, numSlots=dispMax-dispMin+1;
   const NUM_STR=6, leftPad=78, rightPad=36, topPad=72, bottomPad=52;
-  const strSp=48, fretW=87;
+  const strSp=48, fretW=110;
   const svgW=leftPad+numSlots*fretW+rightPad, svgH=topPad+(NUM_STR-1)*strSp+bottomPad;
   const ROOT_FILL='#4A90E2', NOTE_FILL='#667085', SIG_FILL='#f0a030';
   const rPitch = rootPitchOf(rootName);
@@ -837,8 +837,8 @@ function buildFretboardImage(state,tone){
       const cardX=SAFE+(maxCardW-cardW)/2;
 
       ctx.save(); ctx.shadowColor='rgba(0,0,0,0.28)'; ctx.shadowBlur=36; ctx.shadowOffsetY=10;
-      roundRect(ctx,cardX,cardY,cardW,cardH+52,28); ctx.fillStyle='#FFFFFF'; ctx.fill(); ctx.restore();
-      ctx.drawImage(img,cardX+14,cardY+26,cardW-28,cardH);
+      roundRect(ctx,cardX,cardY,cardW,cardH+24,28); ctx.fillStyle='#FFFFFF'; ctx.fill(); ctx.restore();
+      ctx.drawImage(img,cardX+8,cardY+12,cardW-16,cardH);
       URL.revokeObjectURL(url);
 
       // Legend — centered under the card, slightly bigger font
