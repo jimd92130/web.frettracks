@@ -814,16 +814,26 @@ function buildFretboardImage(state,tone){
     const img=new Image();
     img.onload=()=>{
       const vb=svgEl.viewBox.baseVal;
-      const aspect=vb.height/vb.width; // natural aspect ratio of fretboard
-      // Reserve space: legend ~60px + rule ~20px + insight ~220px + watermark ~80px
-      const RESERVE=380;
+      const aspect=vb.height/vb.width;
       const cardY=subBottom+56;
-      const maxCardH=CONTENT_BOT-cardY-RESERVE;
       const maxCardW=IG_W-SAFE*2;
-      // Fit preserving aspect ratio within both maxCardW and maxCardH
+
+      // Measure how much space the insight paragraph needs
+      const fullInsight=FULL_INSIGHTS[state.sk]||'';
+      const FONT_SIZE=52, LINE_H=70;
+      ctx.font=`italic 400 ${FONT_SIZE}px ${FONT}`;
+      let insightLines=0;
+      if(fullInsight){
+        const words=fullInsight.split(' '); let ln='';
+        for(const w of words){ const t=ln?ln+' '+w:w; if(ctx.measureText(t).width>IG_W-LP-SAFE&&ln){insightLines++;ln=w;}else ln=t; }
+        insightLines++;
+      }
+      // Space needed below card: legend(50) + legRule(20) + insight(lines*LINE_H) + botRule(20) + wm(60)
+      const RESERVE=50+20+(insightLines*LINE_H)+20+60;
+      const maxCardH=CONTENT_BOT-cardY-RESERVE;
       let cardW=maxCardW, cardH=Math.round(cardW*aspect);
       if(cardH>maxCardH){ cardH=maxCardH; cardW=Math.round(cardH/aspect); }
-      const cardX=SAFE+(maxCardW-cardW)/2; // center horizontally
+      const cardX=SAFE+(maxCardW-cardW)/2;
 
       ctx.save(); ctx.shadowColor='rgba(0,0,0,0.28)'; ctx.shadowBlur=36; ctx.shadowOffsetY=10;
       roundRect(ctx,cardX,cardY,cardW,cardH+52,28); ctx.fillStyle='#FFFFFF'; ctx.fill(); ctx.restore();
@@ -856,7 +866,6 @@ function buildFretboardImage(state,tone){
       // Insight paragraph — same style as panel 2 flat note (52px, italic, 90% opacity)
       const ruleAbove=legY+44, ruleBelow=CONTENT_BOT-10;
       drawHRule(ctx,ruleAbove);
-      const fullInsight=FULL_INSIGHTS[state.sk]||'';
       if(fullInsight){
         const FONT_SIZE=52, LINE_H=70;
         ctx.font=`italic 400 ${FONT_SIZE}px ${FONT}`;
@@ -884,7 +893,7 @@ function buildScaleImage(state,tone){
   const rows=state.noteNames.length;
   const hasFlats=state.scale.degs.some(d=>d.includes('b'));
   const hasSharps=state.scale.degs.some(d=>d.includes('#'));
-  const FLAT_NOTE_H = (hasFlats||hasSharps) ? 90 : 0;
+  const FLAT_NOTE_H = (hasFlats||hasSharps) ? 160 : 0;
   const tableBot=CONTENT_BOT - FLAT_NOTE_H - 20;
   const rowH=Math.floor((tableBot-tableTop)/(rows+1));
   const colDeg=LP+20, colNote=LP+380;
@@ -905,7 +914,7 @@ function buildScaleImage(state,tone){
     const fnY=tableBot+10;
     drawHRule(ctx,fnY);
     ctx.fillStyle='rgba(255,255,255,0.90)';
-    ctx.font=`italic 400 52px ${FONT}`;
+    ctx.font=`italic 400 44px ${FONT}`;
     ctx.textAlign='left';
     let fnText='';
     if(hasFlats && hasSharps)
@@ -914,7 +923,7 @@ function buildScaleImage(state,tone){
       fnText='A note referenced as "b" or flat, is flat compared to the major scale.';
     else
       fnText='A note referenced as "#" or sharp, is sharp compared to the major scale.';
-    ctx.fillText(fnText,LP,fnY+62);
+    canvasWrapText(ctx,fnText,LP,fnY+56,IG_W-LP-5,58);
   }
   drawHRule(ctx,CONTENT_BOT-10); drawWatermark(ctx);
   return Promise.resolve(c);
@@ -965,7 +974,7 @@ function buildVideoImage(state,tone){
   ctx.textAlign='left'; ctx.fillStyle='#FFFFFF'; ctx.font=`bold 96px ${FONT}`;
   ctx.fillText('The Sound',LP,VIDEO_TITLE_Y);
   // Subtitle — 64px, wrap if needed, 5px min right padding
-  const vidSub='You can jam like this, with FretTracks.';
+  const vidSub='You can jam like this with FretTracks.';
   ctx.fillStyle='rgba(255,255,255,0.82)'; ctx.font=`500 64px ${FONT}`; ctx.textAlign='left';
   const vidMaxW=IG_W-LP-5;
   const vidLineH=76;
