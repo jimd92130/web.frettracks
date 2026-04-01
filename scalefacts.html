@@ -836,7 +836,10 @@ function buildScaleImage(state,tone){
     if(i===0){ ctx.save(); ctx.strokeStyle='rgba(255,255,255,0.55)'; ctx.lineWidth=4; const tw=ctx.measureText(note).width; ctx.beginPath(); ctx.moveTo(colNote,textY+10); ctx.lineTo(colNote+tw,textY+10); ctx.stroke(); ctx.restore(); }
   });
   drawHRule(ctx,IG_H-SAFE-70); drawDotsAndLabel(ctx,state,2); drawWatermark(ctx);
-  return Promise.resolve(c);(state,tone){
+  return Promise.resolve(c);
+}
+
+function buildChordsImage(state,tone){
   const c=igCanvas(), ctx=c.getContext('2d');
   drawBackground(ctx,tone);
   const cd=state.chordsData, isParent=cd&&cd.type==='parent';
