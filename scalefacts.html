@@ -919,11 +919,11 @@ function buildScaleImage(state,tone){
     ctx.textAlign='left';
     let fnText='';
     if(hasFlats && hasSharps)
-      fnText='Notes marked "b" are flat and "#" are sharp, relative to the major scale.';
+      fnText='Scale degrees marked "b" are flat and "#" are sharp, relative to the major scale.';
     else if(hasFlats)
-      fnText='A note referenced as "b" or flat, is flat compared to the major scale.';
+      fnText='A scale degree referenced as "b" or flat, is flat compared to the major scale.';
     else
-      fnText='A note referenced as "#" or sharp, is sharp compared to the major scale.';
+      fnText='A scale degree referenced as "#" or sharp, is sharp compared to the major scale.';
     canvasWrapText(ctx,fnText,LP,fnY+56,IG_W-LP-5,58);
   }
   drawHRule(ctx,CONTENT_BOT-10); drawWatermark(ctx);
