@@ -232,7 +232,7 @@ tbody tr:hover{background:var(--bg);}
     <div class="ig-modal-header">
       <div>
         <div class="ig-modal-title">Export Instagram Images</div>
-        <div class="ig-modal-sub">1080×1440 · PNG · Scale name visible in 1350 crop · All content in 1080 safe zone</div>
+        <div class="ig-modal-sub">1080×1920 · PNG · Reel format · Safe zone top 225 · Instagram UI overlay bottom 300px</div>
       </div>
       <button class="ig-close" onclick="hideExportPopup()">✕</button>
     </div>
@@ -279,7 +279,7 @@ tbody tr:hover{background:var(--bg);}
     </div>
     <button class="ig-all-btn" onclick="exportImage('all')">⬇ Download All 4 Images</button>
     <button class="ig-all-btn" style="margin-top:8px;background:#444e60;" onclick="exportImage('proof')">🗂 Download Proof Sheet</button>
-    <p class="ig-all-note">All images 1080×1440 · Post in reverse order (4→3→2→1) for correct grid sequence</p>
+    <p class="ig-all-note">All images 1080×1920 · Post as Reels · Post in reverse order (4→3→2→1) for correct grid sequence</p>
   </div>
 </div>
 
@@ -639,10 +639,10 @@ function quick(root,sk){
 //   y=225–1215: SAFE ZONE — all critical content here
 //   y=1215–1395: bottom bleed
 //   y=1395–1440: bleed (cropped when grid shows 1350)
-const IG_W=1080, IG_H=1440;
+const IG_W=1080, IG_H=1920;
 const SCALE_NAME_Y = 88;   // scale name baseline — visible in 1350 crop, hidden in square
 const CONTENT_TOP  = 225;  // safe zone top
-const CONTENT_BOT  = 1215; // safe zone bottom
+const CONTENT_BOT  = 1580; // safe zone bottom
 const FONT='ui-sans-serif,system-ui,sans-serif';
 
 const T={
@@ -725,7 +725,7 @@ function drawWatermark(ctx){
   while(ctx.measureText(text).width > maxW && sz > 28){ sz--; ctx.font = `bold ${sz}px ${FONT}`; }
   ctx.fillStyle = 'rgba(255,255,255,0.82)';
   ctx.textAlign = 'center';
-  ctx.fillText(text, IG_W/2, IG_H - 36); // very bottom, 36px padding
+  ctx.fillText(text, IG_W/2, IG_H - 80); // bottom, above Instagram UI overlay zone
   ctx.restore();
 }
 
@@ -1056,7 +1056,7 @@ async function buildProofSheet(canvases, state) {
   });
 
   ctx.fillStyle='#AAAAAA'; ctx.font=`400 16px ui-sans-serif,system-ui,sans-serif`; ctx.textAlign='center';
-  ctx.fillText('FretTracks Scale Explorer  ·  1080×1440px  ·  proof sheet', totalW/2, totalH-MARGIN-8);
+  ctx.fillText('FretTracks Scale Explorer  ·  1080×1920px  ·  proof sheet', totalW/2, totalH-MARGIN-8);
   return c;
 }
 
