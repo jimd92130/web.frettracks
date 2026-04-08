@@ -278,7 +278,6 @@ tbody tr:hover{background:var(--bg);}
       </button>
     </div>
     <button class="ig-all-btn" onclick="exportImage('all')">⬇ Download All 4 Images</button>
-    <button class="ig-all-btn" style="margin-top:8px;background:#1a7a4a;" onclick="exportImage('videos')">🎬 Download All 4 as Video Clips</button>
     <button class="ig-all-btn" style="margin-top:8px;background:#444e60;" onclick="exportImage('proof')">🗂 Download Proof Sheet</button>
     <p class="ig-all-note">All images 1080×1920 · Post as Reels · Post in reverse order (4→3→2→1) for correct grid sequence</p>
   </div>
@@ -1077,78 +1076,6 @@ function showExportPopup(){
 function hideExportPopup(){ document.getElementById('igPopup').classList.remove('visible'); }
 
 
-// ── FFmpeg.wasm mp4 export ──
-let _ffmpeg = null;
-
-async function getFFmpeg() {
-  if (_ffmpeg) return _ffmpeg;
-  const { createFFmpeg, fetchFile } = FFmpeg;
-  _ffmpeg = createFFmpeg({
-    log: false,
-    corePath: 'https://unpkg.com/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js',
-  });
-  await _ffmpeg.load();
-  return _ffmpeg;
-}
-
-function recordCanvasAsWebm(canvas, durationMs = 3000) {
-  return new Promise(resolve => {
-    const stream = canvas.captureStream(30);
-    const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
-      ? 'video/webm;codecs=vp9' : 'video/webm';
-    const recorder = new MediaRecorder(stream, { mimeType });
-    const chunks = [];
-    recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
-    recorder.onstop = () => resolve(new Blob(chunks, { type: mimeType }));
-    recorder.start();
-    setTimeout(() => recorder.stop(), durationMs);
-  });
-}
-
-async function recordCanvasAsVideo(canvas, filename, durationMs = 3000) {
-  // Show progress in button
-  const btn = document.querySelector('.ig-all-btn[onclick*="videos"]');
-  const origText = btn ? btn.textContent : '';
-  const setStatus = (msg) => { if (btn) btn.textContent = msg; };
-
-  try {
-    setStatus('🎬 Recording…');
-    const webmBlob = await recordCanvasAsWebm(canvas, durationMs);
-
-    setStatus('⚙️ Converting to MP4…');
-    const ffmpeg = await getFFmpeg();
-    const { fetchFile } = FFmpeg;
-
-    const inName  = 'input.webm';
-    const outName = 'output.mp4';
-    ffmpeg.FS('writeFile', inName, await fetchFile(webmBlob));
-    await ffmpeg.run(
-      '-i', inName,
-      '-c:v', 'libx264',
-      '-preset', 'fast',
-      '-pix_fmt', 'yuv420p',
-      '-movflags', '+faststart',
-      outName
-    );
-    const data = ffmpeg.FS('readFile', outName);
-    ffmpeg.FS('unlink', inName);
-    ffmpeg.FS('unlink', outName);
-
-    const mp4Blob = new Blob([data.buffer], { type: 'video/mp4' });
-    const url = URL.createObjectURL(mp4Blob);
-    const link = document.createElement('a');
-    link.download = filename.replace('.png', '.mp4');
-    link.href = url;
-    link.click();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  } catch(err) {
-    console.error('Video export error:', err);
-    alert('MP4 conversion failed: ' + err.message + '\n\nTry using the Images export instead.');
-  } finally {
-    if (btn) btn.textContent = origText;
-  }
-}
-
 async function exportImage(type){
   const s=_exportState, tone=_igTone;
   const c1=await buildFretboardImage(s,tone);
@@ -1169,14 +1096,6 @@ async function exportImage(type){
     hideExportPopup();
   }
 
-  if(type==='videos'){
-    await recordCanvasAsVideo(c1, buildFilename(s.root,s.sk,'fretboard'));
-    await recordCanvasAsVideo(c2, buildFilename(s.root,s.sk,'scale'));
-    await recordCanvasAsVideo(c3, buildFilename(s.root,s.sk,'chords'));
-    await recordCanvasAsVideo(c4, buildFilename(s.root,s.sk,'video'));
-    hideExportPopup();
-  }
-
   if(type==='proof'){
     const proof=await buildProofSheet([c1,c2,c3,c4],s);
     downloadCanvas(proof, buildFilename(s.root,s.sk,'proof'));
@@ -1191,6 +1110,5 @@ document.addEventListener('keydown',e=>{
 window.addEventListener('load',()=>quick('A','minor_pentatonic'));
 
 </script>
-<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
 </body>
 </html>
