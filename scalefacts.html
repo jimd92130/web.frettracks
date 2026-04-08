@@ -381,7 +381,7 @@ const SHORT_INSIGHTS = {
 };
 
 const FULL_INSIGHTS = {
-  ionian:'This is the reference scale. When someone says a song is \'in C,\' they mean C major. Learn this and you have a strong foundation for understanding other scales.',
+  ionian:(r)=>`This is the reference scale. When someone says a song is 'in ${r},' they mean ${r} major. Learn this and you have a strong foundation for understanding other scales.`,
   dorian:'Dorian is a minor scale with the 6th note raised. That one note adds a brighter, more sophisticated edge. It\'s the sound of jazz, funk and blues-rock.',
   phrygian:'Phrygian is a minor scale with the 2nd note lowered. That one note creates a dark, exotic sound heard in flamenco and metal. Instantly recognizable.',
   lydian:'Lydian is a major scale with the 4th note raised. That one note creates a floating, cinematic feel. Play it over a major chord and you\'ll hear it immediately.',
@@ -717,15 +717,29 @@ function drawHRule(ctx,y){
 }
 
 function drawWatermark(ctx){
-  const text = 'Try FretTracks free. Link in Bio.';
-  const maxW = IG_W - 100; // 50px padding each side
+  const text = 'Learn to Play Lead Guitar — Try FretTracks Free. Link in Bio.';
+  const maxW = IG_W - 100;
+  const LP = 50;
   ctx.save();
   let sz = 52;
   ctx.font = `bold ${sz}px ${FONT}`;
   while(ctx.measureText(text).width > maxW && sz > 28){ sz--; ctx.font = `bold ${sz}px ${FONT}`; }
   ctx.fillStyle = 'rgba(255,255,255,0.82)';
   ctx.textAlign = 'center';
-  ctx.fillText(text, IG_W/2, IG_H - 80); // bottom, above Instagram UI overlay zone
+  const lineH = sz + 14;
+  const baseY = IG_H - 280; // clear Instagram hashtag overlay zone
+  if(ctx.measureText(text).width <= maxW){
+    ctx.fillText(text, IG_W/2, baseY);
+  } else {
+    // wrap to 2 lines
+    const words = text.split(' '); let line = '', lines = [];
+    for(const w of words){
+      const test = line ? line+' '+w : w;
+      if(ctx.measureText(test).width > maxW && line){ lines.push(line); line=w; } else line=test;
+    }
+    if(line) lines.push(line);
+    lines.forEach((l,i) => ctx.fillText(l, IG_W/2, baseY + i*lineH));
+  }
   ctx.restore();
 }
 
@@ -819,7 +833,8 @@ function buildFretboardImage(state,tone){
       const maxCardW=IG_W-SAFE*2;
 
       // Measure insight lines at actual draw width
-      const fullInsight=FULL_INSIGHTS[state.sk]||'';
+      const rawInsight=FULL_INSIGHTS[state.sk]||'';
+      const fullInsight=typeof rawInsight==='function' ? rawInsight(state.root) : rawInsight;
       const FONT_SIZE=52, LINE_H=70;
       const insightMaxW=IG_W-LP-SAFE;
       ctx.font=`italic 400 ${FONT_SIZE}px ${FONT}`;
