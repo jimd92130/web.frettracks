@@ -231,8 +231,8 @@ tbody tr:hover{background:var(--bg);}
   <div class="ig-modal">
     <div class="ig-modal-header">
       <div>
-        <div class="ig-modal-title">Export Instagram Images</div>
-        <div class="ig-modal-sub">1080×1920 · PNG · Reel format · Safe zone top 225 · Instagram UI overlay bottom 300px</div>
+        <div class="ig-modal-title">Export for Instagram</div>
+        <div class="ig-modal-sub">1080×1920 · Panels 1–3 MP4 with series overlay · Panel 4 PNG for CapCut</div>
       </div>
       <button class="ig-close" onclick="hideExportPopup()">✕</button>
     </div>
@@ -247,39 +247,12 @@ tbody tr:hover{background:var(--bg);}
         <span class="ig-tone-swatch" style="background:#f0a030"></span>Gold Border
       </button>
     </div>
-    <div class="ig-modal-body">
-      <button class="ig-export-btn" onclick="exportImage('fretboard')">
-        <span class="ig-btn-text">
-          <strong>1 — The Tab</strong>
-          <span>Fretboard diagram · tagline · insight paragraph</span>
-        </span>
-        <span class="ig-arrow">↓</span>
-      </button>
-      <button class="ig-export-btn" onclick="exportImage('scale')">
-        <span class="ig-btn-text">
-          <strong>2 — The Notes</strong>
-          <span>Scale degrees · note names</span>
-        </span>
-        <span class="ig-arrow">↓</span>
-      </button>
-      <button class="ig-export-btn" onclick="exportImage('chords')">
-        <span class="ig-btn-text">
-          <strong>3 — The Chords</strong>
-          <span>Nashville chart · footnote</span>
-        </span>
-        <span class="ig-arrow">↓</span>
-      </button>
-      <button class="ig-export-btn" onclick="exportImage('video')">
-        <span class="ig-btn-text">
-          <strong>4 — The Sound</strong>
-          <span>Overlay your video on this in CapCut</span>
-        </span>
-        <span class="ig-arrow">↓</span>
-      </button>
+    <div class="ig-modal-body" style="padding-top:20px;">
+      <button class="ig-all-btn" id="btnFullSet" onclick="exportImage('fullset')" style="margin:0 0 8px 0;width:100%;background:#1a7a4a;font-size:16px;padding:16px;">🎬 Download Full Set</button>
+      <p style="text-align:center;font-size:12px;color:var(--muted);margin:0 0 14px;">Proof Sheet · Videos 1–3 (MP4) · Panel 4 Static (PNG)</p>
+      <button class="ig-all-btn" id="btnProof" onclick="exportImage('proof')" style="margin:0;width:100%;background:#444e60;">🗂 Download Proof Sheet Only</button>
     </div>
-    <button class="ig-all-btn" onclick="exportImage('all')">⬇ Download All 4 Images</button>
-    <button class="ig-all-btn" style="margin-top:8px;background:#444e60;" onclick="exportImage('proof')">🗂 Download Proof Sheet</button>
-    <p class="ig-all-note">All images 1080×1920 · Post as Reels · Post in reverse order (4→3→2→1) for correct grid sequence</p>
+    <p class="ig-all-note">Post as Reels in reverse order (4→3→2→1) for correct grid sequence</p>
   </div>
 </div>
 
@@ -381,7 +354,7 @@ const SHORT_INSIGHTS = {
 };
 
 const FULL_INSIGHTS = {
-  ionian:(r)=>`When someone says a song is 'in ${r},' they mean ${r} major. Learn this and you have a strong foundation for understanding other scales.`,
+  ionian:'This is the reference scale. When someone says a song is \'in C,\' they mean C major. Learn this and you have a strong foundation for understanding other scales.',
   dorian:'Dorian is a minor scale with the 6th note raised. That one note adds a brighter, more sophisticated edge. It\'s the sound of jazz, funk and blues-rock.',
   phrygian:'Phrygian is a minor scale with the 2nd note lowered. That one note creates a dark, exotic sound heard in flamenco and metal. Instantly recognizable.',
   lydian:'Lydian is a major scale with the 4th note raised. That one note creates a floating, cinematic feel. Play it over a major chord and you\'ll hear it immediately.',
@@ -639,10 +612,10 @@ function quick(root,sk){
 //   y=225–1215: SAFE ZONE — all critical content here
 //   y=1215–1395: bottom bleed
 //   y=1395–1440: bleed (cropped when grid shows 1350)
-const IG_W=1080, IG_H=1920;
+const IG_W=1080, IG_H=1440;
 const SCALE_NAME_Y = 88;   // scale name baseline — visible in 1350 crop, hidden in square
 const CONTENT_TOP  = 225;  // safe zone top
-const CONTENT_BOT  = 1580; // safe zone bottom
+const CONTENT_BOT  = 1215; // safe zone bottom
 const FONT='ui-sans-serif,system-ui,sans-serif';
 
 const T={
@@ -717,26 +690,15 @@ function drawHRule(ctx,y){
 }
 
 function drawWatermark(ctx){
-  const text = 'Learn Lead Guitar. Try FretTracks Free. Link in Bio.';
-  const maxW = IG_W - 100;
+  const text = 'Try FretTracks free. Link in Bio.';
+  const maxW = IG_W - 100; // 50px padding each side
   ctx.save();
-  const sz = 52;
+  let sz = 52;
   ctx.font = `bold ${sz}px ${FONT}`;
-  const lineH = sz + 14;
-  const baseY = IG_H - 280;
+  while(ctx.measureText(text).width > maxW && sz > 28){ sz--; ctx.font = `bold ${sz}px ${FONT}`; }
   ctx.fillStyle = 'rgba(255,255,255,0.82)';
   ctx.textAlign = 'center';
-  if(ctx.measureText(text).width <= maxW){
-    ctx.fillText(text, IG_W/2, baseY);
-  } else {
-    const words = text.split(' '); let line = '', lines = [];
-    for(const w of words){
-      const test = line ? line+' '+w : w;
-      if(ctx.measureText(test).width > maxW && line){ lines.push(line); line=w; } else line=test;
-    }
-    if(line) lines.push(line);
-    lines.forEach((l,i) => ctx.fillText(l, IG_W/2, baseY + i*lineH));
-  }
+  ctx.fillText(text, IG_W/2, IG_H - 36); // very bottom, 36px padding
   ctx.restore();
 }
 
@@ -830,8 +792,7 @@ function buildFretboardImage(state,tone){
       const maxCardW=IG_W-SAFE*2;
 
       // Measure insight lines at actual draw width
-      const rawInsight=FULL_INSIGHTS[state.sk]||'';
-      const fullInsight=typeof rawInsight==='function' ? rawInsight(state.root) : rawInsight;
+      const fullInsight=FULL_INSIGHTS[state.sk]||'';
       const FONT_SIZE=52, LINE_H=70;
       const insightMaxW=IG_W-LP-SAFE;
       ctx.font=`italic 400 ${FONT_SIZE}px ${FONT}`;
@@ -927,7 +888,7 @@ function buildScaleImage(state,tone){
     const fnY=tableBot+10;
     drawHRule(ctx,fnY);
     ctx.fillStyle='rgba(255,255,255,0.90)';
-    ctx.font=`italic 400 52px ${FONT}`;
+    ctx.font=`italic 400 44px ${FONT}`;
     ctx.textAlign='left';
     let fnText='';
     if(hasFlats && hasSharps)
@@ -936,7 +897,7 @@ function buildScaleImage(state,tone){
       fnText='A scale degree referenced as "b" or flat, is flat compared to the major scale.';
     else
       fnText='A scale degree referenced as "#" or sharp, is sharp compared to the major scale.';
-    canvasWrapText(ctx,fnText,LP,fnY+62,IG_W-LP-5,70);
+    canvasWrapText(ctx,fnText,LP,fnY+56,IG_W-LP-5,58);
   }
   drawHRule(ctx,CONTENT_BOT-10); drawWatermark(ctx);
   return Promise.resolve(c);
@@ -951,7 +912,7 @@ function buildChordsImage(state,tone){
   const chordsTableTop=titleY+36;
   drawHRule(ctx,chordsTableTop-14);
   const footnoteText=(CHORD_FOOTNOTES[state.sk]||(r=>r))(state.root);
-  const FN_SIZE=52, FN_LINE_H=70, FN_MAX_W=IG_W-LP-SAFE;
+  const FN_SIZE=42, FN_LINE_H=FN_SIZE+12, FN_MAX_W=IG_W-LP-SAFE;
   ctx.font=`400 ${FN_SIZE}px ${FONT}`;
   const words=footnoteText.split(' '); let fnLines=1, testLine='';
   for(const w of words){ const test=testLine?testLine+' '+w:w; if(ctx.measureText(test).width>FN_MAX_W&&testLine){fnLines++;testLine=w;}else testLine=test; }
@@ -1068,13 +1029,181 @@ async function buildProofSheet(canvases, state) {
   });
 
   ctx.fillStyle='#AAAAAA'; ctx.font=`400 16px ui-sans-serif,system-ui,sans-serif`; ctx.textAlign='center';
-  ctx.fillText('FretTracks Scale Explorer  ·  1080×1920px  ·  proof sheet', totalW/2, totalH-MARGIN-8);
+  ctx.fillText('FretTracks Scale Explorer  ·  1080×1440px  ·  proof sheet', totalW/2, totalH-MARGIN-8);
   return c;
 }
 
 // ============================================================
-// POPUP & EXPORT CONTROLS
+// SERIES OVERLAY — chapter card for panels 1-3
 // ============================================================
+const PANEL_LABELS = ['The Tab', 'The Notes', 'The Chords', 'The Sound'];
+
+function drawSeriesOverlay(ctx, panelNum, state, tone, alpha) {
+  if(alpha <= 0) return;
+  ctx.save();
+  ctx.globalAlpha = alpha;
+
+  // Full canvas dim
+  ctx.fillStyle = 'rgba(0,0,0,0.70)';
+  ctx.fillRect(0, 0, IG_W, IG_H);
+
+  // Card dimensions
+  const cardW = 860, cardH = 480;
+  const cardX = (IG_W - cardW) / 2;
+  const cardY = (IG_H - cardH) / 2;
+  const cardR = 24;
+  const borderColor = (IG_BORDERS[tone] || IG_BORDERS.light).color;
+
+  // Card background
+  ctx.globalAlpha = alpha;
+  roundRect(ctx, cardX, cardY, cardW, cardH, cardR);
+  ctx.fillStyle = '#0d3060';
+  ctx.fill();
+
+  // Card border
+  roundRect(ctx, cardX, cardY, cardW, cardH, cardR);
+  ctx.strokeStyle = borderColor;
+  ctx.lineWidth = 6;
+  ctx.stroke();
+
+  // Title line: "A Dorian – Part 2 of 4"
+  const vidScaleName = VIDEO_SCALE_NAME[state.sk] || state.displayName;
+  const titleText = `${state.root} ${vidScaleName} \u2013 Part ${panelNum} of 4`;
+  ctx.font = `bold 52px ${FONT}`;
+  ctx.fillStyle = '#FFFFFF';
+  ctx.textAlign = 'left';
+  ctx.fillText(titleText, cardX + 48, cardY + 80);
+
+  // Divider
+  ctx.strokeStyle = borderColor;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(cardX + 48, cardY + 104);
+  ctx.lineTo(cardX + cardW - 48, cardY + 104);
+  ctx.stroke();
+
+  // Bullet list
+  const items = PANEL_LABELS;
+  const listTop = cardY + 148;
+  const lineH = 72;
+  const dotX = cardX + 72;
+  const textX = cardX + 108;
+
+  items.forEach((label, i) => {
+    const isCurrent = (i + 1) === panelNum;
+    const y = listTop + i * lineH;
+
+    // Bullet dot
+    ctx.beginPath();
+    ctx.arc(dotX, y - 10, isCurrent ? 10 : 7, 0, Math.PI * 2);
+    ctx.fillStyle = isCurrent ? borderColor : 'rgba(255,255,255,0.40)';
+    ctx.fill();
+
+    // Label
+    ctx.font = isCurrent ? `bold 52px ${FONT}` : `400 48px ${FONT}`;
+    ctx.fillStyle = isCurrent ? '#FFFFFF' : 'rgba(255,255,255,0.45)';
+    ctx.textAlign = 'left';
+    ctx.fillText(label, textX, y);
+  });
+
+  ctx.globalAlpha = 1;
+  ctx.restore();
+}
+
+// ============================================================
+// FFMPEG + VIDEO RECORDING
+// ============================================================
+let _ffmpeg = null;
+
+async function getFFmpeg() {
+  if (_ffmpeg) return _ffmpeg;
+  const { createFFmpeg } = FFmpeg;
+  _ffmpeg = createFFmpeg({
+    log: false,
+    corePath: 'https://unpkg.com/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js',
+  });
+  await _ffmpeg.load();
+  return _ffmpeg;
+}
+
+function setExportStatus(msg) {
+  const btn = document.getElementById('btnFullSet');
+  if (btn) btn.textContent = msg || '🎬 Download Full Set';
+}
+
+async function recordPanelAsMP4(staticCanvas, panelNum, state, tone, filename) {
+  const FPS = 30;
+  const DURATION = 5; // seconds
+  const FADE_START = 1.0;
+  const HOLD_START = 1.5;
+  const FADE_OUT_START = 3.5;
+  const FADE_OUT_END = 4.0;
+  const TOTAL_FRAMES = FPS * DURATION;
+
+  // Working canvas
+  const work = document.createElement('canvas');
+  work.width = IG_W; work.height = IG_H;
+  const wctx = work.getContext('2d');
+
+  // Render all frames
+  const frameBlobs = [];
+  for (let f = 0; f < TOTAL_FRAMES; f++) {
+    const t = f / FPS;
+    let alpha = 0;
+    if (t >= FADE_START && t < HOLD_START)
+      alpha = (t - FADE_START) / (HOLD_START - FADE_START);
+    else if (t >= HOLD_START && t < FADE_OUT_START)
+      alpha = 1;
+    else if (t >= FADE_OUT_START && t < FADE_OUT_END)
+      alpha = 1 - (t - FADE_OUT_START) / (FADE_OUT_END - FADE_OUT_START);
+
+    wctx.clearRect(0, 0, IG_W, IG_H);
+    wctx.drawImage(staticCanvas, 0, 0);
+    if (alpha > 0) drawSeriesOverlay(wctx, panelNum, state, tone, alpha);
+
+    const blob = await new Promise(res => work.toBlob(res, 'image/png'));
+    frameBlobs.push(blob);
+  }
+
+  setExportStatus(`⚙️ Converting panel ${panelNum} to MP4…`);
+  const ffmpeg = await getFFmpeg();
+  const { fetchFile } = FFmpeg;
+
+  // Write frames
+  for (let i = 0; i < frameBlobs.length; i++) {
+    const padded = String(i).padStart(4, '0');
+    ffmpeg.FS('writeFile', `frame${padded}.png`, await fetchFile(frameBlobs[i]));
+  }
+
+  // Encode
+  await ffmpeg.run(
+    '-framerate', String(FPS),
+    '-i', 'frame%04d.png',
+    '-c:v', 'libx264',
+    '-preset', 'fast',
+    '-pix_fmt', 'yuv420p',
+    '-movflags', '+faststart',
+    'output.mp4'
+  );
+
+  const data = ffmpeg.FS('readFile', 'output.mp4');
+
+  // Cleanup
+  for (let i = 0; i < frameBlobs.length; i++) {
+    ffmpeg.FS('unlink', `frame${String(i).padStart(4,'0')}.png`);
+  }
+  ffmpeg.FS('unlink', 'output.mp4');
+
+  const mp4Blob = new Blob([data.buffer], { type: 'video/mp4' });
+  const url = URL.createObjectURL(mp4Blob);
+  const link = document.createElement('a');
+  link.download = filename.replace('.png', '.mp4');
+  link.href = url;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+
 function setTone(tone){
   _igTone=tone;
   ['light','med','dark'].forEach(t=>{
@@ -1087,7 +1216,6 @@ function showExportPopup(){
 }
 function hideExportPopup(){ document.getElementById('igPopup').classList.remove('visible'); }
 
-
 async function exportImage(type){
   const s=_exportState, tone=_igTone;
   const c1=await buildFretboardImage(s,tone);
@@ -1095,23 +1223,34 @@ async function exportImage(type){
   const c3=await buildChordsImage(s,tone);
   const c4=await buildVideoImage(s,tone);
 
-  if(type==='fretboard') downloadCanvas(c1, buildFilename(s.root,s.sk,'fretboard'));
-  if(type==='scale')     downloadCanvas(c2, buildFilename(s.root,s.sk,'scale'));
-  if(type==='chords')    downloadCanvas(c3, buildFilename(s.root,s.sk,'chords'));
-  if(type==='video')     downloadCanvas(c4, buildFilename(s.root,s.sk,'video'));
-
-  if(type==='all'){
-    downloadCanvas(c1, buildFilename(s.root,s.sk,'fretboard'));
-    downloadCanvas(c2, buildFilename(s.root,s.sk,'scale'));
-    downloadCanvas(c3, buildFilename(s.root,s.sk,'chords'));
-    downloadCanvas(c4, buildFilename(s.root,s.sk,'video'));
-    hideExportPopup();
-  }
-
   if(type==='proof'){
     const proof=await buildProofSheet([c1,c2,c3,c4],s);
     downloadCanvas(proof, buildFilename(s.root,s.sk,'proof'));
     hideExportPopup();
+  }
+
+  if(type==='fullset'){
+    hideExportPopup();
+    try {
+      // Proof sheet
+      setExportStatus('🗂 Building proof sheet…');
+      const proof=await buildProofSheet([c1,c2,c3,c4],s);
+      downloadCanvas(proof, buildFilename(s.root,s.sk,'proof'));
+
+      // Panel 4 static PNG
+      downloadCanvas(c4, buildFilename(s.root,s.sk,'video'));
+
+      // Panels 1-3 as MP4
+      setExportStatus('⚙️ Loading video encoder…');
+      await recordPanelAsMP4(c1, 1, s, tone, buildFilename(s.root,s.sk,'fretboard'));
+      await recordPanelAsMP4(c2, 2, s, tone, buildFilename(s.root,s.sk,'scale'));
+      await recordPanelAsMP4(c3, 3, s, tone, buildFilename(s.root,s.sk,'chords'));
+    } catch(err) {
+      console.error('Full set export error:', err);
+      alert('Export failed: ' + err.message);
+    } finally {
+      setExportStatus('🎬 Download Full Set');
+    }
   }
 }
 
@@ -1122,5 +1261,6 @@ document.addEventListener('keydown',e=>{
 window.addEventListener('load',()=>quick('A','minor_pentatonic'));
 
 </script>
+<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
 </body>
 </html>
