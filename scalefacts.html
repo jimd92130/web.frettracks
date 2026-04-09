@@ -876,12 +876,12 @@ function buildScaleImage(state,tone){
   ctx.fillText('NOTE',colNote,tableTop+46);
   drawHRule(ctx,tableTop+64);
   state.noteNames.forEach((note,i)=>{
-    const rowY=tableTop+64+i*rowH, textY=rowY+rowH*0.72;
+    const rowY=tableTop+64+i*rowH, textY=rowY+rowH*0.72, textY2=rowY+rowH*0.82;
     if(i%2===0){ ctx.save(); ctx.fillStyle='rgba(255,255,255,0.07)'; ctx.fillRect(SAFE,rowY,IG_W-SAFE*2,rowH); ctx.restore(); }
     if(i>0){ ctx.save(); ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(SAFE,rowY); ctx.lineTo(IG_W-SAFE,rowY); ctx.stroke(); ctx.restore(); }
     setFont(ctx,T.DATA_MD); ctx.textAlign='left'; ctx.fillText(state.scale.degs[i],colDeg,textY);
-    ctx.fillStyle='#FFFFFF'; ctx.font=`bold ${T.DATA_LG.size}px ${FONT}`; ctx.textAlign='left'; ctx.fillText(note,colNote,textY);
-    if(i===0){ ctx.save(); ctx.strokeStyle='rgba(255,255,255,0.55)'; ctx.lineWidth=4; const tw=ctx.measureText(note).width; ctx.beginPath(); ctx.moveTo(colNote,textY+10); ctx.lineTo(colNote+tw,textY+10); ctx.stroke(); ctx.restore(); }
+    ctx.fillStyle='#FFFFFF'; ctx.font=`bold ${T.DATA_LG.size}px ${FONT}`; ctx.textAlign='left'; ctx.fillText(note,colNote,textY2);
+    if(i===0){ ctx.save(); ctx.strokeStyle='rgba(255,255,255,0.55)'; ctx.lineWidth=4; const tw=ctx.measureText(note).width; ctx.beginPath(); ctx.moveTo(colNote,textY2+10); ctx.lineTo(colNote+tw,textY2+10); ctx.stroke(); ctx.restore(); }
   });
   // Footnote — only if scale has flat or sharp degrees
   if(hasFlats || hasSharps){
@@ -927,11 +927,11 @@ function buildChordsImage(state,tone){
   ctx.fillText('ROMAN NUMERALS',colNash,tableTop+46); ctx.fillText('CHORD',colChord,tableTop+46);
   drawHRule(ctx,tableTop+64);
   chords.forEach((ch,i)=>{
-    const rowY=tableTop+64+i*rowH, textY=rowY+rowH*0.72;
+    const rowY=tableTop+64+i*rowH, textY=rowY+rowH*0.72, textY2=rowY+rowH*0.82;
     if(i%2===0){ ctx.save(); ctx.fillStyle='rgba(255,255,255,0.07)'; ctx.fillRect(SAFE,rowY,IG_W-SAFE*2,rowH); ctx.restore(); }
     if(i>0){ ctx.save(); ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(SAFE,rowY); ctx.lineTo(IG_W-SAFE,rowY); ctx.stroke(); ctx.restore(); }
     ctx.fillStyle='rgba(255,255,255,0.65)'; ctx.font=`600 ${CHORD_MD}px ${FONT}`; ctx.textAlign='left'; ctx.fillText(ch.roman,colNash,textY);
-    ctx.fillStyle='#FFFFFF'; ctx.font=`bold ${CHORD_LG}px ${FONT}`; ctx.fillText(ch.symbol,colChord,textY);
+    ctx.fillStyle='#FFFFFF'; ctx.font=`bold ${CHORD_LG}px ${FONT}`; ctx.fillText(ch.symbol,colChord,textY2);
   });
   const fnY=tableBot+20;
   drawHRule(ctx,fnY-16); ctx.fillStyle='rgba(255,255,255,0.80)'; ctx.font=`400 ${FN_SIZE}px ${FONT}`; ctx.textAlign='left';
