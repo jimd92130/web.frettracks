@@ -354,7 +354,7 @@ const SHORT_INSIGHTS = {
 };
 
 const FULL_INSIGHTS = {
-  ionian:'This is the reference scale. When someone says a song is \'in C,\' they mean C major. Learn this and you have a strong foundation for understanding other scales.',
+  ionian:(r)=>`When someone says a song is 'in ${r},' they mean ${r} major. Learn this and you have a strong foundation for understanding other scales.`,
   dorian:'Dorian is a minor scale with the 6th note raised. That one note adds a brighter, more sophisticated edge. It\'s the sound of jazz, funk and blues-rock.',
   phrygian:'Phrygian is a minor scale with the 2nd note lowered. That one note creates a dark, exotic sound heard in flamenco and metal. Instantly recognizable.',
   lydian:'Lydian is a major scale with the 4th note raised. That one note creates a floating, cinematic feel. Play it over a major chord and you\'ll hear it immediately.',
@@ -612,10 +612,10 @@ function quick(root,sk){
 //   y=225–1215: SAFE ZONE — all critical content here
 //   y=1215–1395: bottom bleed
 //   y=1395–1440: bleed (cropped when grid shows 1350)
-const IG_W=1080, IG_H=1440;
+const IG_W=1080, IG_H=1920;
 const SCALE_NAME_Y = 88;   // scale name baseline — visible in 1350 crop, hidden in square
 const CONTENT_TOP  = 225;  // safe zone top
-const CONTENT_BOT  = 1215; // safe zone bottom
+const CONTENT_BOT  = 1580; // safe zone bottom
 const FONT='ui-sans-serif,system-ui,sans-serif';
 
 const T={
@@ -690,7 +690,7 @@ function drawHRule(ctx,y){
 }
 
 function drawWatermark(ctx){
-  const text = 'Try FretTracks free. Link in Bio.';
+  const text = 'Learn Lead Guitar. Try FretTracks Free. Link in Bio.';
   const maxW = IG_W - 100; // 50px padding each side
   ctx.save();
   let sz = 52;
@@ -698,7 +698,7 @@ function drawWatermark(ctx){
   while(ctx.measureText(text).width > maxW && sz > 28){ sz--; ctx.font = `bold ${sz}px ${FONT}`; }
   ctx.fillStyle = 'rgba(255,255,255,0.82)';
   ctx.textAlign = 'center';
-  ctx.fillText(text, IG_W/2, IG_H - 36); // very bottom, 36px padding
+  ctx.fillText(text, IG_W/2, IG_H - 280); // clear Instagram hashtag overlay zone
   ctx.restore();
 }
 
@@ -792,7 +792,8 @@ function buildFretboardImage(state,tone){
       const maxCardW=IG_W-SAFE*2;
 
       // Measure insight lines at actual draw width
-      const fullInsight=FULL_INSIGHTS[state.sk]||'';
+      const rawInsight=FULL_INSIGHTS[state.sk]||'';
+      const fullInsight=typeof rawInsight==='function' ? rawInsight(state.root) : rawInsight;
       const FONT_SIZE=52, LINE_H=70;
       const insightMaxW=IG_W-LP-SAFE;
       ctx.font=`italic 400 ${FONT_SIZE}px ${FONT}`;
@@ -1029,7 +1030,7 @@ async function buildProofSheet(canvases, state) {
   });
 
   ctx.fillStyle='#AAAAAA'; ctx.font=`400 16px ui-sans-serif,system-ui,sans-serif`; ctx.textAlign='center';
-  ctx.fillText('FretTracks Scale Explorer  ·  1080×1440px  ·  proof sheet', totalW/2, totalH-MARGIN-8);
+  ctx.fillText('FretTracks Scale Explorer  ·  1080×1920px  ·  proof sheet', totalW/2, totalH-MARGIN-8);
   return c;
 }
 
