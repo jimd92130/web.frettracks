@@ -876,7 +876,7 @@ function buildScaleImage(state,tone){
   ctx.fillText('NOTE',colNote,tableTop+46);
   drawHRule(ctx,tableTop+64);
   state.noteNames.forEach((note,i)=>{
-    const rowY=tableTop+64+i*rowH, textY=rowY+rowH*0.62;
+    const rowY=tableTop+64+i*rowH, textY=rowY+rowH*0.72;
     if(i%2===0){ ctx.save(); ctx.fillStyle='rgba(255,255,255,0.07)'; ctx.fillRect(SAFE,rowY,IG_W-SAFE*2,rowH); ctx.restore(); }
     if(i>0){ ctx.save(); ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(SAFE,rowY); ctx.lineTo(IG_W-SAFE,rowY); ctx.stroke(); ctx.restore(); }
     setFont(ctx,T.DATA_MD); ctx.textAlign='left'; ctx.fillText(state.scale.degs[i],colDeg,textY);
@@ -927,7 +927,7 @@ function buildChordsImage(state,tone){
   ctx.fillText('ROMAN NUMERALS',colNash,tableTop+46); ctx.fillText('CHORD',colChord,tableTop+46);
   drawHRule(ctx,tableTop+64);
   chords.forEach((ch,i)=>{
-    const rowY=tableTop+64+i*rowH, textY=rowY+rowH*0.62;
+    const rowY=tableTop+64+i*rowH, textY=rowY+rowH*0.72;
     if(i%2===0){ ctx.save(); ctx.fillStyle='rgba(255,255,255,0.07)'; ctx.fillRect(SAFE,rowY,IG_W-SAFE*2,rowH); ctx.restore(); }
     if(i>0){ ctx.save(); ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(SAFE,rowY); ctx.lineTo(IG_W-SAFE,rowY); ctx.stroke(); ctx.restore(); }
     ctx.fillStyle='rgba(255,255,255,0.65)'; ctx.font=`600 ${CHORD_MD}px ${FONT}`; ctx.textAlign='left'; ctx.fillText(ch.roman,colNash,textY);
