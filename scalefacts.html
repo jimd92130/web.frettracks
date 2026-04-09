@@ -1047,8 +1047,8 @@ function drawSeriesOverlay(ctx, panelNum, state, tone, alpha) {
   ctx.fillStyle = 'rgba(0,0,0,0.70)';
   ctx.fillRect(0, 0, IG_W, IG_H);
 
-  // Card dimensions
-  const cardW = 860, cardH = 480;
+  // Card dimensions — taller to fit footer line
+  const cardW = 860, cardH = 560;
   const cardX = (IG_W - cardW) / 2;
   const cardY = (IG_H - cardH) / 2;
   const cardR = 24;
@@ -1074,7 +1074,7 @@ function drawSeriesOverlay(ctx, panelNum, state, tone, alpha) {
   ctx.textAlign = 'left';
   ctx.fillText(titleText, cardX + 48, cardY + 80);
 
-  // Divider
+  // Divider under title
   ctx.strokeStyle = borderColor;
   ctx.lineWidth = 2;
   ctx.beginPath();
@@ -1106,6 +1106,22 @@ function drawSeriesOverlay(ctx, panelNum, state, tone, alpha) {
     ctx.fillText(label, textX, y);
   });
 
+  // Divider above footer
+  const footerDivY = cardY + cardH - 90;
+  ctx.strokeStyle = `rgba(255,255,255,0.20)`;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(cardX + 48, footerDivY);
+  ctx.lineTo(cardX + cardW - 48, footerDivY);
+  ctx.stroke();
+
+  // Footer line
+  ctx.font = `italic 400 38px ${FONT}`;
+  // Convert border hex color to rgba at 85% opacity
+  ctx.fillStyle = borderColor + 'D9'; // D9 = ~85% in hex
+  ctx.textAlign = 'center';
+  ctx.fillText('See the full series on our profile', cardX + cardW / 2, footerDivY + 52);
+
   ctx.globalAlpha = 1;
   ctx.restore();
 }
@@ -1134,10 +1150,10 @@ function setExportStatus(msg) {
 async function recordPanelAsMP4(staticCanvas, panelNum, state, tone, filename) {
   const FPS = 30;
   const DURATION = 5; // seconds
-  const FADE_START = 1.0;
-  const HOLD_START = 1.5;
-  const FADE_OUT_START = 3.5;
-  const FADE_OUT_END = 4.0;
+  const FADE_START = 0.5;
+  const HOLD_START = 1.0;
+  const FADE_OUT_START = 4.0;
+  const FADE_OUT_END = 4.5;
   const TOTAL_FRAMES = FPS * DURATION;
 
   // Working canvas
