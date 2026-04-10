@@ -246,11 +246,17 @@ tbody tr:hover{background:var(--bg);}
       <button class="ig-tone-btn" id="toneDark" onclick="setTone('dark')">
         <span class="ig-tone-swatch" style="background:#f0a030"></span>Gold Border
       </button>
+      <button class="ig-tone-btn" id="toneCyan" onclick="setTone('cyan')">
+        <span class="ig-tone-swatch" style="background:#00bcd4"></span>Cyan Border
+      </button>
     </div>
     <div class="ig-modal-body" style="padding-top:20px;">
       <button class="ig-all-btn" id="btnFullSet" onclick="exportImage('fullset')" style="margin:0 0 8px 0;width:100%;background:#1a7a4a;font-size:16px;padding:16px;">🎬 Download Full Set</button>
       <p style="text-align:center;font-size:12px;color:var(--muted);margin:0 0 14px;">Proof Sheet · Videos 1–3 (MP4) · Panel 4 Static (PNG)</p>
-      <button class="ig-all-btn" id="btnProof" onclick="exportImage('proof')" style="margin:0;width:100%;background:#444e60;">🗂 Download Proof Sheet Only</button>
+      <button class="ig-all-btn" id="btnProof" onclick="exportImage('proof')" style="margin:0 0 8px 0;width:100%;background:#444e60;">🗂 Download Proof Sheet Only</button>
+      <button class="ig-all-btn" id="btnBatch" onclick="triggerBatchProcess()" style="margin:0;width:100%;background:#7b3fa0;">📋 Process from List</button>
+      <input type="file" id="batchFileInput" accept=".xlsx" style="display:none" onchange="handleBatchFile(event)">
+      <div id="batchStatus" style="display:none;margin-top:14px;padding:12px 14px;background:var(--bg);border-radius:10px;font-size:13px;line-height:1.6;color:var(--ink);max-height:200px;overflow-y:auto;"></div>
     </div>
     <p class="ig-all-note">Post as Reels in reverse order (4→3→2→1) for correct grid sequence</p>
   </div>
@@ -383,6 +389,7 @@ const IG_BORDERS = {
   light: { color:'#4A90E2', width:16 },
   med:   { color:'#5ddb9e', width:16 },
   dark:  { color:'#f0a030', width:16 },
+  cyan:  { color:'#00bcd4', width:16 },
 };
 const ACCENT_BAND_H = 50;
 const SAFE = 36;
@@ -1128,8 +1135,173 @@ function drawSeriesOverlay(ctx, panelNum, state, tone, alpha) {
 }
 
 // ============================================================
-// FFMPEG + VIDEO RECORDING
+// BATCH PROCESSING FROM EXCEL FILE
 // ============================================================
+
+const VALID_KEYS = new Set(['C','C#','Db','D','Eb','E','F','F#','Gb','G','Ab','A','Bb','B']);
+
+const SCALE_NAME_MAP = {
+  'major':'ionian', 'ionian':'ionian',
+  'minor':'aeolian', 'aeolian':'aeolian',
+  'dorian':'dorian',
+  'phrygian':'phrygian',
+  'lydian':'lydian',
+  'mixolydian':'mixolydian',
+  'locrian':'locrian',
+  'major pentatonic':'major_pentatonic', 'major_pentatonic':'major_pentatonic',
+  'minor pentatonic':'minor_pentatonic', 'minor_pentatonic':'minor_pentatonic',
+  'blues':'blues',
+};
+
+const BORDER_NAME_MAP = {
+  'blue':'light', 'green':'med', 'gold':'dark', 'cyan':'cyan',
+};
+
+function triggerBatchProcess(){
+  document.getElementById('batchFileInput').click();
+}
+
+function setBatchStatus(html, color){
+  const el = document.getElementById('batchStatus');
+  el.style.display = 'block';
+  el.style.color = color || 'var(--ink)';
+  el.innerHTML = html;
+}
+
+async function handleBatchFile(event){
+  const file = event.target.files[0];
+  event.target.value = '';
+  if(!file) return;
+
+  setBatchStatus('Reading file…');
+
+  let rows;
+  try {
+    const data = await file.arrayBuffer();
+    const wb = XLSX.read(data, { type:'array' });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const raw = XLSX.utils.sheet_to_json(ws, { defval:'' });
+    if(!raw || raw.length === 0){
+      setBatchStatus('❌ File is empty or could not be read.', '#a02020');
+      return;
+    }
+
+    // Normalize headers (case insensitive)
+    rows = raw.map(r => {
+      const normalized = {};
+      Object.keys(r).forEach(k => { normalized[k.toLowerCase().trim()] = String(r[k]).trim(); });
+      return normalized;
+    });
+  } catch(err) {
+    setBatchStatus('❌ Could not read file: ' + err.message, '#a02020');
+    return;
+  }
+
+  // Validate all rows first
+  const errors = [];
+  const parsed = [];
+
+  rows.forEach((r, i) => {
+    const rowNum = i + 2; // +2 because row 1 is header
+    const keyRaw = r['key'] || '';
+    const scaleRaw = r['scale'] || '';
+    const borderRaw = r['border'] || '';
+
+    const keyVal = keyRaw.charAt(0).toUpperCase() + keyRaw.slice(1);
+    const scaleKey = SCALE_NAME_MAP[scaleRaw.toLowerCase()];
+    const toneKey = BORDER_NAME_MAP[borderRaw.toLowerCase()];
+
+    if(!keyRaw) errors.push(`Row ${rowNum}: Key is missing`);
+    else if(!VALID_KEYS.has(keyVal)) errors.push(`Row ${rowNum}: '${keyRaw}' is not a valid key`);
+
+    if(!scaleRaw) errors.push(`Row ${rowNum}: Scale is missing`);
+    else if(!scaleKey) errors.push(`Row ${rowNum}: '${scaleRaw}' is not a valid scale`);
+
+    if(!borderRaw) errors.push(`Row ${rowNum}: Border is missing`);
+    else if(!toneKey) errors.push(`Row ${rowNum}: '${borderRaw}' is not a valid border color (use Blue, Green, Gold, or Cyan)`);
+
+    if(VALID_KEYS.has(keyVal) && scaleKey && toneKey){
+      parsed.push({ root: keyVal, sk: scaleKey, tone: toneKey, label: `${keyVal} ${DISPLAY[scaleKey]||scaleKey}` });
+    }
+  });
+
+  if(errors.length > 0){
+    setBatchStatus('<strong>❌ Validation failed — fix these errors and try again:</strong><br><br>' + errors.map(e=>`• ${e}`).join('<br>'), '#a02020');
+    return;
+  }
+
+  // All valid — start processing
+  setBatchStatus(`✅ Validation passed. Starting batch export of ${parsed.length} scales…`);
+  await new Promise(r => setTimeout(r, 300));
+
+  let filesExported = 0;
+  try {
+    for(let i = 0; i < parsed.length; i++){
+      const { root, sk, tone, label } = parsed[i];
+      setBatchStatus(`⚙️ Processing row ${i+1} of ${parsed.length} — ${label} (${tone})`);
+
+      // Build export state for this scale
+      const scale = SCALES[sk];
+      const dn = DISPLAY[sk] || sk;
+      const noteNames = scale.diatonic ? buildDiatonicNotes(root, scale.ivs) : spellChromatic(root, scale.ivs);
+      const seqLabels = [noteNames[0]];
+      for(let j=1;j<noteNames.length;j++) seqLabels.push(noteNames[j]);
+      seqLabels.push(noteNames[0]);
+      for(let j=1;j<noteNames.length;j++) seqLabels.push(noteNames[j]);
+      seqLabels.push(noteNames[0]);
+
+      // Build chords data
+      let chordsData = null;
+      const chordFootnoteText = (CHORD_FOOTNOTES[sk]||(r=>r))(root);
+      if(scale.chords){
+        const qs = QUALITIES[scale.chordKey||sk];
+        if(qs) chordsData = { type:'diatonic', chords: noteNames.map((cr,idx)=>({roman:toRoman(qs[idx],idx),symbol:toSymbol(cr,qs[idx]),q:qs[idx]})), footnote:chordFootnoteText };
+      } else {
+        const pc = buildParentChords(root, sk);
+        if(pc) chordsData = { type:'parent', parentKey:pc.parentKey, parentDisplayName:pc.parentDisplayName, chords:pc.chords, footnote:chordFootnoteText };
+      }
+
+      // Temporarily set the fretboard SVG by generating it
+      document.getElementById('fretboardContainer').innerHTML = renderFretboard(root, scale, seqLabels, sk);
+
+      const s = { root, sk, scale, noteNames, displayName:dn, formula:scale.formula||'', chordsData };
+
+      // Build canvases
+      const c1 = await buildFretboardImage(s, tone);
+      const c2 = await buildScaleImage(s, tone);
+      const c3 = await buildChordsImage(s, tone);
+      const c4 = await buildVideoImage(s, tone);
+
+      // Proof sheet
+      setBatchStatus(`📄 Row ${i+1} of ${parsed.length} — ${label}: building proof sheet…`);
+      const proof = await buildProofSheet([c1,c2,c3,c4], s);
+      downloadCanvas(proof, buildFilename(root, sk, 'proof'));
+      filesExported++;
+
+      // Panel 4 PNG
+      downloadCanvas(c4, buildFilename(root, sk, 'video'));
+      filesExported++;
+
+      // Panels 1-3 MP4
+      setBatchStatus(`🎬 Row ${i+1} of ${parsed.length} — ${label}: encoding video 1 of 3…`);
+      await recordPanelAsMP4(c1, 1, s, tone, buildFilename(root, sk, 'fretboard'));
+      filesExported++;
+      setBatchStatus(`🎬 Row ${i+1} of ${parsed.length} — ${label}: encoding video 2 of 3…`);
+      await recordPanelAsMP4(c2, 2, s, tone, buildFilename(root, sk, 'scale'));
+      filesExported++;
+      setBatchStatus(`🎬 Row ${i+1} of ${parsed.length} — ${label}: encoding video 3 of 3…`);
+      await recordPanelAsMP4(c3, 3, s, tone, buildFilename(root, sk, 'chords'));
+      filesExported++;
+    }
+
+    setBatchStatus(`✅ Complete! ${parsed.length} scales processed · ${filesExported} files exported.`, '#1a7a4a');
+
+  } catch(err) {
+    setBatchStatus(`❌ Error during processing: ${err.message}`, '#a02020');
+  }
+}
+
+
 let _ffmpeg = null;
 
 async function getFFmpeg() {
@@ -1150,7 +1322,7 @@ function setExportStatus(msg) {
 
 async function recordPanelAsMP4(staticCanvas, panelNum, state, tone, filename) {
   const FPS = 30;
-  const DURATION = 5; // seconds
+  const DURATION = 10; // seconds
   const FADE_START = 0.5;
   const HOLD_START = 1.0;
   const FADE_OUT_START = 4.0;
@@ -1223,8 +1395,9 @@ async function recordPanelAsMP4(staticCanvas, panelNum, state, tone, filename) {
 
 function setTone(tone){
   _igTone=tone;
-  ['light','med','dark'].forEach(t=>{
-    document.getElementById('tone'+t.charAt(0).toUpperCase()+t.slice(1)).classList.toggle('active',t===tone);
+  ['light','med','dark','cyan'].forEach(t=>{
+    const el=document.getElementById('tone'+t.charAt(0).toUpperCase()+t.slice(1));
+    if(el) el.classList.toggle('active',t===tone);
   });
 }
 function showExportPopup(){
@@ -1278,6 +1451,7 @@ document.addEventListener('keydown',e=>{
 window.addEventListener('load',()=>quick('A','minor_pentatonic'));
 
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
 </body>
 </html>
