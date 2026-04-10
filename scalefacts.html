@@ -256,6 +256,8 @@ tbody tr:hover{background:var(--bg);}
       <button class="ig-all-btn" id="btnProof" onclick="exportImage('proof')" style="margin:0 0 8px 0;width:100%;background:#444e60;">🗂 Download Proof Sheet Only</button>
       <button class="ig-all-btn" id="btnBatch" onclick="triggerBatchProcess()" style="margin:0;width:100%;background:#7b3fa0;">📋 Process from List</button>
       <input type="file" id="batchFileInput" accept=".xlsx" style="display:none" onchange="handleBatchFile(event)">
+      <input type="file" id="singleVideoInput" accept="video/mp4,video/*" style="display:none" onchange="handleSingleVideo(event)">
+      <input type="file" id="batchVideoInput" accept="video/mp4,video/*" multiple style="display:none" onchange="handleBatchVideos(event)">
       <div id="batchStatus" style="display:none;margin-top:14px;padding:12px 14px;background:var(--bg);border-radius:10px;font-size:13px;line-height:1.6;color:var(--ink);max-height:200px;overflow-y:auto;"></div>
     </div>
     <p class="ig-all-note">Post as Reels in reverse order (4→3→2→1) for correct grid sequence</p>
@@ -268,6 +270,8 @@ tbody tr:hover{background:var(--bg);}
 // ============================================================
 let _exportState = null;
 let _igTone = 'light';
+let _singleVideoFile = null;   // File object for single-mode Panel 4
+let _batchVideoMap = {};       // filename → File object for batch mode
 
 // ============================================================
 // MUSIC THEORY DATA
@@ -1135,8 +1139,179 @@ function drawSeriesOverlay(ctx, panelNum, state, tone, alpha) {
 }
 
 // ============================================================
-// BATCH PROCESSING FROM EXCEL FILE
+// VIDEO COMPOSITE — Panel 4
 // ============================================================
+
+// Video inset layout constants
+const VID_INSET_X = 40;
+const VID_INSET_W = IG_W - 80;
+const VID_INSET_BORDER = 7;
+const VID_INSET_RADIUS = 16;
+
+function validateVideoAspect(videoEl) {
+  const w = videoEl.videoWidth, h = videoEl.videoHeight;
+  if(h === 0) return false;
+  const ratio = w / h;
+  return ratio >= 1.7 && ratio <= 1.85; // 16:9 = 1.777
+}
+
+function loadVideoElement(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const vid = document.createElement('video');
+    vid.src = url;
+    vid.muted = false;
+    vid.preload = 'auto';
+    vid.onloadedmetadata = () => resolve(vid);
+    vid.onerror = () => reject(new Error(`Could not load video: ${file.name}`));
+  });
+}
+
+async function buildVideoComposite(backgroundCanvas, videoFile, tone, filename) {
+  setExportStatus('⚙️ Loading backing video…');
+
+  const vid = await loadVideoElement(videoFile);
+
+  // Validate 16:9
+  if(!validateVideoAspect(vid)) {
+    URL.revokeObjectURL(vid.src);
+    throw new Error(`Video '${videoFile.name}' is not 16:9 landscape. Please provide a horizontally-oriented 16:9 video (e.g. 1920×1080 or 1280×720).`);
+  }
+
+  const vidW = vid.videoWidth, vidH = vid.videoHeight;
+  const duration = Math.min(vid.duration, 25); // cap at 25 seconds
+  const FPS = 30;
+  const totalFrames = Math.round(duration * FPS);
+
+  // Inset dimensions
+  const insetW = VID_INSET_W;
+  const insetH = Math.round(insetW * vidH / vidW);
+  const insetX = VID_INSET_X;
+
+  // Vertically center inset in open space (below hrule ~y=560, above watermark ~y=1580)
+  const openTop = 560, openBot = 1560;
+  const insetY = Math.round((openTop + openBot - insetH) / 2);
+
+  const borderColor = (IG_BORDERS[tone] || IG_BORDERS.light).color;
+
+  // Off-screen canvas for video frames
+  const work = document.createElement('canvas');
+  work.width = IG_W; work.height = IG_H;
+  const wctx = work.getContext('2d');
+
+  // Temp canvas for video frame extraction
+  const vidCanvas = document.createElement('canvas');
+  vidCanvas.width = vidW; vidCanvas.height = vidH;
+  const vctx = vidCanvas.getContext('2d');
+
+  // Write background canvas as static image to FFmpeg
+  const ffmpeg = await getFFmpeg();
+  const { fetchFile } = FFmpeg;
+
+  setExportStatus('⚙️ Rendering Panel 4 composite frames…');
+
+  const frameBlobs = [];
+  for(let f = 0; f < totalFrames; f++) {
+    const t = (f / FPS);
+
+    // Seek video to time t
+    await new Promise(res => {
+      vid.currentTime = t;
+      vid.onseeked = res;
+    });
+
+    // Draw background
+    wctx.clearRect(0, 0, IG_W, IG_H);
+    wctx.drawImage(backgroundCanvas, 0, 0);
+
+    // Draw video frame
+    vctx.drawImage(vid, 0, 0);
+    wctx.drawImage(vidCanvas, insetX, insetY, insetW, insetH);
+
+    // Draw border around video inset
+    wctx.save();
+    roundRect(wctx, insetX - VID_INSET_BORDER, insetY - VID_INSET_BORDER,
+      insetW + VID_INSET_BORDER*2, insetH + VID_INSET_BORDER*2, VID_INSET_RADIUS);
+    wctx.strokeStyle = borderColor;
+    wctx.lineWidth = VID_INSET_BORDER;
+    wctx.stroke();
+    wctx.restore();
+
+    const blob = await new Promise(res => work.toBlob(res, 'image/png'));
+    frameBlobs.push(blob);
+
+    if(f % 30 === 0) setExportStatus(`⚙️ Rendering Panel 4 frames… ${Math.round(f/totalFrames*100)}%`);
+  }
+
+  URL.revokeObjectURL(vid.src);
+
+  setExportStatus('⚙️ Encoding Panel 4 MP4 with audio…');
+
+  // Write video frames
+  for(let i = 0; i < frameBlobs.length; i++) {
+    ffmpeg.FS('writeFile', `vframe${String(i).padStart(4,'0')}.png`, await fetchFile(frameBlobs[i]));
+  }
+
+  // Write original video for audio extraction
+  ffmpeg.FS('writeFile', 'backvid.mp4', await fetchFile(videoFile));
+
+  // Encode with audio from original video — trim to 25s, fade audio last 2s
+  await ffmpeg.run(
+    '-framerate', String(FPS),
+    '-i', 'vframe%04d.png',
+    '-i', 'backvid.mp4',
+    '-map', '0:v',
+    '-map', '1:a',
+    '-t', '25',
+    '-c:v', 'libx264',
+    '-preset', 'fast',
+    '-pix_fmt', 'yuv420p',
+    '-c:a', 'aac',
+    '-af', 'afade=t=out:st=23:d=2',
+    '-movflags', '+faststart',
+    'vidout.mp4'
+  );
+
+  const data = ffmpeg.FS('readFile', 'vidout.mp4');
+
+  // Cleanup
+  for(let i = 0; i < frameBlobs.length; i++) ffmpeg.FS('unlink', `vframe${String(i).padStart(4,'0')}.png`);
+  ffmpeg.FS('unlink', 'backvid.mp4');
+  ffmpeg.FS('unlink', 'vidout.mp4');
+
+  const mp4Blob = new Blob([data.buffer], { type:'video/mp4' });
+  const url = URL.createObjectURL(mp4Blob);
+  const link = document.createElement('a');
+  link.download = filename.replace('.png', '.mp4');
+  link.href = url;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+// Single mode video picker handler
+function handleSingleVideo(event) {
+  const file = event.target.files[0];
+  event.target.value = '';
+  if(!file) return;
+  _singleVideoFile = file;
+  // Continue fullset export now that we have the video
+  _pendingFullSetExport();
+}
+
+// Batch mode video picker handler
+function handleBatchVideos(event) {
+  const files = Array.from(event.target.files);
+  event.target.value = '';
+  _batchVideoMap = {};
+  files.forEach(f => { _batchVideoMap[f.name] = f; });
+  // Continue batch after videos loaded
+  _pendingBatchExport();
+}
+
+let _pendingFullSetExport = () => {};
+let _pendingBatchExport = () => {};
+
+
 
 const VALID_KEYS = new Set(['C','C#','Db','D','Eb','E','F','F#','Gb','G','Ab','A','Bb','B']);
 
@@ -1185,8 +1360,6 @@ async function handleBatchFile(event){
       setBatchStatus('❌ File is empty or could not be read.', '#a02020');
       return;
     }
-
-    // Normalize headers (case insensitive)
     rows = raw.map(r => {
       const normalized = {};
       Object.keys(r).forEach(k => { normalized[k.toLowerCase().trim()] = String(r[k]).trim(); });
@@ -1202,10 +1375,11 @@ async function handleBatchFile(event){
   const parsed = [];
 
   rows.forEach((r, i) => {
-    const rowNum = i + 2; // +2 because row 1 is header
+    const rowNum = i + 2;
     const keyRaw = r['key'] || '';
     const scaleRaw = r['scale'] || '';
     const borderRaw = r['border'] || '';
+    const videoRaw = r['video'] || '';
 
     const keyVal = keyRaw.charAt(0).toUpperCase() + keyRaw.slice(1);
     const scaleKey = SCALE_NAME_MAP[scaleRaw.toLowerCase()];
@@ -1220,8 +1394,10 @@ async function handleBatchFile(event){
     if(!borderRaw) errors.push(`Row ${rowNum}: Border is missing`);
     else if(!toneKey) errors.push(`Row ${rowNum}: '${borderRaw}' is not a valid border color (use Blue, Green, Gold, or Cyan)`);
 
-    if(VALID_KEYS.has(keyVal) && scaleKey && toneKey){
-      parsed.push({ root: keyVal, sk: scaleKey, tone: toneKey, label: `${keyVal} ${DISPLAY[scaleKey]||scaleKey}` });
+    if(!videoRaw) errors.push(`Row ${rowNum}: Video filename is missing`);
+
+    if(VALID_KEYS.has(keyVal) && scaleKey && toneKey && videoRaw){
+      parsed.push({ root: keyVal, sk: scaleKey, tone: toneKey, videoName: videoRaw, label: `${keyVal} ${DISPLAY[scaleKey]||scaleKey}` });
     }
   });
 
@@ -1230,75 +1406,79 @@ async function handleBatchFile(event){
     return;
   }
 
-  // All valid — start processing
-  setBatchStatus(`✅ Validation passed. Starting batch export of ${parsed.length} scales…`);
-  await new Promise(r => setTimeout(r, 300));
-
-  let filesExported = 0;
-  try {
-    for(let i = 0; i < parsed.length; i++){
-      const { root, sk, tone, label } = parsed[i];
-      setBatchStatus(`⚙️ Processing row ${i+1} of ${parsed.length} — ${label} (${tone})`);
-
-      // Build export state for this scale
-      const scale = SCALES[sk];
-      const dn = DISPLAY[sk] || sk;
-      const noteNames = scale.diatonic ? buildDiatonicNotes(root, scale.ivs) : spellChromatic(root, scale.ivs);
-      const seqLabels = [noteNames[0]];
-      for(let j=1;j<noteNames.length;j++) seqLabels.push(noteNames[j]);
-      seqLabels.push(noteNames[0]);
-      for(let j=1;j<noteNames.length;j++) seqLabels.push(noteNames[j]);
-      seqLabels.push(noteNames[0]);
-
-      // Build chords data
-      let chordsData = null;
-      const chordFootnoteText = (CHORD_FOOTNOTES[sk]||(r=>r))(root);
-      if(scale.chords){
-        const qs = QUALITIES[scale.chordKey||sk];
-        if(qs) chordsData = { type:'diatonic', chords: noteNames.map((cr,idx)=>({roman:toRoman(qs[idx],idx),symbol:toSymbol(cr,qs[idx]),q:qs[idx]})), footnote:chordFootnoteText };
-      } else {
-        const pc = buildParentChords(root, sk);
-        if(pc) chordsData = { type:'parent', parentKey:pc.parentKey, parentDisplayName:pc.parentDisplayName, chords:pc.chords, footnote:chordFootnoteText };
-      }
-
-      // Temporarily set the fretboard SVG by generating it
-      document.getElementById('fretboardContainer').innerHTML = renderFretboard(root, scale, seqLabels, sk);
-
-      const s = { root, sk, scale, noteNames, displayName:dn, formula:scale.formula||'', chordsData };
-
-      // Build canvases
-      const c1 = await buildFretboardImage(s, tone);
-      const c2 = await buildScaleImage(s, tone);
-      const c3 = await buildChordsImage(s, tone);
-      const c4 = await buildVideoImage(s, tone);
-
-      // Proof sheet
-      setBatchStatus(`📄 Row ${i+1} of ${parsed.length} — ${label}: building proof sheet…`);
-      const proof = await buildProofSheet([c1,c2,c3,c4], s);
-      downloadCanvas(proof, buildFilename(root, sk, 'proof'));
-      filesExported++;
-
-      // Panel 4 PNG
-      downloadCanvas(c4, buildFilename(root, sk, 'video'));
-      filesExported++;
-
-      // Panels 1-3 MP4
-      setBatchStatus(`🎬 Row ${i+1} of ${parsed.length} — ${label}: encoding video 1 of 3…`);
-      await recordPanelAsMP4(c1, 1, s, tone, buildFilename(root, sk, 'fretboard'));
-      filesExported++;
-      setBatchStatus(`🎬 Row ${i+1} of ${parsed.length} — ${label}: encoding video 2 of 3…`);
-      await recordPanelAsMP4(c2, 2, s, tone, buildFilename(root, sk, 'scale'));
-      filesExported++;
-      setBatchStatus(`🎬 Row ${i+1} of ${parsed.length} — ${label}: encoding video 3 of 3…`);
-      await recordPanelAsMP4(c3, 3, s, tone, buildFilename(root, sk, 'chords'));
-      filesExported++;
+  // Validation passed — now prompt for video files
+  setBatchStatus(`✅ Validation passed. Now select all ${parsed.length} backing track video files…`);
+  _pendingBatchExport = async () => {
+    // Verify all video filenames are present
+    const missingVideos = parsed.filter(p => !_batchVideoMap[p.videoName]).map(p => p.videoName);
+    if(missingVideos.length > 0){
+      setBatchStatus('<strong>❌ Missing video files:</strong><br><br>' + missingVideos.map(v=>`• ${v}`).join('<br>') + '<br><br>Please re-select all video files.', '#a02020');
+      return;
     }
 
-    setBatchStatus(`✅ Complete! ${parsed.length} scales processed · ${filesExported} files exported.`, '#1a7a4a');
+    setBatchStatus(`✅ All videos loaded. Starting batch export of ${parsed.length} scales…`);
+    await new Promise(r => setTimeout(r, 300));
 
-  } catch(err) {
-    setBatchStatus(`❌ Error during processing: ${err.message}`, '#a02020');
-  }
+    let filesExported = 0;
+    try {
+      for(let i = 0; i < parsed.length; i++){
+        const { root, sk, tone, videoName, label } = parsed[i];
+        setBatchStatus(`⚙️ Processing row ${i+1} of ${parsed.length} — ${label} (${tone})`);
+
+        const scale = SCALES[sk];
+        const dn = DISPLAY[sk] || sk;
+        const noteNames = scale.diatonic ? buildDiatonicNotes(root, scale.ivs) : spellChromatic(root, scale.ivs);
+        const seqLabels = [noteNames[0]];
+        for(let j=1;j<noteNames.length;j++) seqLabels.push(noteNames[j]);
+        seqLabels.push(noteNames[0]);
+        for(let j=1;j<noteNames.length;j++) seqLabels.push(noteNames[j]);
+        seqLabels.push(noteNames[0]);
+
+        let chordsData = null;
+        const chordFootnoteText = (CHORD_FOOTNOTES[sk]||(r=>r))(root);
+        if(scale.chords){
+          const qs = QUALITIES[scale.chordKey||sk];
+          if(qs) chordsData = { type:'diatonic', chords: noteNames.map((cr,idx)=>({roman:toRoman(qs[idx],idx),symbol:toSymbol(cr,qs[idx]),q:qs[idx]})), footnote:chordFootnoteText };
+        } else {
+          const pc = buildParentChords(root, sk);
+          if(pc) chordsData = { type:'parent', parentKey:pc.parentKey, parentDisplayName:pc.parentDisplayName, chords:pc.chords, footnote:chordFootnoteText };
+        }
+
+        document.getElementById('fretboardContainer').innerHTML = renderFretboard(root, scale, seqLabels, sk);
+        const s = { root, sk, scale, noteNames, displayName:dn, formula:scale.formula||'', chordsData };
+
+        const c1 = await buildFretboardImage(s, tone);
+        const c2 = await buildScaleImage(s, tone);
+        const c3 = await buildChordsImage(s, tone);
+        const c4 = await buildVideoImage(s, tone);
+
+        setBatchStatus(`📄 Row ${i+1} of ${parsed.length} — ${label}: building proof sheet…`);
+        const proof = await buildProofSheet([c1,c2,c3,c4], s);
+        downloadCanvas(proof, buildFilename(root, sk, 'proof'));
+        filesExported++;
+
+        setBatchStatus(`🎬 Row ${i+1} of ${parsed.length} — ${label}: encoding video 1 of 3…`);
+        await recordPanelAsMP4(c1, 1, s, tone, buildFilename(root, sk, 'fretboard'));
+        filesExported++;
+        setBatchStatus(`🎬 Row ${i+1} of ${parsed.length} — ${label}: encoding video 2 of 3…`);
+        await recordPanelAsMP4(c2, 2, s, tone, buildFilename(root, sk, 'scale'));
+        filesExported++;
+        setBatchStatus(`🎬 Row ${i+1} of ${parsed.length} — ${label}: encoding video 3 of 3…`);
+        await recordPanelAsMP4(c3, 3, s, tone, buildFilename(root, sk, 'chords'));
+        filesExported++;
+
+        setBatchStatus(`🎬 Row ${i+1} of ${parsed.length} — ${label}: compositing Panel 4…`);
+        await buildVideoComposite(c4, _batchVideoMap[videoName], tone, buildFilename(root, sk, 'video'));
+        filesExported++;
+      }
+
+      setBatchStatus(`✅ Complete! ${parsed.length} scales processed · ${filesExported} files exported.`, '#1a7a4a');
+
+    } catch(err) {
+      setBatchStatus(`❌ Error during processing: ${err.message}`, '#a02020');
+    }
+  };
+  document.getElementById('batchVideoInput').click();
 }
 
 
@@ -1408,12 +1588,12 @@ function hideExportPopup(){ document.getElementById('igPopup').classList.remove(
 
 async function exportImage(type){
   const s=_exportState, tone=_igTone;
-  const c1=await buildFretboardImage(s,tone);
-  const c2=await buildScaleImage(s,tone);
-  const c3=await buildChordsImage(s,tone);
-  const c4=await buildVideoImage(s,tone);
 
   if(type==='proof'){
+    const c1=await buildFretboardImage(s,tone);
+    const c2=await buildScaleImage(s,tone);
+    const c3=await buildChordsImage(s,tone);
+    const c4=await buildVideoImage(s,tone);
     const proof=await buildProofSheet([c1,c2,c3,c4],s);
     downloadCanvas(proof, buildFilename(s.root,s.sk,'proof'));
     hideExportPopup();
@@ -1421,26 +1601,37 @@ async function exportImage(type){
 
   if(type==='fullset'){
     hideExportPopup();
-    try {
-      // Proof sheet
-      setExportStatus('🗂 Building proof sheet…');
-      const proof=await buildProofSheet([c1,c2,c3,c4],s);
-      downloadCanvas(proof, buildFilename(s.root,s.sk,'proof'));
+    // Prompt for backing video first
+    _pendingFullSetExport = async () => {
+      if(!_singleVideoFile) return;
+      try {
+        const c1=await buildFretboardImage(s,tone);
+        const c2=await buildScaleImage(s,tone);
+        const c3=await buildChordsImage(s,tone);
+        const c4=await buildVideoImage(s,tone);
 
-      // Panel 4 static PNG
-      downloadCanvas(c4, buildFilename(s.root,s.sk,'video'));
+        setExportStatus('🗂 Building proof sheet…');
+        const proof=await buildProofSheet([c1,c2,c3,c4],s);
+        downloadCanvas(proof, buildFilename(s.root,s.sk,'proof'));
 
-      // Panels 1-3 as MP4
-      setExportStatus('⚙️ Loading video encoder…');
-      await recordPanelAsMP4(c1, 1, s, tone, buildFilename(s.root,s.sk,'fretboard'));
-      await recordPanelAsMP4(c2, 2, s, tone, buildFilename(s.root,s.sk,'scale'));
-      await recordPanelAsMP4(c3, 3, s, tone, buildFilename(s.root,s.sk,'chords'));
-    } catch(err) {
-      console.error('Full set export error:', err);
-      alert('Export failed: ' + err.message);
-    } finally {
-      setExportStatus('🎬 Download Full Set');
-    }
+        // Panels 1-3 MP4
+        setExportStatus('⚙️ Loading video encoder…');
+        await recordPanelAsMP4(c1, 1, s, tone, buildFilename(s.root,s.sk,'fretboard'));
+        await recordPanelAsMP4(c2, 2, s, tone, buildFilename(s.root,s.sk,'scale'));
+        await recordPanelAsMP4(c3, 3, s, tone, buildFilename(s.root,s.sk,'chords'));
+
+        // Panel 4 composite MP4
+        await buildVideoComposite(c4, _singleVideoFile, tone, buildFilename(s.root,s.sk,'video'));
+
+        setExportStatus('🎬 Download Full Set');
+        _singleVideoFile = null;
+      } catch(err) {
+        console.error('Full set export error:', err);
+        alert('Export failed: ' + err.message);
+        setExportStatus('🎬 Download Full Set');
+      }
+    };
+    document.getElementById('singleVideoInput').click();
   }
 }
 
