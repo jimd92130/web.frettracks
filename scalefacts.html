@@ -1407,7 +1407,7 @@ async function handleBatchFile(event){
   }
 
   // Validation passed — now prompt for video files
-  setBatchStatus(`✅ Validation passed. Now select all ${parsed.length} backing track video files…`);
+  setBatchStatus(`✅ Validation passed. Click below to select all ${parsed.length} backing track video files.<br><br><button onclick="document.getElementById('batchVideoInput').click()" style="background:#1a7a4a;color:white;border:none;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;width:100%;">📂 Select Video Files</button>`);
   _pendingBatchExport = async () => {
     // Verify all video filenames are present
     const missingVideos = parsed.filter(p => !_batchVideoMap[p.videoName]).map(p => p.videoName);
