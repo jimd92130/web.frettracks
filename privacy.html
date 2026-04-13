@@ -28,30 +28,7 @@ body{
 h1,h2,h3{color:var(--ink);letter-spacing:.2px}
 a{color:var(--brand)}
 
-/* NAV */
-.nav-wrap{background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20}
-.nav{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;max-width:1150px;margin:0 auto;gap:12px}
-.brand{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
-.brand .pick{width:40px;height:40px;border-radius:9px;box-shadow:var(--shadow)}
-.brand .wordmark{height:28px;width:auto}
-.hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:4px}
-.hamburger span{display:block;width:24px;height:2px;background:var(--ink);border-radius:2px}
-.links{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
-.links a{display:inline-block;padding:7px 11px;border-radius:10px;text-decoration:none;color:var(--ink);font-size:15px;white-space:nowrap}
-.links a:hover{background:#E9F0FF}
-
-@media(max-width:600px){
-  .hamburger{display:flex}
-  .links{
-    display:none;flex-direction:column;align-items:flex-start;
-    position:absolute;top:62px;left:0;right:0;
-    background:#fff;border-bottom:1px solid var(--border);
-    padding:8px 16px 16px;gap:2px;
-    box-shadow:0 4px 12px rgba(0,0,0,0.08);
-  }
-  .links.open{display:flex}
-  .links a{width:100%;padding:10px 12px;font-size:16px}
-}
+/* CONTENT */
 
 /* CONTENT */
 .container{max-width:1150px;margin:0 auto;padding:28px 20px}
@@ -74,29 +51,12 @@ a{color:var(--brand)}
 h2{margin-top:28px;margin-bottom:4px;font-size:18px}
 h3{margin-top:18px;margin-bottom:4px;font-size:16px;color:var(--muted)}
 
-.footer{margin:40px 0 24px;text-align:center;color:var(--muted);font-size:14px}
-.footer a{color:var(--muted);text-decoration:underline}
 </style>
 </head>
 <body>
 
-<div class="nav-wrap">
-  <div class="nav">
-    <a class="brand" href="index.html">
-      <img class="pick" src="logo.png" alt="FretTracks logo">
-      <img class="wordmark" src="/trial/frettracks.png" alt="FretTracks">
-    </a>
-    <button class="hamburger" onclick="document.querySelector('.links').classList.toggle('open')" aria-label="Menu">
-      <span></span><span></span><span></span>
-    </button>
-    <div class="links">
-      <a href="privacy.html">Privacy</a>
-      <a href="tos.html">Terms</a>
-      <a href="support.html">Support</a>
-      <a href="/trial">Free Trial</a>
-    </div>
-  </div>
-</div>
+<script src="/nav.js"></script>
+<site-nav></site-nav>
 
 <div class="container">
   <div class="panel prose">
@@ -231,7 +191,6 @@ h3{margin-top:18px;margin-bottom:4px;font-size:16px;color:var(--muted)}
 
     <h3>7.3 How to Exercise Your Rights</h3>
     <p>Contact us at <a href="mailto:support@frettracks.com">support@frettracks.com</a> with your request.</p>
-
     <h2>8. Children's Privacy</h2>
     <p>FretTracks is not intended for children under 13. We do not knowingly collect personal information from children under 13. If we discover such information, we will delete it immediately.</p>
 
@@ -252,7 +211,7 @@ h3{margin-top:18px;margin-bottom:4px;font-size:16px;color:var(--muted)}
     Address: San Diego, CA, United States</p>
   </div>
 
-  <div class="footer">© 2026 FretTracks Labs LLC · <a href="privacy.html">Privacy</a> · <a href="tos.html">Terms</a> · <a href="support.html">Support</a></div>
+  <site-footer></site-footer>
 </div>
 
 </body>
