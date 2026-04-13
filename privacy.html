@@ -1,1613 +1,259 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Scale Explorer – FretTracks</title>
-<style>
-:root {
-  --brand:#4A90E2; --brand-dark:#3A7BC8; --ink:#212121; --muted:#667085;
-  --bg:#F6F7F9; --surface:#FFFFFF; --border:#E0E0E0; --radius:18px;
-  --shadow:0 1px 2px rgba(9,30,66,.08),0 2px 8px rgba(9,30,66,.06);
-  --major-color:#1a6a48; --minor-color:#5a30a0; --dim-color:#b02828; --aug-color:#a05010;
+  <link rel="icon" href="/favicon.png" type="image/png" sizes="32x32" />
+  <meta charset="utf-8" />
+  <title>Privacy Policy – FretTracks</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+:root{
+  --brand:#4A90E2;
+  --brand-dark:#3A7BC8;
+  --ink:#212121;
+  --muted:#667085;
+  --bg:#F6F7F9;
+  --surface:#FFFFFF;
+  --border:#E0E0E0;
+  --radius:18px;
+  --shadow:0 1px 2px rgba(9,30,66,.08), 0 2px 8px rgba(9,30,66,.06);
 }
-*{box-sizing:border-box;margin:0;padding:0;}
-html,body{margin:0;padding:0;}
-body{font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;color:var(--ink);background:var(--bg);line-height:1.7;}
-h1,h2,h3,h4{color:var(--ink);letter-spacing:.2px;}
-
-
-
-.container{max-width:1150px;margin:0 auto;padding:24px 20px;}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;box-shadow:var(--shadow);margin-bottom:16px;}
-.card-label{font-size:13px;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:#444e60;margin-bottom:14px;}
-.input-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
-.input-label{font-size:15px;font-weight:600;color:#3a4252;}
-
-select{
-  background:var(--bg);border:1.5px solid var(--border);color:var(--ink);
-  font-family:inherit;font-size:15px;font-weight:500;
-  padding:8px 32px 8px 12px;outline:none;cursor:pointer;
-  appearance:none;-webkit-appearance:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7' viewBox='0 0 10 7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%234A90E2' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 10px center;
-  border-radius:10px;transition:border-color 0.2s;
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  color:var(--ink);
+  background:var(--bg);
+  line-height:1.7;
 }
-select:focus{border-color:var(--brand);}
-#rootSelect{width:90px;} #scaleSelect{width:260px;}
+h1,h2,h3{color:var(--ink);letter-spacing:.2px}
+a{color:var(--brand)}
 
-.btn{display:inline-block;padding:9px 22px;background:var(--brand);color:#fff;border-radius:12px;border:none;font-family:inherit;font-weight:700;font-size:15px;box-shadow:0 4px 14px rgba(74,144,226,0.35);transition:background 0.18s,transform 0.18s;cursor:pointer;white-space:nowrap;}
-.btn:hover{background:var(--brand-dark);transform:translateY(-1px);}
+/* NAV */
+.nav-wrap{background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;max-width:1150px;margin:0 auto;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
+.brand .pick{width:40px;height:40px;border-radius:9px;box-shadow:var(--shadow)}
+.brand .wordmark{height:28px;width:auto}
+.hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:4px}
+.hamburger span{display:block;width:24px;height:2px;background:var(--ink);border-radius:2px}
+.links{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.links a{display:inline-block;padding:7px 11px;border-radius:10px;text-decoration:none;color:var(--ink);font-size:15px;white-space:nowrap}
+.links a:hover{background:#E9F0FF}
 
-.quick-picks{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);}
-.qp-label{font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#3a4252;margin-right:2px;}
-.qp-btn{background:#EEF4FC;border:1px solid #C8DEFA;color:#2d6abf;font-family:inherit;font-size:13px;font-weight:600;padding:4px 11px;cursor:pointer;border-radius:999px;transition:all 0.15s;}
-.qp-btn:hover{background:#C8DEFA;}
+@media(max-width:600px){
+  .hamburger{display:flex}
+  .links{
+    display:none;flex-direction:column;align-items:flex-start;
+    position:absolute;top:62px;left:0;right:0;
+    background:#fff;border-bottom:1px solid var(--border);
+    padding:8px 16px 16px;gap:2px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.08);
+  }
+  .links.open{display:flex}
+  .links a{width:100%;padding:10px 12px;font-size:16px}
+}
 
-#output{display:none;} #output.visible{display:block;}
+/* CONTENT */
+.container{max-width:1150px;margin:0 auto;padding:28px 20px}
+.panel{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:36px 40px;
+  max-width:820px;
+  margin:0 auto;
+}
+@media(max-width:600px){
+  .panel{padding:24px 20px}
+}
+.meta{color:var(--muted);font-size:14px;margin-top:6px;margin-bottom:24px}
+.prose p{margin:12px 0}
+.prose ul,.prose ol{margin:12px 0 16px 22px}
+.prose li{margin-bottom:4px}
+h2{margin-top:28px;margin-bottom:4px;font-size:18px}
+h3{margin-top:18px;margin-bottom:4px;font-size:16px;color:var(--muted)}
 
-.fretboard-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;box-shadow:var(--shadow);margin-bottom:16px;}
-.scale-heading{display:flex;align-items:baseline;gap:14px;margin-bottom:16px;flex-wrap:wrap;}
-.scale-title{font-size:clamp(24px,3vw,32px);font-weight:700;letter-spacing:-0.02em;color:var(--ink);}
-.scale-subtitle{font-size:15px;color:#444e60;font-weight:500;}
-.section-label{font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:#3a4252;font-weight:700;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
-.fretboard-wrap{overflow-x:auto;} .fretboard-svg-container{min-width:500px;}
-.legend{display:flex;gap:16px;margin-top:10px;flex-wrap:wrap;}
-.legend-item{display:flex;align-items:center;gap:6px;font-size:14px;color:#3a4252;font-weight:500;}
-.legend-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;}
-.formula-row{margin-top:10px;font-size:13px;color:#3a4252;}
-.formula-row strong{color:var(--brand-dark);font-weight:700;}
-
-.tables-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
-.table-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);}
-table{width:100%;border-collapse:collapse;font-size:15px;}
-thead th{text-align:left;padding:6px 10px;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:#3a4252;border-bottom:1.5px solid var(--border);font-weight:700;}
-tbody td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:middle;}
-tbody tr:last-child td{border-bottom:none;}
-tbody tr:hover{background:var(--bg);}
-.degree-cell{font-weight:600;color:#444e60;width:75px;font-size:14px;}
-.note-cell{font-weight:500;color:var(--ink);}
-.note-cell.is-root{color:var(--brand-dark);font-weight:700;}
-.roman-cell{font-weight:700;width:65px;}
-.roman-M{color:var(--major-color);} .roman-m{color:var(--minor-color);} .roman-d{color:var(--dim-color);} .roman-A{color:var(--aug-color);}
-.chord-M{color:var(--major-color);font-weight:600;} .chord-m{color:var(--minor-color);font-weight:600;} .chord-d{color:var(--dim-color);font-weight:600;} .chord-A{color:var(--aug-color);font-weight:600;}
-.no-chords td{color:#444e60;font-style:italic;padding:12px 10px;font-size:14px;}
-.chords-footnote{margin-top:12px;font-size:13px;color:#444e60;line-height:1.5;font-style:italic;padding:10px 12px;background:var(--bg);border-radius:8px;border-left:3px solid var(--brand);}
-.error-banner{background:#fff3f3;border:1px solid #f0b0b0;color:#a02020;padding:10px 14px;border-radius:10px;font-size:13px;margin-bottom:14px;display:none;}
-.error-banner.visible{display:block;}
-
-/* ── EXPORT POPUP ── */
-.ig-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:100;align-items:center;justify-content:center;}
-.ig-overlay.visible{display:flex;}
-.ig-modal{background:#fff;border-radius:20px;width:540px;max-width:calc(100vw - 40px);box-shadow:0 8px 40px rgba(0,0,0,0.22);overflow:hidden;}
-.ig-modal-header{display:flex;align-items:flex-start;justify-content:space-between;padding:22px 24px 16px;border-bottom:1px solid var(--border);}
-.ig-modal-title{font-size:18px;font-weight:700;color:var(--ink);}
-.ig-modal-sub{font-size:13px;color:var(--muted);margin-top:2px;line-height:1.5;}
-.ig-close{background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:2px 6px;border-radius:6px;line-height:1;}
-.ig-close:hover{background:var(--bg);}
-.ig-tone-row{display:flex;gap:8px;padding:14px 24px 0;justify-content:center;}
-.ig-tone-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 0;border:2px solid var(--border);border-radius:10px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s;background:var(--bg);color:var(--ink);}
-.ig-tone-btn.active{border-color:var(--brand);background:#EEF4FC;color:var(--brand);}
-.ig-tone-btn:hover{border-color:var(--brand);}
-.ig-tone-swatch{display:inline-block;width:14px;height:14px;border-radius:50%;flex-shrink:0;}
-.ig-modal-body{padding:16px 24px;display:flex;flex-direction:column;gap:10px;}
-.ig-export-btn{display:flex;align-items:center;gap:14px;width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:14px;padding:14px 16px;cursor:pointer;text-align:left;transition:all 0.15s;}
-.ig-export-btn:hover{border-color:var(--brand);background:#EEF4FC;}
-.ig-btn-text{display:flex;flex-direction:column;flex:1;}
-.ig-btn-text strong{font-size:15px;color:var(--ink);}
-.ig-btn-text span{font-size:12px;color:var(--muted);margin-top:1px;}
-.ig-badge{font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;background:#EEF4FC;color:var(--brand);border:1px solid #C8DEFA;border-radius:6px;padding:2px 7px;margin-left:6px;vertical-align:middle;white-space:nowrap;}
-.ig-arrow{font-size:18px;color:var(--brand);font-weight:700;flex-shrink:0;}
-.ig-all-btn{display:block;width:calc(100% - 48px);margin:0 24px 10px;padding:13px;background:var(--brand);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(74,144,226,0.35);transition:background 0.18s;}
-.ig-all-btn:hover{background:var(--brand-dark);}
-.ig-all-note{text-align:center;font-size:12px;color:var(--muted);margin:0 24px 18px;line-height:1.6;}
-
-@media(max-width:600px){.tables-grid{grid-template-columns:1fr;}.container{padding:16px 14px;}}
+.footer{margin:40px 0 24px;text-align:center;color:var(--muted);font-size:14px}
+.footer a{color:var(--muted);text-decoration:underline}
 </style>
 </head>
 <body>
 
-<script src="/nav.js"></script>
-<site-nav></site-nav>
+<div class="nav-wrap">
+  <div class="nav">
+    <a class="brand" href="index.html">
+      <img class="pick" src="logo.png" alt="FretTracks logo">
+      <img class="wordmark" src="/trial/frettracks.png" alt="FretTracks">
+    </a>
+    <button class="hamburger" onclick="document.querySelector('.links').classList.toggle('open')" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="links">
+      <a href="privacy.html">Privacy</a>
+      <a href="tos.html">Terms</a>
+      <a href="support.html">Support</a>
+      <a href="/trial">Free Trial</a>
+    </div>
+  </div>
+</div>
 
 <div class="container">
-  <div class="card">
-    <div class="card-label">Select a Scale</div>
-    <div class="input-row">
-      <span class="input-label">Root</span>
-      <select id="rootSelect">
-        <option>C</option><option>C#</option><option>Db</option>
-        <option>D</option><option>Eb</option><option>E</option>
-        <option>F</option><option>F#</option><option>Gb</option>
-        <option>G</option><option>Ab</option><option>A</option>
-        <option>Bb</option><option>B</option>
-      </select>
-      <span class="input-label">Scale / Mode</span>
-      <select id="scaleSelect">
-        <optgroup label="Diatonic Modes">
-          <option value="ionian">Major (Ionian)</option>
-          <option value="dorian">Dorian</option>
-          <option value="phrygian">Phrygian</option>
-          <option value="lydian">Lydian</option>
-          <option value="mixolydian">Mixolydian</option>
-          <option value="aeolian">Minor (Aeolian)</option>
-          <option value="locrian">Locrian</option>
-        </optgroup>
-        <optgroup label="Pentatonic">
-          <option value="major_pentatonic">Major Pentatonic</option>
-          <option value="minor_pentatonic">Minor Pentatonic</option>
-        </optgroup>
-        <optgroup label="Blues">
-          <option value="blues">Blues</option>
-        </optgroup>
-      </select>
-      <button class="btn" onclick="generate()">Generate →</button>
-    </div>
-    <div class="quick-picks">
-      <span class="qp-label">Try</span>
-      <button class="qp-btn" onclick="quick('A','minor_pentatonic')">Am Pent</button>
-      <button class="qp-btn" onclick="quick('C','ionian')">C Major</button>
-      <button class="qp-btn" onclick="quick('D','dorian')">D Dorian</button>
-      <button class="qp-btn" onclick="quick('E','aeolian')">E Minor</button>
-      <button class="qp-btn" onclick="quick('G','mixolydian')">G Mixolydian</button>
-    </div>
+  <div class="panel prose">
+    <h1>Privacy Policy</h1>
+    <div class="meta">Last Updated: August 21, 2025</div>
+
+    <h2>1. Introduction</h2>
+    <p>FretTracks ("we," "our," or "us") respects your privacy and is committed to protecting your personal information. This Privacy Policy explains how we collect, use, and safeguard your information when you use the FretTracks mobile application ("App").</p>
+
+    <h2>2. Information We Collect</h2>
+    <h3>2.1 Account Information</h3>
+    <ul>
+      <li><strong>Email Address (Optional):</strong> Used solely for account management and service-related communications.</li>
+      <li><strong>User ID:</strong> A unique identifier for managing your subscription and app preferences.</li>
+    </ul>
+
+    <h3>2.2 Usage Analytics</h3>
+    <ul>
+      <li><strong>App Usage Data:</strong> Anonymous statistics about features, backing tracks, and scales you access to improve our service.</li>
+      <li><strong>Performance Data:</strong> Anonymous technical data (e.g., crash reports) to maintain and improve the App.</li>
+      <li><strong>Device Information:</strong> Basic device details (iOS version, device model) for compatibility and support.</li>
+    </ul>
+
+    <h3>2.3 Subscription Information</h3>
+    <ul>
+      <li><strong>Purchase Data:</strong> Subscription status and purchase information processed through Apple's App Store. We do not store payment card information.</li>
+    </ul>
+
+    <h2>3. How We Use Your Information</h2>
+    <h3>3.1 Service Provision</h3>
+    <ul>
+      <li>Manage your account and subscription</li>
+      <li>Provide access to App features and content</li>
+      <li>Sync your preferences across devices</li>
+    </ul>
+
+    <h3>3.2 Communication</h3>
+    <ul>
+      <li>Send account-related notifications (subscription status, renewals, etc.)</li>
+      <li>Provide customer support when requested</li>
+      <li>Send service updates and important App information</li>
+    </ul>
+
+    <h3>3.3 App Improvement</h3>
+    <ul>
+      <li>Analyze anonymous usage patterns to improve content and features</li>
+      <li>Monitor app performance and fix technical issues</li>
+      <li>Develop new features based on user preferences</li>
+    </ul>
+
+    <h2>4. Email Communications and Consent</h2>
+    <h3>4.1 Types of Emails</h3>
+    <p>With your consent, we may send you:</p>
+    <ul>
+      <li>Account and subscription management emails</li>
+      <li>App updates and new feature announcements</li>
+      <li>Educational content related to guitar learning</li>
+      <li>Customer support responses</li>
+    </ul>
+
+    <h3>4.2 Your Consent and Rights</h3>
+    <ul>
+      <li><strong>Opt-in Required:</strong> We will only send marketing emails with your explicit consent.</li>
+      <li><strong>Easy Unsubscribe:</strong> Every email includes an unsubscribe link.</li>
+      <li><strong>Account Emails:</strong> Some transactional emails (e.g., subscription confirmations) are necessary for service operation.</li>
+      <li><strong>Your Choice:</strong> You can opt out of promotional emails while still receiving essential account communications.</li>
+    </ul>
+
+    <h3>4.3 CAN-SPAM Compliance</h3>
+    <p>We comply with the CAN-SPAM Act by:</p>
+    <ul>
+      <li>Never using false or misleading header information</li>
+      <li>Not using deceptive subject lines</li>
+      <li>Clearly identifying promotional messages</li>
+      <li>Including our physical address in emails</li>
+      <li>Providing easy unsubscribe mechanisms</li>
+      <li>Honoring opt-out requests promptly</li>
+    </ul>
+
+    <h2>5. Information Sharing and Disclosure</h2>
+    <h3>5.1 Third-Party Services</h3>
+    <p>We use the following third-party services that may collect information:</p>
+    <ul>
+      <li><strong>Apple App Store:</strong> Processes subscription payments and provides purchase data.</li>
+      <li><strong>Firebase (Google):</strong> Provides authentication, analytics, and app infrastructure.</li>
+      <li><strong>RevenueCat:</strong> Manages subscription status and billing.</li>
+    </ul>
+
+    <h3>5.2 No Data Sales</h3>
+    <p>We do not sell, rent, or trade your personal information to third parties for marketing purposes.</p>
+
+    <h3>5.3 Legal Requirements</h3>
+    <p>We may disclose information if required by law, court order, or to protect our rights and the safety of our users.</p>
+
+    <h2>6. Data Storage and Security</h2>
+    <h3>6.1 No User-Generated Content Storage</h3>
+    <p>We do not store any personal content, files, or user-generated data on our servers.</p>
+
+    <h3>6.2 Data Security</h3>
+    <ul>
+      <li>All data transmission is encrypted using industry-standard protocols.</li>
+      <li>We implement appropriate technical and organizational measures to protect your information.</li>
+      <li>Access to personal data is restricted to authorized personnel only.</li>
+    </ul>
+
+    <h3>6.3 Data Retention</h3>
+    <ul>
+      <li><strong>Account Data:</strong> Retained while your account is active and for a reasonable period after account deletion.</li>
+      <li><strong>Analytics Data:</strong> Anonymous usage data may be retained indefinitely for service improvement.</li>
+      <li><strong>Email Data:</strong> Email addresses are deleted when you request account deletion.</li>
+    </ul>
+
+    <h2>7. Your Privacy Rights</h2>
+    <h3>7.1 Access and Control</h3>
+    <p>You have the right to:</p>
+    <ul>
+      <li>Access the personal information we have about you</li>
+      <li>Correct inaccurate personal information</li>
+      <li>Request deletion of your account and associated data</li>
+      <li>Opt out of promotional emails</li>
+      <li>Data portability (where technically feasible)</li>
+    </ul>
+
+    <h3>7.2 California Privacy Rights (CCPA)</h3>
+    <p>California residents have additional rights, including:</p>
+    <ul>
+      <li>Right to know what personal information is collected</li>
+      <li>Right to delete personal information</li>
+      <li>Right to opt out of the sale of personal information (we do not sell personal information)</li>
+      <li>Right to non-discrimination for exercising privacy rights</li>
+    </ul>
+
+    <h3>7.3 How to Exercise Your Rights</h3>
+    <p>Contact us at <a href="mailto:support@frettracks.com">support@frettracks.com</a> with your request.</p>
+
+    <h2>8. Children's Privacy</h2>
+    <p>FretTracks is not intended for children under 13. We do not knowingly collect personal information from children under 13. If we discover such information, we will delete it immediately.</p>
+
+    <h2>9. International Users</h2>
+    <p>If you use the App from outside the United States, your information may be transferred to, stored, and processed in the United States where our servers are located.</p>
+
+    <h2>10. Changes to This Privacy Policy</h2>
+    <p>We may update this Privacy Policy. We will notify you by:</p>
+    <ul>
+      <li>Posting the new Privacy Policy in the App</li>
+      <li>Sending an email notification (if you have provided an email address)</li>
+      <li>Updating the "Last Updated" date at the top of this policy</li>
+    </ul>
+    <p>Your continued use of the App after any changes constitutes acceptance of the updated Privacy Policy.</p>
+
+    <h2>11. Contact Us</h2>
+    <p>Email: <a href="mailto:support@frettracks.com">support@frettracks.com</a><br>
+    Address: San Diego, CA, United States</p>
   </div>
 
-  <div id="output">
-    <div class="error-banner" id="errorBanner"></div>
-    <div class="fretboard-card">
-      <div class="scale-heading">
-        <span class="scale-title" id="scaleTitle"></span>
-        <span class="scale-subtitle" id="scaleSubtitle"></span>
-      </div>
-      <div class="section-label">Fretboard · 2 Octaves · Standard Tuning EADGBe</div>
-      <div class="fretboard-wrap">
-        <div class="fretboard-svg-container" id="fretboardContainer"></div>
-      </div>
-      <div class="legend" id="fretboardLegend">
-        <div class="legend-item"><div class="legend-dot" style="background:var(--brand)"></div>Root note</div>
-      </div>
-      <div class="formula-row" id="formulaRow"></div>
-      <div class="formula-row" id="scaleInsight" style="margin-top:6px;font-style:italic;color:#f0a030;font-weight:600;"></div>
-    </div>
-    <div class="tables-grid">
-      <div class="table-card">
-        <div class="section-label">Scale Degrees</div>
-        <table id="notesTable">
-          <thead><tr><th>Degree</th><th style="padding-left:2rem">Note</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-      <div class="table-card">
-        <div class="section-label" id="chordsLabel">Chords of the Key</div>
-        <table id="chordsTable">
-          <thead><tr><th style="width:200px">Roman Numerals</th><th style="padding-left:2.5rem">Chord</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <site-footer></site-footer>
+  <div class="footer">© 2026 FretTracks Labs LLC · <a href="privacy.html">Privacy</a> · <a href="tos.html">Terms</a> · <a href="support.html">Support</a></div>
 </div>
 
-<!-- EXPORT POPUP -->
-<div id="igPopup" class="ig-overlay" onclick="if(event.target===this)hideExportPopup()">
-  <div class="ig-modal">
-    <div class="ig-modal-header">
-      <div>
-        <div class="ig-modal-title">Export for Instagram</div>
-        <div class="ig-modal-sub">1080×1920 · Panels 1–3 MP4 with series overlay · Panel 4 PNG for CapCut</div>
-      </div>
-      <button class="ig-close" onclick="hideExportPopup()">✕</button>
-    </div>
-    <div class="ig-tone-row">
-      <button class="ig-tone-btn active" id="toneLight" onclick="setTone('light')">
-        <span class="ig-tone-swatch" style="background:#4A90E2"></span>Blue Border
-      </button>
-      <button class="ig-tone-btn" id="toneMed" onclick="setTone('med')">
-        <span class="ig-tone-swatch" style="background:#5ddb9e"></span>Green Border
-      </button>
-      <button class="ig-tone-btn" id="toneDark" onclick="setTone('dark')">
-        <span class="ig-tone-swatch" style="background:#f0a030"></span>Gold Border
-      </button>
-      <button class="ig-tone-btn" id="toneCyan" onclick="setTone('cyan')">
-        <span class="ig-tone-swatch" style="background:#00bcd4"></span>Cyan Border
-      </button>
-    </div>
-    <div class="ig-modal-body" style="padding-top:20px;">
-      <button class="ig-all-btn" id="btnFullSet" onclick="exportImage('fullset')" style="margin:0 0 8px 0;width:100%;background:#1a7a4a;font-size:16px;padding:16px;">🎬 Download Full Set</button>
-      <p style="text-align:center;font-size:12px;color:var(--muted);margin:0 0 14px;">Proof Sheet · Videos 1–3 (MP4) · Panel 4 Static (PNG)</p>
-      <button class="ig-all-btn" id="btnProof" onclick="exportImage('proof')" style="margin:0 0 8px 0;width:100%;background:#444e60;">🗂 Download Proof Sheet Only</button>
-      <button class="ig-all-btn" id="btnBatch" onclick="triggerBatchProcess()" style="margin:0;width:100%;background:#7b3fa0;">📋 Process from List</button>
-      <input type="file" id="batchFileInput" accept=".xlsx" style="display:none" onchange="handleBatchFile(event)">
-      <input type="file" id="singleVideoInput" accept="video/mp4,video/*" style="display:none" onchange="handleSingleVideo(event)">
-      <input type="file" id="batchVideoInput" accept="video/mp4,video/*" multiple style="display:none" onchange="handleBatchVideos(event)">
-      <div id="batchStatus" style="display:none;margin-top:14px;padding:12px 14px;background:var(--bg);border-radius:10px;font-size:13px;line-height:1.6;color:var(--ink);max-height:200px;overflow-y:auto;"></div>
-    </div>
-    <p class="ig-all-note">Post as Reels in reverse order (4→3→2→1) for correct grid sequence</p>
-  </div>
-</div>
-
-<script>
-// ============================================================
-// STATE
-// ============================================================
-let _exportState = null;
-let _igTone = 'light';
-let _singleVideoFile = null;   // File object for single-mode Panel 4
-let _batchVideoMap = {};       // filename → File object for batch mode
-
-// ============================================================
-// MUSIC THEORY DATA
-// ============================================================
-const LETTERS    = ['C','D','E','F','G','A','B'];
-const NATURAL_ST = { C:0, D:2, E:4, F:5, G:7, A:9, B:11 };
-const OPEN_PITCH = [4, 9, 2, 7, 11, 4];
-const STR_LABEL  = ['E','A','D','G','B','e'];
-const ROOT_FRET  = {
-  'C':8,'C#':9,'Db':9,'D':10,'Eb':11,'E':12,
-  'F':1,'F#':2,'Gb':2,'G':3,'Ab':4,'A':5,'Bb':6,'B':7
-};
-
-const SCALES = {
-  ionian:          { ivs:[0,2,4,5,7,9,11], degs:['1','2','3','4','5','6','7'],       formula:'W – W – H – W – W – W – H', chords:true,  diatonic:true  },
-  dorian:          { ivs:[0,2,3,5,7,9,10], degs:['1','2','b3','4','5','6','b7'],      formula:'W – H – W – W – W – H – W', chords:true,  diatonic:true  },
-  phrygian:        { ivs:[0,1,3,5,7,8,10], degs:['1','b2','b3','4','5','b6','b7'],    formula:'H – W – W – W – H – W – W', chords:true,  diatonic:true  },
-  lydian:          { ivs:[0,2,4,6,7,9,11], degs:['1','2','3','#4','5','6','7'],       formula:'W – W – W – H – W – W – H', chords:true,  diatonic:true  },
-  mixolydian:      { ivs:[0,2,4,5,7,9,10], degs:['1','2','3','4','5','6','b7'],       formula:'W – W – H – W – W – H – W', chords:true,  diatonic:true  },
-  aeolian:         { ivs:[0,2,3,5,7,8,10], degs:['1','2','b3','4','5','b6','b7'],     formula:'W – H – W – W – H – W – W', chords:true,  diatonic:true  },
-  locrian:         { ivs:[0,1,3,5,6,8,10], degs:['1','b2','b3','4','b5','b6','b7'],   formula:'H – W – W – H – W – W – W', chords:true,  diatonic:true  },
-  major_pentatonic:{ ivs:[0,2,4,7,9],      degs:['1','2','3','5','6'],                formula:'W – W – W½ – W – W½',       chords:false, diatonic:false },
-  minor_pentatonic:{ ivs:[0,3,5,7,10],     degs:['1','b3','4','5','b7'],              formula:'W½ – W – W – W½ – W',       chords:false, diatonic:false },
-  blues:           { ivs:[0,3,5,6,7,10],   degs:['1','b3','4','b5','5','b7'],         formula:'W½ – W – H – H – W½ – W',  chords:false, diatonic:false, isBlues:true },
-};
-
-const QUALITIES = {
-  ionian:    ['M','m','m','M','M','m','d'],
-  dorian:    ['m','m','M','M','m','d','M'],
-  phrygian:  ['m','M','M','m','d','M','m'],
-  lydian:    ['M','M','m','d','M','m','m'],
-  mixolydian:['M','m','d','M','m','m','M'],
-  aeolian:   ['m','d','M','m','m','M','M'],
-  locrian:   ['d','M','m','m','M','M','m'],
-};
-
-const PARENT_KEY = {
-  minor_pentatonic: 'aeolian',
-  blues:            'aeolian',
-  major_pentatonic: 'ionian',
-};
-
-const ROM = ['I','II','III','IV','V','VI','VII'];
-
-function toRoman(q, i) {
-  const r = ROM[i];
-  if(q==='M') return r; if(q==='m') return r.toLowerCase();
-  if(q==='d') return r.toLowerCase()+'°'; if(q==='A') return r+'+';
-  return r;
-}
-function toSymbol(root, q) {
-  if(q==='M') return root; if(q==='m') return root+'m';
-  if(q==='d') return root+'°'; if(q==='A') return root+'+';
-  return root;
-}
-function toBluesSymbol(root, q, degIdx) {
-  if(degIdx===0||degIdx===3||degIdx===4) return root+'7';
-  return toSymbol(root, q);
-}
-function toBluesRoman(q, i) {
-  if(i===0||i===3||i===4) return ROM[i];
-  return toRoman(q, i);
-}
-
-const DISPLAY = {
-  ionian:'Major (Ionian)', dorian:'Dorian', phrygian:'Phrygian', lydian:'Lydian',
-  mixolydian:'Mixolydian', aeolian:'Minor (Aeolian)', locrian:'Locrian',
-  major_pentatonic:'Major Pentatonic', minor_pentatonic:'Minor Pentatonic', blues:'Blues',
-};
-
-const TAGLINES = {
-  ionian:'A bright, uplifting sound for any style', dorian:'Minor with attitude — jazz, rock and funk',
-  phrygian:'Dark and exotic — instantly distinctive', lydian:'Dreamy and cinematic — a distinct musical color',
-  mixolydian:'A bluesy major — classic rock\'s secret weapon', aeolian:'Emotional and expressive — works in every genre',
-  locrian:'Dark tension — bold and adventurous', major_pentatonic:'A versatile scale for country, rock and pop',
-  minor_pentatonic:'The essential scale for rock and blues', blues:'Soulful and gritty — the sound of the blues',
-};
-
-const SIGNATURE_TONES = {
-  ionian:null, dorian:[9], phrygian:[1], lydian:[6], mixolydian:[10],
-  aeolian:[3,8,10], locrian:[1,6], major_pentatonic:null, minor_pentatonic:null, blues:[6],
-};
-
-const SHORT_INSIGHTS = {
-  ionian:'The gold standard. All scales start here.', dorian:'Minor scale with a raised 6 — a little happier.',
-  phrygian:'The b2 creates that dark, exotic edge.', lydian:'The raised 4 is the note that floats.',
-  mixolydian:'The b7 gives classic rock its swagger.', aeolian:'Three flatted notes — that\'s the emotion.',
-  locrian:'The b5 creates tension that won\'t resolve.', major_pentatonic:'No wrong notes. Pure melody.',
-  minor_pentatonic:'5 notes. No wrong answers.', blues:'The b5 blue note is where the soul lives.',
-};
-
-const FULL_INSIGHTS = {
-  ionian:(r)=>`When someone says a song is 'in ${r},' they mean ${r} major. Learn this and you have a strong foundation for understanding other scales.`,
-  dorian:'Dorian is a minor scale with the 6th note raised. That one note adds a brighter, more sophisticated edge. It\'s the sound of jazz, funk and blues-rock.',
-  phrygian:'Phrygian is a minor scale with the 2nd note lowered. That one note creates a dark, exotic sound heard in flamenco and metal. Instantly recognizable.',
-  lydian:'Lydian is a major scale with the 4th note raised. That one note creates a floating, cinematic feel. Play it over a major chord and you\'ll hear it immediately.',
-  mixolydian:'Mixolydian is a major scale with the 7th note lowered. That one note makes it bluesy instead of bright. It\'s the sound of classic rock guitar.',
-  aeolian:'Natural minor lowers the 3rd, 6th and 7th notes compared to major. These changes create a darker, more emotional sound used in countless songs.',
-  locrian:'Locrian lowers the 2nd and 5th notes, making it the most unstable scale. The lowered 5th creates constant tension. Used sparingly — bold choice.',
-  major_pentatonic:'Major pentatonic removes the 4th and 7th notes from the major scale. What\'s left is smooth, versatile and hard to clash. It\'s used in country, pop and rock.',
-  minor_pentatonic:'Minor pentatonic removes two notes from the minor scale, leaving five that work over many minor and blues progressions. Simple, flexible and essential.',
-  blues:'The blues scale adds a lowered 5th note to minor pentatonic. That one note creates the tension that defines blues and rock. Small change, big sound.',
-};
-
-const CHORD_FOOTNOTES = {
-  ionian:          (r) => `These chords were made for ${r} Major. Experiment with different progressions, then use scale notes to target chord tones when soloing.`,
-  dorian:          (r) => `${r} Dorian sounds great over these chords. Experiment with different progressions, then use scale notes to target chord tones when soloing.`,
-  phrygian:        (r) => `These chords set you up perfectly for ${r} Phrygian leads. Experiment with different progressions, then use scale notes to target chord tones when soloing.`,
-  lydian:          (r) => `${r} Lydian floats beautifully over these chords. The #IV° is unusual — focus on I, II and V. Experiment with different progressions, then use scale notes to target chord tones when soloing.`,
-  mixolydian:      (r) => `These chords were made for ${r} Mixolydian. Experiment with different progressions, then use scale notes to target chord tones when soloing.`,
-  aeolian:         (r) => `${r} Minor sounds great over these chords. Experiment with different progressions, then use scale notes to target chord tones when soloing.`,
-  locrian:         (r) => `These chords set you up for ${r} Locrian's tension. Experiment with different progressions, then use scale notes to target chord tones when soloing.`,
-  major_pentatonic:(r) => `These chords were made for ${r} Major Pentatonic. Experiment with different progressions, then use scale notes to target chord tones when soloing.`,
-  minor_pentatonic:(r) => `${r} Minor Pentatonic sounds great over these chords. Experiment with different progressions, then use scale notes to target chord tones when soloing.`,
-  blues:           (r) => `These chords were made for ${r} Blues. Experiment with different progressions, then use scale notes to target chord tones when soloing.`,
-};
-
-const IG_BORDERS = {
-  light: { color:'#4A90E2', width:16 },
-  med:   { color:'#5ddb9e', width:16 },
-  dark:  { color:'#f0a030', width:16 },
-  cyan:  { color:'#00bcd4', width:16 },
-};
-const ACCENT_BAND_H = 50;
-const SAFE = 36;
-
-// ============================================================
-// ENHARMONIC SPELLING
-// ============================================================
-function buildDiatonicNotes(rootName, intervals) {
-  const rootLetter = rootName[0].toUpperCase();
-  const rootAcc    = rootName.slice(1);
-  const rootLetterIdx = LETTERS.indexOf(rootLetter);
-  let rootPitch = NATURAL_ST[rootLetter];
-  if(rootAcc==='#')  rootPitch+=1; if(rootAcc==='##') rootPitch+=2;
-  if(rootAcc==='b')  rootPitch-=1; if(rootAcc==='bb') rootPitch-=2;
-  rootPitch = ((rootPitch%12)+12)%12;
-  return intervals.map((iv,stepIdx)=>{
-    const tIdx = (rootLetterIdx+stepIdx)%7;
-    const tLet = LETTERS[tIdx];
-    const tNat = NATURAL_ST[tLet];
-    const nPitch = ((rootPitch+iv)%12+12)%12;
-    let diff = nPitch - tNat;
-    if(diff> 6) diff-=12; if(diff<-6) diff+=12;
-    if(diff> 2) diff-=12; if(diff<-2) diff+=12;
-    const acc = diff===2?'##':diff===1?'#':diff===-1?'b':diff===-2?'bb':'';
-    return tLet+acc;
-  });
-}
-
-const FLAT_KEYS = new Set(['F','Bb','Eb','Ab','Db','Gb']);
-function spellChromatic(rootName, intervals) {
-  let rootPitch = NATURAL_ST[rootName[0].toUpperCase()];
-  const acc = rootName.slice(1);
-  if(acc==='#') rootPitch++; if(acc==='b') rootPitch--;
-  rootPitch = ((rootPitch%12)+12)%12;
-  const useFlat = FLAT_KEYS.has(rootName);
-  const SH = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
-  const FL = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
-  return intervals.map(iv=>{ const p=((rootPitch+iv)%12+12)%12; return useFlat?FL[p]:SH[p]; });
-}
-
-// ============================================================
-// PARENT KEY CHORDS
-// ============================================================
-function buildParentChords(root, sk) {
-  const parentKey = PARENT_KEY[sk]; if(!parentKey) return null;
-  const parentScale = SCALES[parentKey];
-  const parentNotes = buildDiatonicNotes(root, parentScale.ivs);
-  const qs = QUALITIES[parentKey];
-  const isBlues = SCALES[sk].isBlues;
-  const chords = parentNotes.map((cr, i) => {
-    const q = qs[i];
-    return { roman: isBlues?toBluesRoman(q,i):toRoman(q,i), symbol: isBlues?toBluesSymbol(cr,q,i):toSymbol(cr,q), q };
-  });
-  const parentFriendly = parentKey==='aeolian' ? `${root} Minor (Aeolian)` : `${root} Major (Ionian)`;
-  const parentDisplayName = parentKey==='aeolian' ? 'Minor (Aeolian)' : 'Major (Ionian)';
-  return { parentKey, parentDisplayName, parentFriendly, parentNotes, chords };
-}
-
-// ============================================================
-// FRETBOARD
-// ============================================================
-function rootPitchOf(n) {
-  let p = NATURAL_ST[n[0].toUpperCase()];
-  const a = n.slice(1); if(a==='#') p++; if(a==='b') p--;
-  return ((p%12)+12)%12;
-}
-function findFret(physStr, targetMod, minFret) {
-  let fret = ((targetMod-OPEN_PITCH[physStr])%12+12)%12;
-  while(fret < minFret) fret+=12;
-  return fret>17 ? -1 : fret;
-}
-function buildPattern(rootName, scale) {
-  const rPitch = rootPitchOf(rootName);
-  const startFret = ROOT_FRET[rootName]; if(startFret===undefined) return null;
-  const ivs = scale.ivs;
-  const seq = [0]; for(let i=1;i<ivs.length;i++) seq.push(ivs[i]);
-  seq.push(12); for(let i=1;i<ivs.length;i++) seq.push(12+ivs[i]); seq.push(24);
-  const targets = seq.map(iv=>((rPitch+iv)%12+12)%12);
-  const placed = []; let seqIdx=0, physStr=0, prevStringFirstFret=null;
-  while(seqIdx<targets.length && physStr<=5){
-    const minStart = prevStringFirstFret!==null ? prevStringFirstFret-1 : startFret;
-    let stringFirstFret;
-    if(physStr===0){ stringFirstFret=startFret; }
-    else { stringFirstFret=findFret(physStr,targets[seqIdx],Math.max(1,minStart)); if(stringFirstFret===-1) break; }
-    const windowMax=stringFirstFret+3; let notesOnString=0, tempIdx=seqIdx;
-    while(notesOnString<3 && tempIdx<targets.length){
-      let fret=findFret(physStr,targets[tempIdx],stringFirstFret);
-      if(fret===-1||fret>windowMax) break;
-      placed.push({phys:physStr,fret,seqIdx:tempIdx,isRoot:seq[tempIdx]%12===0});
-      notesOnString++; tempIdx++; if(tempIdx===targets.length) break;
-    }
-    prevStringFirstFret=stringFirstFret; seqIdx=tempIdx; physStr++;
-  }
-  const frets = placed.map(n=>n.fret);
-  return { placed, minFret:Math.min(...frets), maxFret:Math.max(...frets), seq };
-}
-
-function renderFretboard(rootName, scale, noteLabels, sk) {
-  const result = buildPattern(rootName, scale); if(!result) return '<p style="color:red">Could not build pattern.</p>';
-  const { placed, minFret, maxFret } = result;
-  const dispMin=minFret, dispMax=maxFret, numSlots=dispMax-dispMin+1;
-  const NUM_STR=6, leftPad=78, rightPad=36, topPad=72, bottomPad=52;
-  const strSp=48, fretW=110;
-  const svgW=leftPad+numSlots*fretW+rightPad, svgH=topPad+(NUM_STR-1)*strSp+bottomPad;
-  const ROOT_FILL='#4A90E2', NOTE_FILL='#667085', SIG_FILL='#f0a030';
-  const rPitch = rootPitchOf(rootName);
-  const sigIntervals = SIGNATURE_TONES[sk] || [];
-  const sigPitches = new Set(sigIntervals.map(iv=>((rPitch+iv)%12+12)%12));
-  function physToRow(p){ return 5-p; }
-  function slotCx(fretN){ return leftPad+(fretN-dispMin)*fretW+fretW/2; }
-  const svgStyle=`max-width:${svgW}px;width:calc(100vw - 100px);height:auto;display:block;`;
-  let svg=`<svg viewBox="0 0 ${svgW} ${svgH}" xmlns="http://www.w3.org/2000/svg" style="${svgStyle}">`;
-  svg+=`<defs><linearGradient id="mg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#faefd8"/><stop offset="100%" stop-color="#edd898"/></linearGradient><filter id="ds"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#00000040"/></filter></defs>`;
-  const fbH=(NUM_STR-1)*strSp, fbW=numSlots*fretW;
-  svg+=`<rect x="${leftPad}" y="${topPad}" width="${fbW}" height="${fbH}" fill="url(#mg)" rx="3"/>`;
-  for(let k=0;k<=numSlots;k++){ const x=leftPad+k*fretW; svg+=`<line x1="${x}" y1="${topPad}" x2="${x}" y2="${topPad+fbH}" stroke="#b8a060" stroke-width="1.8"/>`; }
-  const fretLabelY=topPad+fbH+38;
-  for(let k=0;k<numSlots;k++){ const cx=leftPad+k*fretW+fretW/2; svg+=`<text x="${cx}" y="${fretLabelY}" text-anchor="middle" font-family="ui-sans-serif,sans-serif" font-size="14" fill="#7a6840" font-weight="600">${dispMin+k}</text>`; }
-  for(const mf of [3,5,7,9,12,15,17]){
-    if(mf>=dispMin&&mf<=dispMax){ const cx=slotCx(mf), midY=topPad+fbH/2;
-      if(mf===12){ svg+=`<circle cx="${cx}" cy="${midY-strSp}" r="6" fill="#c8a860" opacity="0.5"/><circle cx="${cx}" cy="${midY+strSp}" r="6" fill="#c8a860" opacity="0.5"/>`;
-      } else { svg+=`<circle cx="${cx}" cy="${midY}" r="6" fill="#c8a860" opacity="0.5"/>`; } }
-  }
-  for(let row=0;row<NUM_STR;row++){
-    const phys=5-row, y=topPad+row*strSp, thickness=(0.7+phys*0.56).toFixed(2);
-    svg+=`<line x1="${leftPad}" y1="${y}" x2="${leftPad+fbW}" y2="${y}" stroke="#6a5838" stroke-width="${thickness}" opacity="0.75"/>`;
-    svg+=`<text x="${leftPad-16}" y="${y+5}" text-anchor="middle" font-family="ui-sans-serif,sans-serif" font-size="13" fill="#667085" font-weight="600">${STR_LABEL[phys]}</text>`;
-  }
-  for(const n of placed){
-    const row=physToRow(n.phys), y=topPad+row*strSp, cx=slotCx(n.fret);
-    const actualPitch=((OPEN_PITCH[n.phys]+n.fret)%12+12)%12;
-    const isSig=!n.isRoot&&sigPitches.has(actualPitch);
-    const fill=n.isRoot?ROOT_FILL:isSig?SIG_FILL:NOTE_FILL;
-    const label=noteLabels[n.seqIdx], fs=label.length>1?11.5:14;
-    svg+=`<circle cx="${cx}" cy="${y}" r="21" fill="${fill}" opacity="0.13"/>`;
-    svg+=`<circle cx="${cx}" cy="${y}" r="16" fill="${fill}" filter="url(#ds)"/>`;
-    svg+=`<circle cx="${cx-3}" cy="${y-4}" r="5" fill="white" opacity="0.22"/>`;
-    svg+=`<text x="${cx}" y="${y}" text-anchor="middle" dominant-baseline="central" font-family="ui-sans-serif,sans-serif" font-size="${fs}" font-weight="700" fill="white">${label}</text>`;
-  }
-  svg+=`</svg>`; return svg;
-}
-
-// ============================================================
-// UI — GENERATE
-// ============================================================
-function chordsInLabel(rootNote, scaleKey, displayName) {
-  if(scaleKey==='ionian')  return `Chords in ${rootNote} Major (Ionian)`;
-  if(scaleKey==='aeolian') return `Chords in ${rootNote} Minor (Aeolian)`;
-  return `Chords in ${rootNote} ${displayName}`;
-}
-
-function generate() {
-  const root=document.getElementById('rootSelect').value;
-  const sk=document.getElementById('scaleSelect').value;
-  const scale=SCALES[sk]; if(!scale) return;
-  const dn=DISPLAY[sk]||sk;
-  const noteNames=scale.diatonic ? buildDiatonicNotes(root,scale.ivs) : spellChromatic(root,scale.ivs);
-  const seqLabels=[noteNames[0]];
-  for(let i=1;i<noteNames.length;i++) seqLabels.push(noteNames[i]);
-  seqLabels.push(noteNames[0]);
-  for(let i=1;i<noteNames.length;i++) seqLabels.push(noteNames[i]);
-  seqLabels.push(noteNames[0]);
-
-  document.getElementById('scaleTitle').textContent=`${root} ${dn}`;
-  document.getElementById('scaleSubtitle').textContent=`${noteNames.length}-note scale · 2 Octaves`;
-  const fEl=document.getElementById('formulaRow');
-  fEl.innerHTML=scale.formula?`Formula: <strong>${scale.formula}</strong> &nbsp;·&nbsp; W = whole step, H = half step, W½ = 1½ steps`:'';
-  document.getElementById('fretboardContainer').innerHTML=renderFretboard(root,scale,seqLabels,sk);
-
-  const hasSig=SIGNATURE_TONES[sk]&&SIGNATURE_TONES[sk].length>0;
-  const legEl=document.getElementById('fretboardLegend');
-  if(legEl) legEl.innerHTML=`<div class="legend-item"><div class="legend-dot" style="background:var(--brand)"></div>Root note</div>${hasSig?'<div class="legend-item"><div class="legend-dot" style="background:#f0a030"></div>Signature tone</div>':''}`;
-  const insightEl=document.getElementById('scaleInsight');
-  if(insightEl) insightEl.textContent=SHORT_INSIGHTS[sk]||'';
-
-  const nb=document.querySelector('#notesTable tbody'); nb.innerHTML='';
-  noteNames.forEach((note,i)=>{
-    const tr=document.createElement('tr');
-    tr.innerHTML=`<td class="degree-cell">${scale.degs[i]}</td><td class="note-cell${i===0?' is-root':''}" style="padding-left:2rem">${note}</td>`;
-    nb.appendChild(tr);
-  });
-
-  const cb=document.querySelector('#chordsTable tbody'); cb.innerHTML='';
-  const prevFn=document.getElementById('chordsFootnote'); if(prevFn) prevFn.remove();
-  let chordsData=null;
-  const chordFootnoteText=(CHORD_FOOTNOTES[sk]||(r=>r))(root);
-
-  if(scale.chords){
-    document.getElementById('chordsLabel').textContent=chordsInLabel(root,sk,dn);
-    const qs=QUALITIES[scale.chordKey||sk];
-    if(qs){
-      noteNames.forEach((cr,i)=>{ const q=qs[i]; const tr=document.createElement('tr'); tr.innerHTML=`<td class="roman-cell roman-${q}">${toRoman(q,i)}</td><td class="chord-${q}" style="padding-left:2.5rem">${toSymbol(cr,q)}</td>`; cb.appendChild(tr); });
-      const fnDiv=document.createElement('div'); fnDiv.id='chordsFootnote'; fnDiv.className='chords-footnote'; fnDiv.innerHTML=chordFootnoteText;
-      document.querySelector('.table-card:last-child').appendChild(fnDiv);
-      chordsData={type:'diatonic',chords:noteNames.map((cr,i)=>({roman:toRoman(qs[i],i),symbol:toSymbol(cr,qs[i]),q:qs[i]})),footnote:chordFootnoteText};
-    }
-  } else {
-    const pc=buildParentChords(root,sk);
-    if(pc){
-      const parentLabel=chordsInLabel(root,pc.parentKey||'',pc.parentDisplayName);
-      document.getElementById('chordsLabel').textContent=`${parentLabel} (parent key of ${root} ${dn})`;
-      pc.chords.forEach(ch=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td class="roman-cell roman-${ch.q}">${ch.roman}</td><td class="chord-${ch.q}" style="padding-left:2.5rem">${ch.symbol}</td>`; cb.appendChild(tr); });
-      const fnDiv=document.createElement('div'); fnDiv.id='chordsFootnote'; fnDiv.className='chords-footnote'; fnDiv.innerHTML=chordFootnoteText;
-      document.querySelector('.table-card:last-child').appendChild(fnDiv);
-      chordsData={type:'parent',parentKey:pc.parentKey,parentDisplayName:pc.parentDisplayName,chords:pc.chords,footnote:chordFootnoteText};
-    }
-  }
-
-  document.getElementById('output').classList.add('visible');
-  _exportState={root,sk,scale,noteNames,displayName:dn,formula:scale.formula||'',chordsData};
-}
-
-function quick(root,sk){
-  document.getElementById('rootSelect').value=root;
-  document.getElementById('scaleSelect').value=sk;
-  generate();
-}
-
-// ============================================================
-// CANVAS UTILITIES
-// ============================================================
-// 1080×1440 — native 4:5 feed post
-// Zone layout:
-//   y=0–45    : bleed (cropped when grid shows 1350)
-//   y=45–90   : SCALE NAME lives here — visible in 1350, hidden in 1080 square
-//   y=90–225  : top bleed for 1080 square crop
-//   y=225–1215: SAFE ZONE — all critical content here
-//   y=1215–1395: bottom bleed
-//   y=1395–1440: bleed (cropped when grid shows 1350)
-const IG_W=1080, IG_H=1920;
-const SCALE_NAME_Y = 88;   // scale name baseline — visible in 1350 crop, hidden in square
-const CONTENT_TOP  = 225;  // safe zone top
-const CONTENT_BOT  = 1580; // safe zone bottom
-const FONT='ui-sans-serif,system-ui,sans-serif';
-
-const T={
-  TITLE:   {size:96, weight:'bold', color:'#FFFFFF'},
-  SUBTITLE:{size:64, weight:'500',  color:'rgba(255,255,255,0.82)'},
-  COL_HDR: {size:36, weight:'bold', color:'rgba(255,255,255,0.55)'},
-  DATA_LG: {size:80, weight:'bold', color:'#FFFFFF'},
-  DATA_MD: {size:52, weight:'600',  color:'rgba(255,255,255,0.65)'},
-};
-
-function setFont(ctx,t){ ctx.font=`${t.weight} ${t.size}px ${FONT}`; ctx.fillStyle=t.color; }
-function fitText(ctx,text,maxW,size,weight){
-  let s=size; ctx.font=`${weight} ${s}px ${FONT}`;
-  while(ctx.measureText(text).width>maxW&&s>24){ s-=2; ctx.font=`${weight} ${s}px ${FONT}`; }
-  return s;
-}
-function igCanvas(){ const c=document.createElement('canvas'); c.width=IG_W; c.height=IG_H; return c; }
-
-function drawBackground(ctx, tone){
-  const grad=ctx.createLinearGradient(0,0,IG_W*0.3,IG_H);
-  grad.addColorStop(0,'#3a7acc'); grad.addColorStop(0.5,'#1f5aaa'); grad.addColorStop(1,'#0a3070');
-  ctx.fillStyle=grad; ctx.fillRect(0,0,IG_W,IG_H);
-  const hl=ctx.createRadialGradient(160,140,0,160,140,550);
-  hl.addColorStop(0,'rgba(255,255,255,0.13)'); hl.addColorStop(1,'rgba(255,255,255,0)');
-  ctx.fillStyle=hl; ctx.fillRect(0,0,IG_W,IG_H);
-  const b=IG_BORDERS[tone]||IG_BORDERS.light;
-  ctx.fillStyle=b.color; ctx.fillRect(b.width,b.width,IG_W-b.width*2,ACCENT_BAND_H);
-  const inset=b.width/2; ctx.save();
-  ctx.strokeStyle=b.color; ctx.lineWidth=b.width;
-  ctx.strokeRect(inset,inset,IG_W-b.width,IG_H-b.width);
-  ctx.restore();
-}
-
-function drawTitle(ctx,line1,line2){
-  const LP = 50;
-  const maxW = IG_W - LP - 5; // 5px right padding minimum
-  const TITLE_Y = CONTENT_TOP + 80;
-  ctx.textAlign = 'left';
-  fitText(ctx, line1, maxW, T.TITLE.size, T.TITLE.weight);
-  ctx.fillStyle = T.TITLE.color;
-  ctx.fillText(line1, LP, TITLE_Y);
-  if(line2){
-    ctx.font = `${T.SUBTITLE.weight} ${T.SUBTITLE.size}px ${FONT}`;
-    ctx.fillStyle = T.SUBTITLE.color;
-    ctx.textAlign = 'left';
-    // Check if subtitle fits on one line
-    if(ctx.measureText(line2).width <= maxW){
-      ctx.fillText(line2, LP, TITLE_Y + 82);
-      return TITLE_Y + 82;
-    } else {
-      // Wrap to 2 lines
-      const words = line2.split(' ');
-      let line = '', lines = [], testLine;
-      for(const w of words){
-        testLine = line ? line + ' ' + w : w;
-        if(ctx.measureText(testLine).width > maxW && line){
-          lines.push(line); line = w;
-        } else { line = testLine; }
-      }
-      if(line) lines.push(line);
-      const LINE_H = T.SUBTITLE.size + 12;
-      lines.forEach((l, i) => ctx.fillText(l, LP, TITLE_Y + 82 + i * LINE_H));
-      return TITLE_Y + 82 + (lines.length - 1) * LINE_H;
-    }
-  }
-  return TITLE_Y;
-}
-
-function drawHRule(ctx,y){
-  ctx.save(); ctx.strokeStyle='rgba(255,255,255,0.20)'; ctx.lineWidth=1.5;
-  ctx.beginPath(); ctx.moveTo(SAFE,y); ctx.lineTo(IG_W-SAFE,y); ctx.stroke(); ctx.restore();
-}
-
-function drawWatermark(ctx){
-  const text = 'Learn Lead Guitar. Try FretTracks Free. Link in Bio.';
-  const maxW = IG_W - 100; // 50px padding each side
-  ctx.save();
-  let sz = 52;
-  ctx.font = `bold ${sz}px ${FONT}`;
-  while(ctx.measureText(text).width > maxW && sz > 28){ sz--; ctx.font = `bold ${sz}px ${FONT}`; }
-  ctx.fillStyle = 'rgba(255,255,255,0.82)';
-  ctx.textAlign = 'center';
-  ctx.fillText(text, IG_W/2, IG_H - 280); // clear Instagram hashtag overlay zone
-  ctx.restore();
-}
-
-function roundRect(ctx,x,y,w,h,r){
-  ctx.beginPath();
-  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
-  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
-  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
-  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y); ctx.closePath();
-}
-
-function canvasWrapText(ctx,text,x,y,maxW,lineH){
-  const words=text.split(' '); let line='', cy=y;
-  for(const w of words){
-    const test=line?line+' '+w:w;
-    if(ctx.measureText(test).width>maxW&&line){ ctx.fillText(line,x,cy); line=w; cy+=lineH; }
-    else line=test;
-  }
-  if(line) ctx.fillText(line,x,cy); return cy;
-}
-
-function downloadCanvas(canvas,filename){
-  const link=document.createElement('a'); link.download=filename; link.href=canvas.toDataURL('image/png'); link.click();
-}
-
-// Naming: AMinorPentatonic_panel1.png / AMinorPentatonic_thumb1.png
-const PANEL_NUMBER = { fretboard:1, scale:2, chords:3, video:4 };
-const SCALE_DISPLAY_NAME = {
-  ionian:'Major', dorian:'Dorian', phrygian:'Phrygian', lydian:'Lydian',
-  mixolydian:'Mixolydian', aeolian:'Minor', locrian:'Locrian',
-  major_pentatonic:'MajorPentatonic', minor_pentatonic:'MinorPentatonic', blues:'Blues',
-};
-function formatRoot(root) {
-  return root
-    .replace('##','DoubleSharp')
-    .replace('#','Sharp')
-    .replace('bb','DoubleFlat')
-    .replace('b','Flat');
-}
-function buildFilename(root, sk, type) {
-  const rootPart  = formatRoot(root);
-  const scalePart = SCALE_DISPLAY_NAME[sk] || sk;
-  const base      = `${rootPart}${scalePart}`;
-  const num       = PANEL_NUMBER[type] || 0;
-  const suffix    = num > 0 ? `_panel${num}` : `_${type}`;
-  return `${base}${suffix}.png`;
-}
-
-// ============================================================
-// PANEL BUILDERS (1080×1440)
-// ============================================================
-
-function buildFretboardImage(state,tone){
-  return new Promise(resolve=>{
-    const c=igCanvas(), ctx=c.getContext('2d');
-    drawBackground(ctx,tone);
-
-    const LP=50;
-    const TITLE_Y=CONTENT_TOP+80;
-    const maxW=IG_W-LP-SAFE;
-    ctx.textAlign='left';
-    fitText(ctx,`${state.root} ${state.displayName}`,maxW,T.TITLE.size,T.TITLE.weight);
-    ctx.fillStyle=T.TITLE.color; ctx.fillText(`${state.root} ${state.displayName}`,LP,TITLE_Y);
-    // Subtitle — 64px, wrap if needed, 5px min right padding
-    ctx.fillStyle='rgba(255,255,255,0.82)'; ctx.font=`500 64px ${FONT}`; ctx.textAlign='left';
-    const subText=TAGLINES[state.sk]||'';
-    const subMaxW=IG_W-LP-5;
-    const subLineH=76;
-    let subBottom=TITLE_Y+82;
-    if(ctx.measureText(subText).width<=subMaxW){
-      ctx.fillText(subText,LP,subBottom);
-    } else {
-      const words=subText.split(' '); let ln='', subLines=[];
-      for(const w of words){ const t=ln?ln+' '+w:w; if(ctx.measureText(t).width>subMaxW&&ln){subLines.push(ln);ln=w;}else ln=t; }
-      if(ln) subLines.push(ln);
-      subLines.forEach((l,i)=>ctx.fillText(l,LP,TITLE_Y+82+i*subLineH));
-      subBottom=TITLE_Y+82+(subLines.length-1)*subLineH;
-    }
-    drawHRule(ctx,subBottom+36);
-
-    const svgEl=document.querySelector('#fretboardContainer svg');
-    if(!svgEl){ drawWatermark(ctx); resolve(c); return; }
-    const svgData=new XMLSerializer().serializeToString(svgEl);
-    const svgBlob=new Blob([svgData],{type:'image/svg+xml;charset=utf-8'});
-    const url=URL.createObjectURL(svgBlob);
-    const img=new Image();
-    img.onload=()=>{
-      const vb=svgEl.viewBox.baseVal;
-      const aspect=vb.height/vb.width;
-      const cardY=subBottom+56;
-      const maxCardW=IG_W-SAFE*2;
-
-      // Measure insight lines at actual draw width
-      const rawInsight=FULL_INSIGHTS[state.sk]||'';
-      const fullInsight=typeof rawInsight==='function' ? rawInsight(state.root) : rawInsight;
-      const FONT_SIZE=52, LINE_H=70;
-      const insightMaxW=IG_W-LP-SAFE;
-      ctx.font=`italic 400 ${FONT_SIZE}px ${FONT}`;
-      let insightLines=0;
-      if(fullInsight){
-        const words=fullInsight.split(' '); let ln='';
-        for(const w of words){ const t=ln?ln+' '+w:w; if(ctx.measureText(t).width>insightMaxW&&ln){insightLines++;ln=w;}else ln=t; }
-        insightLines++;
-      }
-      // RESERVE: legend(50) + rule(16) + insight(lines*LINE_H) + rule(16) + wm(50)
-      const RESERVE=50+16+(insightLines*LINE_H)+16+50;
-      const maxCardH=CONTENT_BOT-cardY-RESERVE;
-      let cardW=maxCardW, cardH=Math.round(cardW*aspect);
-      if(cardH>maxCardH){ cardH=maxCardH; cardW=Math.round(cardH/aspect); }
-      const cardX=SAFE+(maxCardW-cardW)/2;
-
-      ctx.save(); ctx.shadowColor='rgba(0,0,0,0.28)'; ctx.shadowBlur=36; ctx.shadowOffsetY=10;
-      roundRect(ctx,cardX,cardY,cardW,cardH+24,28); ctx.fillStyle='#FFFFFF'; ctx.fill(); ctx.restore();
-      ctx.drawImage(img,cardX+8,cardY+12,cardW-16,cardH);
-      URL.revokeObjectURL(url);
-
-      // Legend — centered under the card, slightly bigger font
-      const hasSig=SIGNATURE_TONES[state.sk]&&SIGNATURE_TONES[state.sk].length>0;
-      const legY=cardY+cardH+78;
-      const DOT_R=14, DOT_GAP=12;
-      const LEG_FONT=34;
-      ctx.font=`600 ${LEG_FONT}px ${FONT}`;
-      const rootW=ctx.measureText('Root note').width;
-      const sigW=hasSig?ctx.measureText('Signature tone').width:0;
-      const itemW=DOT_R*2+DOT_GAP+rootW;
-      const totalLegW=hasSig?itemW+50+DOT_R*2+DOT_GAP+sigW:itemW;
-      let legX=(IG_W-totalLegW)/2;
-      ctx.save(); ctx.beginPath(); ctx.arc(legX+DOT_R,legY,DOT_R,0,Math.PI*2);
-      ctx.fillStyle='#4A90E2'; ctx.fill(); ctx.restore();
-      ctx.fillStyle='#FFFFFF'; ctx.textAlign='left';
-      ctx.fillText('Root note',legX+DOT_R*2+DOT_GAP,legY+LEG_FONT*0.36);
-      if(hasSig){
-        legX+=itemW+50;
-        ctx.save(); ctx.beginPath(); ctx.arc(legX+DOT_R,legY,DOT_R,0,Math.PI*2);
-        ctx.fillStyle='#f0a030'; ctx.fill(); ctx.restore();
-        ctx.fillStyle='#FFFFFF';
-        ctx.fillText('Signature tone',legX+DOT_R*2+DOT_GAP,legY+LEG_FONT*0.36);
-      }
-
-      // Insight paragraph — same style as panel 2 flat note (52px, italic, 90% opacity)
-      const ruleAbove=legY+44, ruleBelow=CONTENT_BOT-10;
-      drawHRule(ctx,ruleAbove);
-      if(fullInsight){
-        const FONT_SIZE=52, LINE_H=70;
-        ctx.font=`italic 400 ${FONT_SIZE}px ${FONT}`;
-        const words=fullInsight.split(' '); let line='', lines=1;
-        for(const w of words){ const test=line?line+' '+w:w; if(ctx.measureText(test).width>IG_W-LP-SAFE&&line){lines++;line=w;}else line=test; }
-        const paraH=lines*LINE_H, availH=ruleBelow-ruleAbove;
-        const startY=ruleAbove+(availH-paraH)/2+FONT_SIZE;
-        ctx.fillStyle='rgba(255,255,255,0.90)'; ctx.textAlign='left';
-        canvasWrapText(ctx,fullInsight,LP,startY,IG_W-LP-SAFE,LINE_H);
-      }
-      drawHRule(ctx,CONTENT_BOT-10); drawWatermark(ctx); resolve(c);
-    };
-    img.onerror=()=>{ drawWatermark(ctx); resolve(c); };
-    img.src=url;
-  });
-}
-
-function buildScaleImage(state,tone){
-  const c=igCanvas(), ctx=c.getContext('2d');
-  drawBackground(ctx,tone);
-  const LP=50;
-  const titleY=drawTitle(ctx,'The Notes',`${state.root} ${state.displayName} · Scale Degrees`);
-  const tableTop=titleY+36;
-  drawHRule(ctx,tableTop-14);
-  const rows=state.noteNames.length;
-  const hasFlats=state.scale.degs.some(d=>d.includes('b'));
-  const hasSharps=state.scale.degs.some(d=>d.includes('#'));
-  const FLAT_NOTE_H = (hasFlats||hasSharps) ? 160 : 0;
-  const tableBot=CONTENT_BOT - FLAT_NOTE_H - 20;
-  const rowH=Math.floor((tableBot-tableTop)/(rows+1));
-  const colDeg=LP+20, colNote=LP+380;
-  setFont(ctx,T.COL_HDR); ctx.textAlign='left';
-  ctx.fillText('DEGREE',colDeg,tableTop+46);
-  ctx.fillText('NOTE',colNote,tableTop+46);
-  drawHRule(ctx,tableTop+64);
-  state.noteNames.forEach((note,i)=>{
-    const rowY=tableTop+64+i*rowH, textY=rowY+rowH*0.72, textY2=rowY+rowH*0.82;
-    if(i%2===0){ ctx.save(); ctx.fillStyle='rgba(255,255,255,0.07)'; ctx.fillRect(SAFE,rowY,IG_W-SAFE*2,rowH); ctx.restore(); }
-    if(i>0){ ctx.save(); ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(SAFE,rowY); ctx.lineTo(IG_W-SAFE,rowY); ctx.stroke(); ctx.restore(); }
-    setFont(ctx,T.DATA_MD); ctx.textAlign='left'; ctx.fillText(state.scale.degs[i],colDeg,textY);
-    ctx.fillStyle='#FFFFFF'; ctx.font=`bold ${T.DATA_LG.size}px ${FONT}`; ctx.textAlign='left'; ctx.fillText(note,colNote,textY2);
-    if(i===0){ ctx.save(); ctx.strokeStyle='rgba(255,255,255,0.55)'; ctx.lineWidth=4; const tw=ctx.measureText(note).width; ctx.beginPath(); ctx.moveTo(colNote,textY2+10); ctx.lineTo(colNote+tw,textY2+10); ctx.stroke(); ctx.restore(); }
-  });
-  // Footnote — only if scale has flat or sharp degrees
-  if(hasFlats || hasSharps){
-    const fnY=tableBot+10;
-    drawHRule(ctx,fnY);
-    ctx.fillStyle='rgba(255,255,255,0.90)';
-    ctx.font=`italic 400 44px ${FONT}`;
-    ctx.textAlign='left';
-    let fnText='';
-    if(hasFlats && hasSharps)
-      fnText='Scale degrees marked "b" are flat and "#" are sharp, relative to the major scale.';
-    else if(hasFlats)
-      fnText='A scale degree referenced as "b" or flat, is flat compared to the major scale.';
-    else
-      fnText='A scale degree referenced as "#" or sharp, is sharp compared to the major scale.';
-    canvasWrapText(ctx,fnText,LP,fnY+56,IG_W-LP-5,58);
-  }
-  drawHRule(ctx,CONTENT_BOT-10); drawWatermark(ctx);
-  return Promise.resolve(c);
-}
-
-function buildChordsImage(state,tone){
-  const c=igCanvas(), ctx=c.getContext('2d');
-  drawBackground(ctx,tone);
-  const LP=50;
-  const cd=state.chordsData;
-  const titleY=drawTitle(ctx,'The Chords',`Play ${state.root} ${state.displayName} Over These Chords`);
-  const chordsTableTop=titleY+36;
-  drawHRule(ctx,chordsTableTop-14);
-  const footnoteText=(CHORD_FOOTNOTES[state.sk]||(r=>r))(state.root);
-  const FN_SIZE=42, FN_LINE_H=FN_SIZE+12, FN_MAX_W=IG_W-LP-SAFE;
-  ctx.font=`400 ${FN_SIZE}px ${FONT}`;
-  const words=footnoteText.split(' '); let fnLines=1, testLine='';
-  for(const w of words){ const test=testLine?testLine+' '+w:w; if(ctx.measureText(test).width>FN_MAX_W&&testLine){fnLines++;testLine=w;}else testLine=test; }
-  const fnBlockH=fnLines*FN_LINE_H+60;
-  const tableTop=chordsTableTop, tableBot=CONTENT_BOT-fnBlockH-20;
-  const chords=cd?cd.chords:[];
-  const rowH=Math.floor((tableBot-tableTop)/(chords.length+1));
-  const colNash=LP, colChord=LP+420;
-  // Reduced chord font size
-  const CHORD_LG=64, CHORD_MD=46;
-  setFont(ctx,T.COL_HDR); ctx.textAlign='left';
-  ctx.fillText('ROMAN NUMERALS',colNash,tableTop+46); ctx.fillText('CHORD',colChord,tableTop+46);
-  drawHRule(ctx,tableTop+64);
-  chords.forEach((ch,i)=>{
-    const rowY=tableTop+64+i*rowH, textY=rowY+rowH*0.72, textY2=rowY+rowH*0.82;
-    if(i%2===0){ ctx.save(); ctx.fillStyle='rgba(255,255,255,0.07)'; ctx.fillRect(SAFE,rowY,IG_W-SAFE*2,rowH); ctx.restore(); }
-    if(i>0){ ctx.save(); ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(SAFE,rowY); ctx.lineTo(IG_W-SAFE,rowY); ctx.stroke(); ctx.restore(); }
-    ctx.fillStyle='rgba(255,255,255,0.65)'; ctx.font=`600 ${CHORD_MD}px ${FONT}`; ctx.textAlign='left'; ctx.fillText(ch.roman,colNash,textY);
-    ctx.fillStyle='#FFFFFF'; ctx.font=`bold ${CHORD_LG}px ${FONT}`; ctx.fillText(ch.symbol,colChord,textY2);
-  });
-  const fnY=tableBot+20;
-  drawHRule(ctx,fnY-16); ctx.fillStyle='rgba(255,255,255,0.80)'; ctx.font=`400 ${FN_SIZE}px ${FONT}`; ctx.textAlign='left';
-  canvasWrapText(ctx,footnoteText,LP,fnY+FN_SIZE+8,FN_MAX_W,FN_LINE_H);
-  drawHRule(ctx,CONTENT_BOT-10); drawWatermark(ctx);
-  return Promise.resolve(c);
-}
-
-// Panel 4 display name — Ionian→Major, Aeolian→Minor, everything else as-is
-const VIDEO_SCALE_NAME = {
-  ionian:'Major', dorian:'Dorian', phrygian:'Phrygian', lydian:'Lydian',
-  mixolydian:'Mixolydian', aeolian:'Minor', locrian:'Locrian',
-  major_pentatonic:'Minor Pentatonic', minor_pentatonic:'Minor Pentatonic', blues:'Blues',
-};
-// Fix major_pentatonic display
-VIDEO_SCALE_NAME['major_pentatonic'] = 'Major Pentatonic';
-
-function buildVideoImage(state,tone){
-  const c=igCanvas(), ctx=c.getContext('2d');
-  drawBackground(ctx,tone);
-  const LP=50;
-  const VIDEO_TITLE_Y=CONTENT_TOP+80;
-
-  // Dynamic title: "The [Root] [ScaleName] Sound"
-  const vidScaleName = VIDEO_SCALE_NAME[state.sk] || state.displayName;
-  const vidTitle = `The ${state.root} ${vidScaleName} Sound`;
-  const maxW = IG_W - LP - 5;
-  ctx.textAlign='left';
-  fitText(ctx, vidTitle, maxW, T.TITLE.size, T.TITLE.weight);
-  ctx.fillStyle='#FFFFFF'; ctx.fillText(vidTitle, LP, VIDEO_TITLE_Y);
-
-  // Subtitle — two natural lines, wrap if needed
-  const vidSub='Imagine playing like this. With FretTracks — you can!';
-  ctx.fillStyle='rgba(255,255,255,0.82)'; ctx.font=`500 64px ${FONT}`; ctx.textAlign='left';
-  const vidMaxW=IG_W-LP-5;
-  const vidLineH=76;
-  let vidSubBottom=VIDEO_TITLE_Y+82;
-  if(ctx.measureText(vidSub).width<=vidMaxW){
-    ctx.fillText(vidSub,LP,vidSubBottom);
-  } else {
-    const words=vidSub.split(' '); let ln='', vidLines=[];
-    for(const w of words){ const t=ln?ln+' '+w:w; if(ctx.measureText(t).width>vidMaxW&&ln){vidLines.push(ln);ln=w;}else ln=t; }
-    if(ln) vidLines.push(ln);
-    vidLines.forEach((l,i)=>ctx.fillText(l,LP,VIDEO_TITLE_Y+82+i*vidLineH));
-    vidSubBottom=VIDEO_TITLE_Y+82+(vidLines.length-1)*vidLineH;
-  }
-  drawHRule(ctx,vidSubBottom+36);
-  // Open middle — clean background for video overlay
-  drawWatermark(ctx);
-  return Promise.resolve(c);
-}
-
-// ============================================================
-// PROOF SHEET — 4 panels side by side
-// ============================================================
-async function buildProofSheet(canvases, state) {
-  const THUMB_W  = 360;
-  const THUMB_H  = Math.round(THUMB_W * IG_H / IG_W); // maintain aspect ratio
-  const MARGIN   = 32;
-  const GAP      = 20;
-  const LABEL_H  = 48;
-  const HEADER_H = 68;
-  const FOOTER_H = 44;
-  const cols     = canvases.length;
-  const totalW   = MARGIN*2 + THUMB_W*cols + GAP*(cols-1);
-  const totalH   = MARGIN + HEADER_H + THUMB_H + LABEL_H + FOOTER_H + MARGIN;
-
-  const c = document.createElement('canvas');
-  c.width = totalW; c.height = totalH;
-  const ctx = c.getContext('2d');
-
-  ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0,0,totalW,totalH);
-
-  // Header
-  const toneLabel = _igTone==='light'?'Blue Border':_igTone==='med'?'Green Border':'Gold Border';
-  ctx.fillStyle='#212121'; ctx.font=`bold 32px ui-sans-serif,system-ui,sans-serif`;
-  ctx.textAlign='center';
-  ctx.fillText(`${state.root} ${state.displayName}  ·  ${toneLabel}  ·  Proof Sheet`, totalW/2, MARGIN+42);
-  ctx.strokeStyle='#E0E0E0'; ctx.lineWidth=1;
-  ctx.beginPath(); ctx.moveTo(MARGIN,MARGIN+HEADER_H-8); ctx.lineTo(totalW-MARGIN,MARGIN+HEADER_H-8); ctx.stroke();
-
-  const LABELS=['1 — The Tab','2 — The Notes','3 — The Chords','4 — The Sound'];
-  const thumbY=MARGIN+HEADER_H;
-
-  canvases.forEach((thumb,i)=>{
-    const thumbX=MARGIN+i*(THUMB_W+GAP);
-    ctx.save(); ctx.shadowColor='rgba(0,0,0,0.15)'; ctx.shadowBlur=10; ctx.shadowOffsetY=3;
-    ctx.fillStyle='#FFFFFF'; ctx.fillRect(thumbX,thumbY,THUMB_W,THUMB_H); ctx.restore();
-    ctx.drawImage(thumb,thumbX,thumbY,THUMB_W,THUMB_H);
-    ctx.strokeStyle='#CCCCCC'; ctx.lineWidth=1;
-    ctx.strokeRect(thumbX,thumbY,THUMB_W,THUMB_H);
-    ctx.fillStyle='#444e60'; ctx.font=`600 20px ui-sans-serif,system-ui,sans-serif`;
-    ctx.textAlign='center';
-    ctx.fillText(LABELS[i],thumbX+THUMB_W/2,thumbY+THUMB_H+32);
-  });
-
-  ctx.fillStyle='#AAAAAA'; ctx.font=`400 16px ui-sans-serif,system-ui,sans-serif`; ctx.textAlign='center';
-  ctx.fillText('FretTracks Scale Explorer  ·  1080×1920px  ·  proof sheet', totalW/2, totalH-MARGIN-8);
-  return c;
-}
-
-// ============================================================
-// SERIES OVERLAY — chapter card for panels 1-3
-// ============================================================
-const PANEL_LABELS = ['The Tab', 'The Notes', 'The Chords', 'The Sound'];
-
-function drawSeriesOverlay(ctx, panelNum, state, tone, alpha) {
-  if(alpha <= 0) return;
-  ctx.save();
-  ctx.globalAlpha = alpha;
-
-  // Full canvas dim
-  ctx.fillStyle = 'rgba(0,0,0,0.70)';
-  ctx.fillRect(0, 0, IG_W, IG_H);
-
-  // Card dimensions — taller to fit footer line
-  const cardW = 860, cardH = 560;
-  const cardX = (IG_W - cardW) / 2;
-  const cardY = (IG_H - cardH) / 2;
-  const cardR = 24;
-  const borderColor = (IG_BORDERS[tone] || IG_BORDERS.light).color;
-
-  // Card background
-  ctx.globalAlpha = alpha;
-  roundRect(ctx, cardX, cardY, cardW, cardH, cardR);
-  ctx.fillStyle = '#0d3060';
-  ctx.fill();
-
-  // Card border
-  roundRect(ctx, cardX, cardY, cardW, cardH, cardR);
-  ctx.strokeStyle = borderColor;
-  ctx.lineWidth = 6;
-  ctx.stroke();
-
-  // Title line: "A Dorian – Part 2 of 4"
-  const vidScaleName = VIDEO_SCALE_NAME[state.sk] || state.displayName;
-  const titleText = `${state.root} ${vidScaleName} \u2013 Part ${panelNum} of 4`;
-  ctx.font = `bold 52px ${FONT}`;
-  ctx.fillStyle = '#FFFFFF';
-  ctx.textAlign = 'left';
-  ctx.fillText(titleText, cardX + 48, cardY + 80);
-
-  // Divider under title
-  ctx.strokeStyle = borderColor;
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(cardX + 48, cardY + 104);
-  ctx.lineTo(cardX + cardW - 48, cardY + 104);
-  ctx.stroke();
-
-  // Bullet list
-  const items = PANEL_LABELS;
-  const listTop = cardY + 148;
-  const lineH = 72;
-  const dotX = cardX + 72;
-  const textX = cardX + 108;
-
-  items.forEach((label, i) => {
-    const isCurrent = (i + 1) === panelNum;
-    const y = listTop + i * lineH;
-
-    // Bullet dot
-    ctx.beginPath();
-    ctx.arc(dotX, y - 10, isCurrent ? 10 : 7, 0, Math.PI * 2);
-    ctx.fillStyle = isCurrent ? borderColor : 'rgba(255,255,255,0.40)';
-    ctx.fill();
-
-    // Label
-    ctx.font = isCurrent ? `bold 52px ${FONT}` : `400 48px ${FONT}`;
-    ctx.fillStyle = isCurrent ? '#FFFFFF' : 'rgba(255,255,255,0.45)';
-    ctx.textAlign = 'left';
-    ctx.fillText(label, textX, y);
-  });
-
-  // Divider above footer
-  const footerDivY = cardY + cardH - 90;
-  ctx.strokeStyle = `rgba(255,255,255,0.20)`;
-  ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  ctx.moveTo(cardX + 48, footerDivY);
-  ctx.lineTo(cardX + cardW - 48, footerDivY);
-  ctx.stroke();
-
-  // Footer line
-  ctx.font = `italic 400 38px ${FONT}`;
-  // Convert border hex color to rgba at 85% opacity
-  ctx.fillStyle = borderColor + 'D9'; // D9 = ~85% in hex
-  ctx.textAlign = 'center';
-  ctx.fillText('See the full series on our profile', cardX + cardW / 2, footerDivY + 52);
-
-  ctx.globalAlpha = 1;
-  ctx.restore();
-}
-
-// ============================================================
-// VIDEO COMPOSITE — Panel 4
-// ============================================================
-
-// Video inset layout constants
-const VID_INSET_X = 40;
-const VID_INSET_W = IG_W - 80;
-const VID_INSET_BORDER = 7;
-const VID_INSET_RADIUS = 16;
-
-function validateVideoAspect(videoEl) {
-  const w = videoEl.videoWidth, h = videoEl.videoHeight;
-  if(h === 0) return false;
-  const ratio = w / h;
-  return ratio >= 1.7 && ratio <= 1.85; // 16:9 = 1.777
-}
-
-function loadVideoElement(file) {
-  return new Promise((resolve, reject) => {
-    const url = URL.createObjectURL(file);
-    const vid = document.createElement('video');
-    vid.src = url;
-    vid.muted = false;
-    vid.preload = 'auto';
-    vid.onloadedmetadata = () => resolve(vid);
-    vid.onerror = () => reject(new Error(`Could not load video: ${file.name}`));
-  });
-}
-
-async function buildVideoComposite(backgroundCanvas, videoFile, tone, filename) {
-  setExportStatus('⚙️ Loading backing video…');
-
-  const vid = await loadVideoElement(videoFile);
-
-  // Validate 16:9
-  if(!validateVideoAspect(vid)) {
-    URL.revokeObjectURL(vid.src);
-    throw new Error(`Video '${videoFile.name}' is not 16:9 landscape. Please provide a horizontally-oriented 16:9 video (e.g. 1920×1080 or 1280×720).`);
-  }
-
-  const vidW = vid.videoWidth, vidH = vid.videoHeight;
-  const duration = Math.min(vid.duration, 25); // cap at 25 seconds
-  const FPS = 30;
-  const totalFrames = Math.round(duration * FPS);
-
-  // Inset dimensions
-  const insetW = VID_INSET_W;
-  const insetH = Math.round(insetW * vidH / vidW);
-  const insetX = VID_INSET_X;
-
-  // Vertically center inset in open space (below hrule ~y=560, above watermark ~y=1580)
-  const openTop = 560, openBot = 1560;
-  const insetY = Math.round((openTop + openBot - insetH) / 2);
-
-  const borderColor = (IG_BORDERS[tone] || IG_BORDERS.light).color;
-
-  // Off-screen canvas for video frames
-  const work = document.createElement('canvas');
-  work.width = IG_W; work.height = IG_H;
-  const wctx = work.getContext('2d');
-
-  // Temp canvas for video frame extraction
-  const vidCanvas = document.createElement('canvas');
-  vidCanvas.width = vidW; vidCanvas.height = vidH;
-  const vctx = vidCanvas.getContext('2d');
-
-  // Write background canvas as static image to FFmpeg
-  const ffmpeg = await getFFmpeg();
-  const { fetchFile } = FFmpeg;
-
-  setExportStatus('⚙️ Rendering Panel 4 composite frames…');
-
-  const frameBlobs = [];
-  for(let f = 0; f < totalFrames; f++) {
-    const t = (f / FPS);
-
-    // Seek video to time t
-    await new Promise(res => {
-      vid.currentTime = t;
-      vid.onseeked = res;
-    });
-
-    // Draw background
-    wctx.clearRect(0, 0, IG_W, IG_H);
-    wctx.drawImage(backgroundCanvas, 0, 0);
-
-    // Draw video frame
-    vctx.drawImage(vid, 0, 0);
-    wctx.drawImage(vidCanvas, insetX, insetY, insetW, insetH);
-
-    // Draw border around video inset
-    wctx.save();
-    roundRect(wctx, insetX - VID_INSET_BORDER, insetY - VID_INSET_BORDER,
-      insetW + VID_INSET_BORDER*2, insetH + VID_INSET_BORDER*2, VID_INSET_RADIUS);
-    wctx.strokeStyle = borderColor;
-    wctx.lineWidth = VID_INSET_BORDER;
-    wctx.stroke();
-    wctx.restore();
-
-    const blob = await new Promise(res => work.toBlob(res, 'image/png'));
-    frameBlobs.push(blob);
-
-    if(f % 30 === 0) setExportStatus(`⚙️ Rendering Panel 4 frames… ${Math.round(f/totalFrames*100)}%`);
-  }
-
-  URL.revokeObjectURL(vid.src);
-
-  setExportStatus('⚙️ Encoding Panel 4 MP4 with audio…');
-
-  // Write video frames
-  for(let i = 0; i < frameBlobs.length; i++) {
-    ffmpeg.FS('writeFile', `vframe${String(i).padStart(4,'0')}.png`, await fetchFile(frameBlobs[i]));
-  }
-
-  // Write original video for audio extraction
-  ffmpeg.FS('writeFile', 'backvid.mp4', await fetchFile(videoFile));
-
-  // Encode with audio from original video — trim to 25s, fade audio last 2s
-  await ffmpeg.run(
-    '-framerate', String(FPS),
-    '-i', 'vframe%04d.png',
-    '-i', 'backvid.mp4',
-    '-map', '0:v',
-    '-map', '1:a',
-    '-t', '25',
-    '-c:v', 'libx264',
-    '-preset', 'fast',
-    '-pix_fmt', 'yuv420p',
-    '-c:a', 'aac',
-    '-af', 'afade=t=out:st=23:d=2',
-    '-movflags', '+faststart',
-    'vidout.mp4'
-  );
-
-  const data = ffmpeg.FS('readFile', 'vidout.mp4');
-
-  // Cleanup
-  for(let i = 0; i < frameBlobs.length; i++) ffmpeg.FS('unlink', `vframe${String(i).padStart(4,'0')}.png`);
-  ffmpeg.FS('unlink', 'backvid.mp4');
-  ffmpeg.FS('unlink', 'vidout.mp4');
-
-  const mp4Blob = new Blob([data.buffer], { type:'video/mp4' });
-  const url = URL.createObjectURL(mp4Blob);
-  const link = document.createElement('a');
-  link.download = filename.replace('.png', '.mp4');
-  link.href = url;
-  link.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
-
-// Single mode video picker handler
-function handleSingleVideo(event) {
-  const file = event.target.files[0];
-  event.target.value = '';
-  if(!file) return;
-  _singleVideoFile = file;
-  // Continue fullset export now that we have the video
-  _pendingFullSetExport();
-}
-
-// Batch mode video picker handler
-function handleBatchVideos(event) {
-  const files = Array.from(event.target.files);
-  event.target.value = '';
-  _batchVideoMap = {};
-  files.forEach(f => { _batchVideoMap[f.name] = f; });
-  // Continue batch after videos loaded
-  _pendingBatchExport();
-}
-
-let _pendingFullSetExport = () => {};
-let _pendingBatchExport = () => {};
-
-
-
-const VALID_KEYS = new Set(['C','C#','Db','D','Eb','E','F','F#','Gb','G','Ab','A','Bb','B']);
-
-const SCALE_NAME_MAP = {
-  'major':'ionian', 'ionian':'ionian',
-  'minor':'aeolian', 'aeolian':'aeolian',
-  'dorian':'dorian',
-  'phrygian':'phrygian',
-  'lydian':'lydian',
-  'mixolydian':'mixolydian',
-  'locrian':'locrian',
-  'major pentatonic':'major_pentatonic', 'major_pentatonic':'major_pentatonic',
-  'minor pentatonic':'minor_pentatonic', 'minor_pentatonic':'minor_pentatonic',
-  'blues':'blues',
-};
-
-const BORDER_NAME_MAP = {
-  'blue':'light', 'green':'med', 'gold':'dark', 'cyan':'cyan',
-};
-
-function triggerBatchProcess(){
-  document.getElementById('batchFileInput').click();
-}
-
-function setBatchStatus(html, color){
-  const el = document.getElementById('batchStatus');
-  el.style.display = 'block';
-  el.style.color = color || 'var(--ink)';
-  el.innerHTML = html;
-}
-
-async function handleBatchFile(event){
-  const file = event.target.files[0];
-  event.target.value = '';
-  if(!file) return;
-
-  setBatchStatus('Reading file…');
-
-  let rows;
-  try {
-    const data = await file.arrayBuffer();
-    const wb = XLSX.read(data, { type:'array' });
-    const ws = wb.Sheets[wb.SheetNames[0]];
-    const raw = XLSX.utils.sheet_to_json(ws, { defval:'' });
-    if(!raw || raw.length === 0){
-      setBatchStatus('❌ File is empty or could not be read.', '#a02020');
-      return;
-    }
-    rows = raw.map(r => {
-      const normalized = {};
-      Object.keys(r).forEach(k => { normalized[k.toLowerCase().trim()] = String(r[k]).trim(); });
-      return normalized;
-    });
-  } catch(err) {
-    setBatchStatus('❌ Could not read file: ' + err.message, '#a02020');
-    return;
-  }
-
-  // Validate all rows first
-  const errors = [];
-  const parsed = [];
-
-  rows.forEach((r, i) => {
-    const rowNum = i + 2;
-    const keyRaw = r['key'] || '';
-    const scaleRaw = r['scale'] || '';
-    const borderRaw = r['border'] || '';
-    const videoRaw = r['video'] || '';
-
-    const keyVal = keyRaw.charAt(0).toUpperCase() + keyRaw.slice(1);
-    const scaleKey = SCALE_NAME_MAP[scaleRaw.toLowerCase()];
-    const toneKey = BORDER_NAME_MAP[borderRaw.toLowerCase()];
-
-    if(!keyRaw) errors.push(`Row ${rowNum}: Key is missing`);
-    else if(!VALID_KEYS.has(keyVal)) errors.push(`Row ${rowNum}: '${keyRaw}' is not a valid key`);
-
-    if(!scaleRaw) errors.push(`Row ${rowNum}: Scale is missing`);
-    else if(!scaleKey) errors.push(`Row ${rowNum}: '${scaleRaw}' is not a valid scale`);
-
-    if(!borderRaw) errors.push(`Row ${rowNum}: Border is missing`);
-    else if(!toneKey) errors.push(`Row ${rowNum}: '${borderRaw}' is not a valid border color (use Blue, Green, Gold, or Cyan)`);
-
-    if(!videoRaw) errors.push(`Row ${rowNum}: Video filename is missing`);
-
-    if(VALID_KEYS.has(keyVal) && scaleKey && toneKey && videoRaw){
-      parsed.push({ root: keyVal, sk: scaleKey, tone: toneKey, videoName: videoRaw, label: `${keyVal} ${DISPLAY[scaleKey]||scaleKey}` });
-    }
-  });
-
-  if(errors.length > 0){
-    setBatchStatus('<strong>❌ Validation failed — fix these errors and try again:</strong><br><br>' + errors.map(e=>`• ${e}`).join('<br>'), '#a02020');
-    return;
-  }
-
-  // Validation passed — now prompt for video files
-  setBatchStatus(`✅ Validation passed. Click below to select all ${parsed.length} backing track video files.<br><br><button onclick="document.getElementById('batchVideoInput').click()" style="background:#1a7a4a;color:white;border:none;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;width:100%;">📂 Select Video Files</button>`);
-  _pendingBatchExport = async () => {
-    // Verify all video filenames are present
-    const missingVideos = parsed.filter(p => !_batchVideoMap[p.videoName]).map(p => p.videoName);
-    if(missingVideos.length > 0){
-      setBatchStatus('<strong>❌ Missing video files:</strong><br><br>' + missingVideos.map(v=>`• ${v}`).join('<br>') + '<br><br>Please re-select all video files.', '#a02020');
-      return;
-    }
-
-    setBatchStatus(`✅ All videos loaded. Starting batch export of ${parsed.length} scales…`);
-    await new Promise(r => setTimeout(r, 300));
-
-    let filesExported = 0;
-    try {
-      for(let i = 0; i < parsed.length; i++){
-        const { root, sk, tone, videoName, label } = parsed[i];
-        setBatchStatus(`⚙️ Processing row ${i+1} of ${parsed.length} — ${label} (${tone})`);
-
-        const scale = SCALES[sk];
-        const dn = DISPLAY[sk] || sk;
-        const noteNames = scale.diatonic ? buildDiatonicNotes(root, scale.ivs) : spellChromatic(root, scale.ivs);
-        const seqLabels = [noteNames[0]];
-        for(let j=1;j<noteNames.length;j++) seqLabels.push(noteNames[j]);
-        seqLabels.push(noteNames[0]);
-        for(let j=1;j<noteNames.length;j++) seqLabels.push(noteNames[j]);
-        seqLabels.push(noteNames[0]);
-
-        let chordsData = null;
-        const chordFootnoteText = (CHORD_FOOTNOTES[sk]||(r=>r))(root);
-        if(scale.chords){
-          const qs = QUALITIES[scale.chordKey||sk];
-          if(qs) chordsData = { type:'diatonic', chords: noteNames.map((cr,idx)=>({roman:toRoman(qs[idx],idx),symbol:toSymbol(cr,qs[idx]),q:qs[idx]})), footnote:chordFootnoteText };
-        } else {
-          const pc = buildParentChords(root, sk);
-          if(pc) chordsData = { type:'parent', parentKey:pc.parentKey, parentDisplayName:pc.parentDisplayName, chords:pc.chords, footnote:chordFootnoteText };
-        }
-
-        document.getElementById('fretboardContainer').innerHTML = renderFretboard(root, scale, seqLabels, sk);
-        const s = { root, sk, scale, noteNames, displayName:dn, formula:scale.formula||'', chordsData };
-
-        const c1 = await buildFretboardImage(s, tone);
-        const c2 = await buildScaleImage(s, tone);
-        const c3 = await buildChordsImage(s, tone);
-        const c4 = await buildVideoImage(s, tone);
-
-        setBatchStatus(`📄 Row ${i+1} of ${parsed.length} — ${label}: building proof sheet…`);
-        const proof = await buildProofSheet([c1,c2,c3,c4], s);
-        downloadCanvas(proof, buildFilename(root, sk, 'proof'));
-        filesExported++;
-
-        setBatchStatus(`🎬 Row ${i+1} of ${parsed.length} — ${label}: encoding video 1 of 3…`);
-        await recordPanelAsMP4(c1, 1, s, tone, buildFilename(root, sk, 'fretboard'));
-        filesExported++;
-        setBatchStatus(`🎬 Row ${i+1} of ${parsed.length} — ${label}: encoding video 2 of 3…`);
-        await recordPanelAsMP4(c2, 2, s, tone, buildFilename(root, sk, 'scale'));
-        filesExported++;
-        setBatchStatus(`🎬 Row ${i+1} of ${parsed.length} — ${label}: encoding video 3 of 3…`);
-        await recordPanelAsMP4(c3, 3, s, tone, buildFilename(root, sk, 'chords'));
-        filesExported++;
-
-        setBatchStatus(`🎬 Row ${i+1} of ${parsed.length} — ${label}: compositing Panel 4…`);
-        await buildVideoComposite(c4, _batchVideoMap[videoName], tone, buildFilename(root, sk, 'video'));
-        filesExported++;
-      }
-
-      setBatchStatus(`✅ Complete! ${parsed.length} scales processed · ${filesExported} files exported.`, '#1a7a4a');
-
-    } catch(err) {
-      setBatchStatus(`❌ Error during processing: ${err.message}`, '#a02020');
-    }
-  };
-  document.getElementById('batchVideoInput').click();
-}
-
-
-let _ffmpeg = null;
-
-async function getFFmpeg() {
-  if (_ffmpeg) return _ffmpeg;
-  const { createFFmpeg } = FFmpeg;
-  _ffmpeg = createFFmpeg({
-    log: false,
-    corePath: 'https://unpkg.com/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js',
-  });
-  await _ffmpeg.load();
-  return _ffmpeg;
-}
-
-function setExportStatus(msg) {
-  const btn = document.getElementById('btnFullSet');
-  if (btn) btn.textContent = msg || '🎬 Download Full Set';
-}
-
-async function recordPanelAsMP4(staticCanvas, panelNum, state, tone, filename) {
-  const FPS = 30;
-  const DURATION = 10; // seconds
-  const FADE_START = 0.5;
-  const HOLD_START = 1.0;
-  const FADE_OUT_START = 4.0;
-  const FADE_OUT_END = 4.5;
-  const TOTAL_FRAMES = FPS * DURATION;
-
-  // Working canvas
-  const work = document.createElement('canvas');
-  work.width = IG_W; work.height = IG_H;
-  const wctx = work.getContext('2d');
-
-  // Render all frames
-  const frameBlobs = [];
-  for (let f = 0; f < TOTAL_FRAMES; f++) {
-    const t = f / FPS;
-    let alpha = 0;
-    if (t >= FADE_START && t < HOLD_START)
-      alpha = (t - FADE_START) / (HOLD_START - FADE_START);
-    else if (t >= HOLD_START && t < FADE_OUT_START)
-      alpha = 1;
-    else if (t >= FADE_OUT_START && t < FADE_OUT_END)
-      alpha = 1 - (t - FADE_OUT_START) / (FADE_OUT_END - FADE_OUT_START);
-
-    wctx.clearRect(0, 0, IG_W, IG_H);
-    wctx.drawImage(staticCanvas, 0, 0);
-    if (alpha > 0) drawSeriesOverlay(wctx, panelNum, state, tone, alpha);
-
-    const blob = await new Promise(res => work.toBlob(res, 'image/png'));
-    frameBlobs.push(blob);
-  }
-
-  setExportStatus(`⚙️ Converting panel ${panelNum} to MP4…`);
-  const ffmpeg = await getFFmpeg();
-  const { fetchFile } = FFmpeg;
-
-  // Write frames
-  for (let i = 0; i < frameBlobs.length; i++) {
-    const padded = String(i).padStart(4, '0');
-    ffmpeg.FS('writeFile', `frame${padded}.png`, await fetchFile(frameBlobs[i]));
-  }
-
-  // Encode
-  await ffmpeg.run(
-    '-framerate', String(FPS),
-    '-i', 'frame%04d.png',
-    '-c:v', 'libx264',
-    '-preset', 'fast',
-    '-pix_fmt', 'yuv420p',
-    '-movflags', '+faststart',
-    'output.mp4'
-  );
-
-  const data = ffmpeg.FS('readFile', 'output.mp4');
-
-  // Cleanup
-  for (let i = 0; i < frameBlobs.length; i++) {
-    ffmpeg.FS('unlink', `frame${String(i).padStart(4,'0')}.png`);
-  }
-  ffmpeg.FS('unlink', 'output.mp4');
-
-  const mp4Blob = new Blob([data.buffer], { type: 'video/mp4' });
-  const url = URL.createObjectURL(mp4Blob);
-  const link = document.createElement('a');
-  link.download = filename.replace('.png', '.mp4');
-  link.href = url;
-  link.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
-
-
-function setTone(tone){
-  _igTone=tone;
-  ['light','med','dark','cyan'].forEach(t=>{
-    const el=document.getElementById('tone'+t.charAt(0).toUpperCase()+t.slice(1));
-    if(el) el.classList.toggle('active',t===tone);
-  });
-}
-function showExportPopup(){
-  if(!_exportState){ alert('Please generate a scale first.'); return; }
-  document.getElementById('igPopup').classList.add('visible');
-}
-function hideExportPopup(){ document.getElementById('igPopup').classList.remove('visible'); }
-
-async function exportImage(type){
-  const s=_exportState, tone=_igTone;
-
-  if(type==='proof'){
-    const c1=await buildFretboardImage(s,tone);
-    const c2=await buildScaleImage(s,tone);
-    const c3=await buildChordsImage(s,tone);
-    const c4=await buildVideoImage(s,tone);
-    const proof=await buildProofSheet([c1,c2,c3,c4],s);
-    downloadCanvas(proof, buildFilename(s.root,s.sk,'proof'));
-    hideExportPopup();
-  }
-
-  if(type==='fullset'){
-    hideExportPopup();
-    // Prompt for backing video first
-    _pendingFullSetExport = async () => {
-      if(!_singleVideoFile) return;
-      try {
-        const c1=await buildFretboardImage(s,tone);
-        const c2=await buildScaleImage(s,tone);
-        const c3=await buildChordsImage(s,tone);
-        const c4=await buildVideoImage(s,tone);
-
-        setExportStatus('🗂 Building proof sheet…');
-        const proof=await buildProofSheet([c1,c2,c3,c4],s);
-        downloadCanvas(proof, buildFilename(s.root,s.sk,'proof'));
-
-        // Panels 1-3 MP4
-        setExportStatus('⚙️ Loading video encoder…');
-        await recordPanelAsMP4(c1, 1, s, tone, buildFilename(s.root,s.sk,'fretboard'));
-        await recordPanelAsMP4(c2, 2, s, tone, buildFilename(s.root,s.sk,'scale'));
-        await recordPanelAsMP4(c3, 3, s, tone, buildFilename(s.root,s.sk,'chords'));
-
-        // Panel 4 composite MP4
-        await buildVideoComposite(c4, _singleVideoFile, tone, buildFilename(s.root,s.sk,'video'));
-
-        setExportStatus('🎬 Download Full Set');
-        _singleVideoFile = null;
-      } catch(err) {
-        console.error('Full set export error:', err);
-        alert('Export failed: ' + err.message);
-        setExportStatus('🎬 Download Full Set');
-      }
-    };
-    document.getElementById('singleVideoInput').click();
-  }
-}
-
-document.addEventListener('keydown',e=>{
-  if(e.ctrlKey&&e.shiftKey&&e.key==='I'){ e.preventDefault(); showExportPopup(); }
-});
-
-window.addEventListener('load',()=>quick('A','minor_pentatonic'));
-
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
 </body>
 </html>
