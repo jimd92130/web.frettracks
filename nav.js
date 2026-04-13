@@ -7,11 +7,12 @@ class SiteNav extends HTMLElement {
             <img class="ft-pick" src="/logo.png" alt="FretTracks logo">
             <img class="ft-wordmark" src="/trial/frettracks.png" alt="FretTracks">
           </a>
+          ${this.getAttribute('subtitle') ? `<span class="ft-nav-subtitle">${this.getAttribute('subtitle')}</span>` : ''}
           <button class="ft-hamburger" aria-label="Menu" onclick="this.closest('site-nav').querySelector('.ft-links').classList.toggle('open')">
             <span></span><span></span><span></span>
           </button>
           <div class="ft-links">
-            <a href="/scales.html">Scales</a>
+            <a href="/scalefacts.html">Scales</a>
             <a href="/support.html">Support</a>
             <a href="/privacy.html">Privacy</a>
             <a href="/tos.html">Terms</a>
@@ -60,6 +61,17 @@ class SiteNav extends HTMLElement {
         .ft-wordmark {
           height: 28px;
           width: auto;
+        }
+        .ft-nav-subtitle {
+          font-size: 14px;
+          font-weight: 600;
+          color: #667085;
+          border-left: 1px solid #E0E0E0;
+          padding-left: 14px;
+          margin-left: 2px;
+        }
+        @media (max-width: 600px) {
+          .ft-nav-subtitle { display: none; }
         }
         .ft-hamburger {
           display: none;
