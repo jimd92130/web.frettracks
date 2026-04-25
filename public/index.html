@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FretTracks · Pulse</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Outfit:wght@300;600&display=swap" rel="stylesheet">
+
+  <!-- Firebase SDKs -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, collection, query, where, getDocs, Timestamp }
+      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCWPaTDzOzIaDty5fS8LSrv8p2vogqtpf0",
+      authDomain: "frettracks-18991.firebaseapp.com",
+      projectId: "frettracks-18991",
+      storageBucket: "frettracks-18991.appspot.com",
+      messagingSenderId: "102848484020",
+      appId: "1:102848484020:web:1a49b316fb5df205f47de1",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
+
+    // ── Auth state ──────────────────────────────────────────────
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        document.getElementById("login-screen").style.display = "none";
+        document.getElementById("dashboard").style.display = "block";
+        document.getElementById("user-name").textContent = user.displayName?.split(" ")[0] || "Jay";
+        loadData();
+        loadEngagement();
+      } else {
+        document.getElementById("login-screen").style.display = "flex";
+        document.getElementById("dashboard").style.display = "none";
+      }
+    });
+
+    window.signIn = async () => {
+      try { await signInWithPopup(auth, provider); }
+      catch (e) { console.error(e); }
+    };
+
+    window.signOut = async () => {
+      await signOut(auth);
+    };
+
+    // ── Pulse: Daily new users ──────────────────────────────────
+    async function loadData() {
+      document.getElementById("loading").style.display = "flex";
+      document.getElementById("table-wrap").style.display = "none";
+
+      const rows = [];
+      let grandTotal = 0;
+
+      const nowPST = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Los_Angeles" }));
+      nowPST.setHours(23, 59, 59, 999);
+
+      const cutoffPST = new Date(nowPST);
+      cutoffPST.setDate(cutoffPST.getDate() - 13);
+      cutoffPST.setHours(0, 0, 0, 0);
+
+      const cutoffTs = Timestamp.fromDate(cutoffPST);
+      const nowTs = Timestamp.fromDate(nowPST);
+
+      try {
+        const q = query(
+          collection(db, "users"),
+          where("firstDownloadDate", ">=", cutoffTs),
+          where("firstDownloadDate", "<=", nowTs)
+        );
+        const snap = await getDocs(q);
+
+        const counts = {};
+        snap.forEach(doc => {
+          const data = doc.data();
+          const ts = data.firstDownloadDate?.toDate?.();
+          if (!ts) return;
+          const dateStr = ts.toLocaleDateString("en-US", {
+            timeZone: "America/Los_Angeles",
+            year: "numeric", month: "2-digit", day: "2-digit"
+          });
+          counts[dateStr] = (counts[dateStr] || 0) + 1;
+        });
+
+        for (let i = 0; i <= 13; i++) {
+          const d = new Date(nowPST);
+          d.setDate(d.getDate() - i);
+          const label = d.toLocaleDateString("en-US", {
+            timeZone: "America/Los_Angeles",
+            weekday: "short", month: "short", day: "numeric"
+          });
+          const key = d.toLocaleDateString("en-US", {
+            timeZone: "America/Los_Angeles",
+            year: "numeric", month: "2-digit", day: "2-digit"
+          });
+          const count = counts[key] || 0;
+          grandTotal += count;
+          rows.push({ label, count, isToday: i === 0 });
+        }
+
+        renderTable(rows, grandTotal, snap.size);
+      } catch (err) {
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("error-msg").textContent = "Error loading data: " + err.message;
+        document.getElementById("error-msg").style.display = "block";
+      }
+    }
+
+    window.refresh = () => { loadData(); loadEngagement(); };
+
+    function renderTable(rows, grandTotal) {
+      document.getElementById("loading").style.display = "none";
+      document.getElementById("table-wrap").style.display = "block";
+
+      const max = Math.max(...rows.map(r => r.count), 1);
+      const tbody = document.getElementById("tbody");
+      tbody.innerHTML = "";
+
+      rows.forEach(({ label, count, isToday }) => {
+        const pct = Math.round((count / max) * 100);
+        const tr = document.createElement("tr");
+        if (isToday) tr.classList.add("today");
+        tr.innerHTML = `
+          <td class="date-cell">${label}${isToday ? ' <span class="today-badge">today</span>' : ""}</td>
+          <td class="bar-cell">
+            <div class="bar-track">
+              <div class="bar-fill" style="width:${count === 0 ? 0 : Math.max(pct, 3)}%"></div>
+            </div>
+          </td>
+          <td class="count-cell">${count}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById("grand-total").textContent = grandTotal;
+      document.getElementById("updated-time").textContent =
+        new Date().toLocaleTimeString("en-US", { timeZone: "America/Los_Angeles", hour: "numeric", minute: "2-digit" });
+    }
+
+    // ── Engagement section ──────────────────────────────────────
+    async function loadEngagement() {
+      document.getElementById("eng-loading").style.display = "flex";
+      document.getElementById("eng-content").style.display = "none";
+      document.getElementById("eng-error").style.display = "none";
+
+      try {
+        const snap = await getDocs(collection(db, "users"));
+        const today = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Los_Angeles" }));
+        today.setHours(23, 59, 59, 999);
+
+        const users = [];
+        snap.forEach(doc => {
+          const d = doc.data();
+          const fdd = d.firstDownloadDate?.toDate?.();
+          const last = d.engagement?.lastTrackPlayedAt?.toDate?.();
+          const tracks = d.engagement?.totalTracksPlayed ?? 0;
+          if (!fdd) return;
+          users.push({ id: doc.id, fdd, last, tracks });
+        });
+
+        function daysBetween(a, b) {
+          return Math.round(Math.abs(a - b) / (1000 * 60 * 60 * 24));
+        }
+        function getStatus(u) {
+          if (!u.last) return "inactive";
+          const d = daysBetween(u.last, today);
+          if (d <= 7)  return "active";
+          if (d <= 14) return "fading";
+          return "inactive";
+        }
+        function getSpan(u) {
+          if (!u.last) return 0;
+          return daysBetween(u.fdd, u.last);
+        }
+
+        const total = users.length;
+        const activeU   = users.filter(u => getStatus(u) === "active");
+        const fadingU   = users.filter(u => getStatus(u) === "fading");
+        const inactiveU = users.filter(u => getStatus(u) === "inactive");
+        const pct = n => total > 0 ? Math.round(n / total * 100) : 0;
+        const avgSpan   = total > 0 ? Math.round(users.reduce((s,u) => s + getSpan(u), 0) / total) : 0;
+        const avgTracks = total > 0 ? Math.round(users.reduce((s,u) => s + u.tracks, 0) / total) : 0;
+
+        // Summary cards
+        document.getElementById("eng-total").textContent   = total;
+        document.getElementById("eng-active").innerHTML    = `${pct(activeU.length)}% <span class="eng-raw">(${activeU.length})</span>`;
+        document.getElementById("eng-fading").innerHTML    = `${pct(fadingU.length)}% <span class="eng-raw">(${fadingU.length})</span>`;
+        document.getElementById("eng-inactive").innerHTML  = `${pct(inactiveU.length)}% <span class="eng-raw">(${inactiveU.length})</span>`;
+        document.getElementById("eng-span").textContent    = avgSpan + "d";
+        document.getElementById("eng-tracks").textContent  = avgTracks;
+
+        // Cohort grouping — by calendar week of FDD
+        function weekKey(date) {
+          const d = new Date(date);
+          d.setHours(0,0,0,0);
+          d.setDate(d.getDate() - d.getDay()); // Sunday
+          return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+        }
+        function weekLabel(date) {
+          const start = new Date(date);
+          start.setHours(0,0,0,0);
+          start.setDate(start.getDate() - start.getDay());
+          const end = new Date(start);
+          end.setDate(end.getDate() + 6);
+          return start.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+            + "–" + end.toLocaleDateString("en-US", { day: "numeric" });
+        }
+
+        const cohortMap = {};
+        users.forEach(u => {
+          const k = weekKey(u.fdd);
+          if (!cohortMap[k]) cohortMap[k] = { label: weekLabel(u.fdd), date: new Date(u.fdd), users: [] };
+          cohortMap[k].users.push(u);
+        });
+
+        const cohortKeys = Object.keys(cohortMap).sort((a,b) => cohortMap[b].date - cohortMap[a].date);
+
+        const cohortGrid = document.getElementById("eng-cohort-grid");
+        cohortGrid.innerHTML = "";
+        cohortKeys.forEach(k => {
+          const c = cohortMap[k];
+          const cu = c.users;
+          const cn = cu.length;
+          const ca = cu.filter(u => getStatus(u) === "active").length;
+          const cf = cu.filter(u => getStatus(u) === "fading").length;
+          const ci = cu.filter(u => getStatus(u) === "inactive").length;
+          const avgS = Math.round(cu.reduce((s,u) => s + getSpan(u), 0) / cn);
+          const avgT = Math.round(cu.reduce((s,u) => s + u.tracks, 0) / cn);
+          const cp = n => Math.round(n/cn*100);
+          cohortGrid.innerHTML += `
+            <div class="eng-cohort-card">
+              <div class="eng-cohort-title">${c.label}</div>
+              <div class="eng-cohort-row"><span>Users</span><span class="eng-cohort-val">${cn}</span></div>
+              <div class="eng-cohort-row"><span>Avg retention span</span><span class="eng-cohort-val">${avgS}d</span></div>
+              <div class="eng-cohort-row"><span>Avg tracks</span><span class="eng-cohort-val">${avgT}</span></div>
+              <div class="eng-cohort-row"><span>Active</span><span class="eng-cohort-val" style="color:#7ec87e;">${cp(ca)}% <span class="eng-raw">(${ca})</span></span></div>
+              <div class="eng-cohort-row"><span>Fading</span><span class="eng-cohort-val" style="color:#c8a96e;">${cp(cf)}% <span class="eng-raw">(${cf})</span></span></div>
+              <div class="eng-cohort-row"><span>Inactive</span><span class="eng-cohort-val" style="color:#e05c5c;">${cp(ci)}% <span class="eng-raw">(${ci})</span></span></div>
+            </div>`;
+        });
+
+        // User table — sorted by retention span desc
+        window._engUsers = users.map(u => ({...u, status: getStatus(u), span: getSpan(u)}));
+        renderEngTable();
+
+        document.getElementById("eng-loading").style.display = "none";
+        document.getElementById("eng-content").style.display = "block";
+
+      } catch (err) {
+        document.getElementById("eng-loading").style.display = "none";
+        document.getElementById("eng-error").textContent = "Error loading engagement: " + err.message;
+        document.getElementById("eng-error").style.display = "block";
+      }
+    }
+
+    window.renderEngTable = function() {
+      const filter = document.getElementById("eng-status-filter").value;
+      const sort   = document.getElementById("eng-sort").value;
+      let rows = (_engUsers || []).slice();
+      if (filter !== "all") rows = rows.filter(r => r.status === filter);
+      if (sort === "span")        rows.sort((a,b) => b.span - a.span);
+      else if (sort === "tracks") rows.sort((a,b) => b.tracks - a.tracks);
+      else                        rows.sort((a,b) => b.fdd - a.fdd);
+
+      function fmt(d) {
+        if (!d) return "—";
+        return d.toLocaleDateString("en-US", { timeZone: "America/Los_Angeles", month: "short", day: "numeric" });
+      }
+
+      const tbody = document.getElementById("eng-tbody");
+      tbody.innerHTML = rows.map(r => {
+        const badgeClass = r.status === "active" ? "eng-badge-active" : r.status === "fading" ? "eng-badge-fading" : "eng-badge-inactive";
+        return `<tr>
+          <td class="eng-uid">${r.id.slice(0,12)}…</td>
+          <td>${fmt(r.fdd)}</td>
+          <td>${fmt(r.last)}</td>
+          <td style="font-weight:500;color:var(--accent)">${r.span}d</td>
+          <td>${r.tracks}</td>
+          <td><span class="eng-badge ${badgeClass}">${r.status}</span></td>
+        </tr>`;
+      }).join("");
+    };
+
+  </script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d0d;
+      --surface: #161616;
+      --border: #2a2a2a;
+      --accent: #c8a96e;
+      --accent-dim: rgba(200,169,110,0.15);
+      --text: #e8e2d9;
+      --text-dim: #a09a92;
+      --text-mid: #c8c2ba;
+      --today-bg: rgba(200,169,110,0.06);
+      --bar-bg: #1e1e1e;
+      --bar-fill: #c8a96e;
+      --red: #e05c5c;
+      --green: #7ec87e;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Login Screen ── */
+    #login-screen {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+      padding: 2rem;
+    }
+
+    .login-logo {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      font-size: 2.8rem;
+      color: var(--accent);
+      letter-spacing: -0.03em;
+    }
+
+    .login-sub {
+      color: var(--text-mid);
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .sign-in-btn {
+      margin-top: 1rem;
+      background: var(--accent);
+      color: #0d0d0d;
+      border: none;
+      padding: 0.85rem 2.5rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .sign-in-btn:hover { opacity: 0.85; }
+
+    /* ── Dashboard ── */
+    #dashboard { display: none; max-width: 640px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+
+    .top-bar {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 2.5rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .app-title {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      font-size: 1.6rem;
+      color: var(--accent);
+      letter-spacing: -0.02em;
+    }
+
+    .top-right {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    .greeting { font-size: 0.7rem; color: var(--text-mid); letter-spacing: 0.08em; }
+
+    .icon-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-dim);
+      font-size: 1rem;
+      padding: 0.25rem;
+      transition: color 0.2s;
+      line-height: 1;
+    }
+    .icon-btn:hover { color: var(--accent); }
+
+    /* ── Summary strip ── */
+    .summary {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-box {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 1rem 1.25rem;
+    }
+
+    .stat-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-mid);
+      margin-bottom: 0.4rem;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 500;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .stat-sub { font-size: 0.65rem; color: var(--text-dim); margin-top: 0.3rem; }
+
+    /* ── Pulse table ── */
+    #table-wrap { display: none; }
+
+    .section-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-mid);
+      margin-bottom: 0.75rem;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+
+    tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+    tr:hover { background: rgba(255,255,255,0.02); }
+    tr.today { background: var(--today-bg); }
+
+    td { padding: 0.6rem 0; vertical-align: middle; }
+
+    .date-cell {
+      font-size: 0.72rem;
+      color: var(--text-mid);
+      white-space: nowrap;
+      width: 120px;
+      padding-right: 1rem;
+    }
+
+    tr.today .date-cell { color: var(--text); }
+
+    .today-badge {
+      display: inline-block;
+      font-size: 0.55rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: var(--accent-dim);
+      color: var(--accent);
+      padding: 0.15rem 0.4rem;
+      margin-left: 0.4rem;
+      vertical-align: middle;
+    }
+
+    .bar-cell { width: 100%; padding-right: 0.75rem; }
+
+    .bar-track {
+      background: var(--bar-bg);
+      height: 6px;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: var(--bar-fill);
+      transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    tr.today .bar-fill { background: var(--accent); }
+
+    .count-cell {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text);
+      text-align: right;
+      width: 32px;
+    }
+
+    /* ── Loading / Error ── */
+    #loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      padding: 3rem 0;
+      color: var(--text-dim);
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+    }
+
+    .spinner {
+      width: 20px; height: 20px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #error-msg {
+      display: none;
+      color: var(--red);
+      font-size: 0.75rem;
+      padding: 1rem 0;
+    }
+
+    .footer {
+      margin-top: 2rem;
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      letter-spacing: 0.08em;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* ── Section divider ── */
+    .section-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 3rem 0 2.5rem;
+    }
+
+    .section-title {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--accent);
+      margin-bottom: 1.5rem;
+      letter-spacing: -0.01em;
+    }
+
+    /* ── Engagement metric cards ── */
+    .eng-metric-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .eng-metric {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 0.85rem 1rem;
+    }
+
+    .eng-metric-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-mid);
+      margin-bottom: 0.35rem;
+    }
+
+    .eng-metric-value {
+      font-size: 1.5rem;
+      font-weight: 500;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .eng-raw {
+      font-size: 0.7rem;
+      font-weight: 400;
+      color: var(--text-dim);
+    }
+
+    .eng-metric-sub {
+      font-size: 0.6rem;
+      color: var(--text-mid);
+      margin-top: 0.25rem;
+    }
+
+    /* ── Cohort cards ── */
+    .eng-cohort-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .eng-cohort-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 0.85rem 1rem;
+    }
+
+    .eng-cohort-title {
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 0.65rem;
+      letter-spacing: 0.04em;
+    }
+
+    .eng-cohort-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.65rem;
+      color: var(--text-mid);
+      margin-bottom: 0.3rem;
+    }
+
+    .eng-cohort-val {
+      color: var(--text-mid);
+      font-weight: 500;
+    }
+
+    /* ── Engagement controls ── */
+    .eng-controls {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .eng-controls select {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-mid);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      padding: 0.4rem 0.75rem;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .eng-controls select:focus { border-color: var(--accent); }
+
+    /* ── Engagement table ── */
+    #eng-table { width: 100%; border-collapse: collapse; font-size: 0.7rem; }
+    #eng-table th {
+      text-align: left;
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-mid);
+      padding: 0.5rem 0.5rem;
+      border-bottom: 1px solid var(--border);
+      font-weight: 400;
+    }
+    #eng-table td {
+      padding: 0.55rem 0.5rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-mid);
+      vertical-align: middle;
+    }
+    #eng-table tr:last-child td { border-bottom: none; }
+    #eng-table tr:hover td { color: var(--text); }
+
+    .eng-uid { font-size: 0.62rem; color: var(--text-dim) !important; }
+
+    .eng-badge {
+      display: inline-block;
+      font-size: 0.58rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.15rem 0.5rem;
+    }
+    .eng-badge-active   { background: rgba(126,200,126,0.12); color: #7ec87e; }
+    .eng-badge-fading   { background: rgba(200,169,110,0.12); color: var(--accent); }
+    .eng-badge-inactive { background: rgba(224,92,92,0.12);   color: var(--red); }
+
+    /* ── Engagement loading/error ── */
+    #eng-loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      padding: 2rem 0;
+      color: var(--text-dim);
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+    }
+    #eng-error {
+      display: none;
+      color: var(--red);
+      font-size: 0.75rem;
+      padding: 1rem 0;
+    }
+    #eng-content { display: none; }
+  </style>
+</head>
+<body>
+
+  <!-- Login -->
+  <div id="login-screen">
+    <div class="login-logo">FretTracks</div>
+    <div class="login-sub">Pulse Dashboard</div>
+    <button class="sign-in-btn" onclick="signIn()">Sign in with Google</button>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="dashboard">
+    <div class="top-bar">
+      <div class="app-title">FretTracks · Pulse</div>
+      <div class="top-right">
+        <span class="greeting">Hey, <span id="user-name">Jay</span></span>
+        <button class="icon-btn" onclick="refresh()" title="Refresh">↻</button>
+        <button class="icon-btn" onclick="signOut()" title="Sign out">⏻</button>
+      </div>
+    </div>
+
+    <!-- ── Pulse: daily new users ── -->
+    <div class="summary">
+      <div class="stat-box">
+        <div class="stat-label">14-day total</div>
+        <div class="stat-value" id="grand-total">—</div>
+        <div class="stat-sub">new users</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Last updated</div>
+        <div class="stat-value" style="font-size:1.1rem;padding-top:0.45rem" id="updated-time">—</div>
+        <div class="stat-sub">Pacific time</div>
+      </div>
+    </div>
+
+    <div class="section-label">Daily new users · past 14 days</div>
+
+    <div id="loading">
+      <div class="spinner"></div>
+      loading
+    </div>
+    <div id="error-msg"></div>
+
+    <div id="table-wrap">
+      <table>
+        <tbody id="tbody"></tbody>
+      </table>
+      <div class="footer">
+        <span>source: firestore · users.firstDownloadDate</span>
+        <span>PST</span>
+      </div>
+    </div>
+
+    <!-- ── Engagement section ── -->
+    <hr class="section-divider">
+    <div class="section-title">Engagement</div>
+
+    <div id="eng-loading">
+      <div class="spinner"></div>
+      loading
+    </div>
+    <div id="eng-error"></div>
+
+    <div id="eng-content">
+
+      <div class="section-label">Overall snapshot · all users</div>
+      <div class="eng-metric-grid">
+        <div class="eng-metric">
+          <div class="eng-metric-label">Total users</div>
+          <div class="eng-metric-value" id="eng-total">—</div>
+          <div class="eng-metric-sub">all time</div>
+        </div>
+        <div class="eng-metric">
+          <div class="eng-metric-label">Active (last 7d)</div>
+          <div class="eng-metric-value" style="color:#7ec87e;" id="eng-active">—</div>
+          <div class="eng-metric-sub">played in last 7 days</div>
+        </div>
+        <div class="eng-metric">
+          <div class="eng-metric-label">Fading (8–14d)</div>
+          <div class="eng-metric-value" style="color:var(--accent);" id="eng-fading">—</div>
+          <div class="eng-metric-sub">8–14 days since play</div>
+        </div>
+        <div class="eng-metric">
+          <div class="eng-metric-label">Inactive (&gt;14d)</div>
+          <div class="eng-metric-value" style="color:var(--red);" id="eng-inactive">—</div>
+          <div class="eng-metric-sub">more than 14 days ago</div>
+        </div>
+        <div class="eng-metric">
+          <div class="eng-metric-label">Avg retention span</div>
+          <div class="eng-metric-value" id="eng-span">—</div>
+          <div class="eng-metric-sub">FDD → last played</div>
+        </div>
+        <div class="eng-metric">
+          <div class="eng-metric-label">Avg tracks played</div>
+          <div class="eng-metric-value" id="eng-tracks">—</div>
+          <div class="eng-metric-sub">all users</div>
+        </div>
+      </div>
+
+      <div class="section-label">Cohort view · by download week</div>
+      <div class="eng-cohort-grid" id="eng-cohort-grid"></div>
+
+      <div class="section-label">User detail</div>
+      <div class="eng-controls">
+        <select id="eng-status-filter" onchange="renderEngTable()">
+          <option value="all">Status: all</option>
+          <option value="active">Active only</option>
+          <option value="fading">Fading only</option>
+          <option value="inactive">Inactive only</option>
+        </select>
+        <select id="eng-sort" onchange="renderEngTable()">
+          <option value="span">Sort: longest retention span</option>
+          <option value="tracks">Sort: most tracks</option>
+          <option value="fdd">Sort: newest first</option>
+        </select>
+      </div>
+
+      <table id="eng-table">
+        <thead>
+          <tr>
+            <th>User ID</th>
+            <th>FDD</th>
+            <th>Last played</th>
+            <th>Retention span</th>
+            <th>Tracks</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="eng-tbody"></tbody>
+      </table>
+
+      <div class="footer" style="margin-top:1.5rem;">
+        <span>source: firestore · users.engagement</span>
+        <span>PST</span>
+      </div>
+
+    </div><!-- /eng-content -->
+
+  </div><!-- /dashboard -->
+
+</body>
+</html>
