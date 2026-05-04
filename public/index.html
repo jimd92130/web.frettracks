@@ -5,15 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FretTracks · Pulse</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Outfit:wght@300;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
 
-  <!-- Firebase SDKs -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
       from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getFirestore, collection, query, where, getDocs, Timestamp }
+    import { getFirestore, collection, getDocs }
       from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFunctions, httpsCallable }
+      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-functions.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCWPaTDzOzIaDty5fS8LSrv8p2vogqtpf0",
@@ -27,287 +28,264 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
+    const functions = getFunctions(app);
     const provider = new GoogleAuthProvider();
 
-    // ── Auth state ──────────────────────────────────────────────
+    // ── Auth ────────────────────────────────────────────────────
     onAuthStateChanged(auth, user => {
       if (user) {
         document.getElementById("login-screen").style.display = "none";
         document.getElementById("dashboard").style.display = "block";
-        document.getElementById("user-name").textContent = user.displayName?.split(" ")[0] || "Jay";
-        loadData();
-        loadEngagement();
+        loadAll();
       } else {
         document.getElementById("login-screen").style.display = "flex";
         document.getElementById("dashboard").style.display = "none";
       }
     });
 
-    window.signIn = async () => {
-      try { await signInWithPopup(auth, provider); }
-      catch (e) { console.error(e); }
-    };
+    window.signIn  = async () => { try { await signInWithPopup(auth, provider); } catch(e) { console.error(e); } };
+    window.signOut = async () => { await signOut(auth); };
+    window.refresh = () => loadAll();
 
-    window.signOut = async () => {
-      await signOut(auth);
-    };
+    // ── Helpers ─────────────────────────────────────────────────
+    function nowPST() {
+      const d = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Los_Angeles" }));
+      d.setHours(23, 59, 59, 999);
+      return d;
+    }
 
-    // ── Pulse: Daily new users ──────────────────────────────────
-    async function loadData() {
-      document.getElementById("loading").style.display = "flex";
-      document.getElementById("table-wrap").style.display = "none";
+    function daysAgo(n) {
+      const d = nowPST();
+      d.setDate(d.getDate() - n);
+      d.setHours(0, 0, 0, 0);
+      return d;
+    }
 
-      const rows = [];
-      let grandTotal = 0;
+    function fmtDate(d) {
+      if (!d) return "—";
+      return d.toLocaleDateString("en-US", { timeZone: "America/Los_Angeles", month: "short", day: "numeric" });
+    }
 
-      const nowPST = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Los_Angeles" }));
-      nowPST.setHours(23, 59, 59, 999);
+    function getFavorite(map) {
+      if (!map) return null;
+      const entries = Object.entries(map);
+      if (!entries.length) return null;
+      const [key] = entries.reduce((a, b) => b[1] > a[1] ? b : a);
+      return key.split(/[\s_(]/)[0];
+    }
 
-      const cutoffPST = new Date(nowPST);
-      cutoffPST.setDate(cutoffPST.getDate() - 13);
-      cutoffPST.setHours(0, 0, 0, 0);
-
-      const cutoffTs = Timestamp.fromDate(cutoffPST);
-      const nowTs = Timestamp.fromDate(nowPST);
-
+    // ── Main load ────────────────────────────────────────────────
+    async function loadAll() {
+      showLoading(true);
       try {
-        const q = query(
-          collection(db, "users"),
-          where("firstDownloadDate", ">=", cutoffTs),
-          where("firstDownloadDate", "<=", nowTs)
-        );
-        const snap = await getDocs(q);
+        const snap = await getDocs(collection(db, "users"));
+        const now  = nowPST();
+        const cut28 = daysAgo(28);
 
-        const counts = {};
+        const allUsers = [];
         snap.forEach(doc => {
-          const data = doc.data();
-          const ts = data.firstDownloadDate?.toDate?.();
-          if (!ts) return;
-          const dateStr = ts.toLocaleDateString("en-US", {
-            timeZone: "America/Los_Angeles",
-            year: "numeric", month: "2-digit", day: "2-digit"
+          const d   = doc.data();
+          const fdd = d.firstDownloadDate?.toDate?.();
+          if (!fdd) return;
+          const eng = d.engagement ?? {};
+          allUsers.push({
+            id:           doc.id,
+            fdd,
+            lastPlayed:   (() => { const a = eng.lastTrackPlayedAt?.toDate?.() ?? null; const b = eng.lastPlayDate?.toDate?.() ?? null; return a && b ? (a > b ? a : b) : (a ?? b); })(),
+            tracks:       eng.totalTracksPlayed   ?? 0,
+            seconds:      eng.totalPlaySeconds    ?? 0,
+            activeDays:   eng.activeDays          ?? 0,
+            streak:       eng.longestStreak       ?? eng.currentStreak ?? 0,
+            scales:       eng.scales              ?? {},
+            styles:       eng.styles              ?? {},
+            firstPlayDate:eng.firstPlayDate       ?? null,
           });
-          counts[dateStr] = (counts[dateStr] || 0) + 1;
         });
 
-        for (let i = 0; i <= 13; i++) {
-          const d = new Date(nowPST);
-          d.setDate(d.getDate() - i);
-          const label = d.toLocaleDateString("en-US", {
-            timeZone: "America/Los_Angeles",
-            weekday: "short", month: "short", day: "numeric"
-          });
-          const key = d.toLocaleDateString("en-US", {
-            timeZone: "America/Los_Angeles",
-            year: "numeric", month: "2-digit", day: "2-digit"
-          });
-          const count = counts[key] || 0;
-          grandTotal += count;
-          rows.push({ label, count, isToday: i === 0 });
-        }
+        // Buckets: users whose FDD falls within window
+        // "today" bucket matches calendar date (PST), not rolling 24hrs
+        const todayStart = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Los_Angeles" }));
+        todayStart.setHours(0, 0, 0, 0);
 
-        renderTable(rows, grandTotal, snap.size);
-      } catch (err) {
-        document.getElementById("loading").style.display = "none";
-        document.getElementById("error-msg").textContent = "Error loading data: " + err.message;
+        const buckets = { 1: [], 7: [], 14: [], 28: [] };
+        allUsers.forEach(u => {
+          // Today: FDD calendar date matches today in PST
+          const fddPST = new Date(u.fdd.toLocaleString("en-US", { timeZone: "America/Los_Angeles" }));
+          fddPST.setHours(0, 0, 0, 0);
+          if (fddPST.getTime() === todayStart.getTime()) buckets[1].push(u);
+          // Rolling windows for 7/14/28
+          [7, 14, 28].forEach(n => {
+            if (u.fdd >= daysAgo(n) && u.fdd <= now) buckets[n].push(u);
+          });
+        });
+
+        renderCards(buckets);
+
+        // Table: 28-day users sorted newest FDD first
+        const tableUsers = buckets[28].slice().sort((a, b) => b.fdd - a.fdd);
+        renderTable(tableUsers);
+
+        // Store for Claude
+        window._pulseData = { allUsers, buckets, now };
+
+        document.getElementById("updated-time").textContent =
+          new Date().toLocaleTimeString("en-US", { timeZone: "America/Los_Angeles", hour: "numeric", minute: "2-digit" });
+
+        showLoading(false);
+      } catch(err) {
+        showLoading(false);
+        document.getElementById("error-msg").textContent = "Error: " + err.message;
         document.getElementById("error-msg").style.display = "block";
       }
     }
 
-    window.refresh = () => { loadData(); loadEngagement(); };
+    function bucketStats(users) {
+      if (!users.length) return { count: 0, pctPlayed: 0, avgTracks: 0, avgMins: 0 };
+      const played   = users.filter(u => u.tracks > 0);
+      const pctPlayed = Math.round(played.length / users.length * 100);
+      const avgTracks = played.length
+        ? Math.round(played.reduce((s, u) => s + u.tracks, 0) / played.length)
+        : 0;
+      const avgMins = played.length
+        ? Math.round(played.reduce((s, u) => s + u.seconds, 0) / played.length / 60)
+        : 0;
+      return { count: users.length, pctPlayed, avgTracks, avgMins };
+    }
 
-    function renderTable(rows, grandTotal) {
-      document.getElementById("loading").style.display = "none";
-      document.getElementById("table-wrap").style.display = "block";
-
-      const max = Math.max(...rows.map(r => r.count), 1);
-      const tbody = document.getElementById("tbody");
-      tbody.innerHTML = "";
-
-      rows.forEach(({ label, count, isToday }) => {
-        const pct = Math.round((count / max) * 100);
-        const tr = document.createElement("tr");
-        if (isToday) tr.classList.add("today");
-        tr.innerHTML = `
-          <td class="date-cell">${label}${isToday ? ' <span class="today-badge">today</span>' : ""}</td>
-          <td class="bar-cell">
-            <div class="bar-track">
-              <div class="bar-fill" style="width:${count === 0 ? 0 : Math.max(pct, 3)}%"></div>
-            </div>
-          </td>
-          <td class="count-cell">${count}</td>
-        `;
-        tbody.appendChild(tr);
+    function renderCards(buckets) {
+      [1, 7, 14, 28].forEach(n => {
+        const s = bucketStats(buckets[n]);
+        document.getElementById(`card-count-${n}`).textContent  = s.count;
+        document.getElementById(`card-pct-${n}`).textContent    = s.pctPlayed + "%";
+        document.getElementById(`card-tracks-${n}`).textContent = s.avgTracks;
+        document.getElementById(`card-mins-${n}`).textContent   = s.avgMins;
       });
-
-      document.getElementById("grand-total").textContent = grandTotal;
-      document.getElementById("updated-time").textContent =
-        new Date().toLocaleTimeString("en-US", { timeZone: "America/Los_Angeles", hour: "numeric", minute: "2-digit" });
     }
 
-    // ── Engagement section ──────────────────────────────────────
-    async function loadEngagement() {
-      document.getElementById("eng-loading").style.display = "flex";
-      document.getElementById("eng-content").style.display = "none";
-      document.getElementById("eng-error").style.display = "none";
-
-      try {
-        const snap = await getDocs(collection(db, "users"));
-        const today = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Los_Angeles" }));
-        today.setHours(23, 59, 59, 999);
-
-        const users = [];
-        snap.forEach(doc => {
-          const d = doc.data();
-          const fdd = d.firstDownloadDate?.toDate?.();
-          const last = d.engagement?.lastTrackPlayedAt?.toDate?.();
-          const tracks = d.engagement?.totalTracksPlayed ?? 0;
-          if (!fdd) return;
-          users.push({ id: doc.id, fdd, last, tracks });
-        });
-
-        function daysBetween(a, b) {
-          return Math.round(Math.abs(a - b) / (1000 * 60 * 60 * 24));
-        }
-        function getStatus(u) {
-          if (!u.last) return "inactive";
-          const d = daysBetween(u.last, today);
-          if (d <= 7)  return "active";
-          if (d <= 14) return "fading";
-          return "inactive";
-        }
-        function getSpan(u) {
-          if (!u.last) return 0;
-          return daysBetween(u.fdd, u.last);
-        }
-
-        const total = users.length;
-        const activeU   = users.filter(u => getStatus(u) === "active");
-        const fadingU   = users.filter(u => getStatus(u) === "fading");
-        const inactiveU = users.filter(u => getStatus(u) === "inactive");
-        const pct = n => total > 0 ? Math.round(n / total * 100) : 0;
-        const avgSpan   = total > 0 ? Math.round(users.reduce((s,u) => s + getSpan(u), 0) / total) : 0;
-        const avgTracks = total > 0 ? Math.round(users.reduce((s,u) => s + u.tracks, 0) / total) : 0;
-
-        // Summary cards
-        document.getElementById("eng-total").textContent   = total;
-        document.getElementById("eng-active").innerHTML    = `${pct(activeU.length)}% <span class="eng-raw">(${activeU.length})</span>`;
-        document.getElementById("eng-fading").innerHTML    = `${pct(fadingU.length)}% <span class="eng-raw">(${fadingU.length})</span>`;
-        document.getElementById("eng-inactive").innerHTML  = `${pct(inactiveU.length)}% <span class="eng-raw">(${inactiveU.length})</span>`;
-        document.getElementById("eng-span").textContent    = avgSpan + "d";
-        document.getElementById("eng-tracks").textContent  = avgTracks;
-
-        // Cohort grouping — by calendar week of FDD
-        function weekKey(date) {
-          const d = new Date(date);
-          d.setHours(0,0,0,0);
-          d.setDate(d.getDate() - d.getDay()); // Sunday
-          return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-        }
-        function weekLabel(date) {
-          const start = new Date(date);
-          start.setHours(0,0,0,0);
-          start.setDate(start.getDate() - start.getDay());
-          const end = new Date(start);
-          end.setDate(end.getDate() + 6);
-          return start.toLocaleDateString("en-US", { month: "short", day: "numeric" })
-            + "–" + end.toLocaleDateString("en-US", { day: "numeric" });
-        }
-
-        const cohortMap = {};
-        users.forEach(u => {
-          const k = weekKey(u.fdd);
-          if (!cohortMap[k]) cohortMap[k] = { label: weekLabel(u.fdd), date: new Date(u.fdd), users: [] };
-          cohortMap[k].users.push(u);
-        });
-
-        const cohortKeys = Object.keys(cohortMap).sort((a,b) => cohortMap[b].date - cohortMap[a].date);
-
-        const cohortGrid = document.getElementById("eng-cohort-grid");
-        cohortGrid.innerHTML = "";
-        cohortKeys.forEach(k => {
-          const c = cohortMap[k];
-          const cu = c.users;
-          const cn = cu.length;
-          const ca = cu.filter(u => getStatus(u) === "active").length;
-          const cf = cu.filter(u => getStatus(u) === "fading").length;
-          const ci = cu.filter(u => getStatus(u) === "inactive").length;
-          const avgS = Math.round(cu.reduce((s,u) => s + getSpan(u), 0) / cn);
-          const avgT = Math.round(cu.reduce((s,u) => s + u.tracks, 0) / cn);
-          const cp = n => Math.round(n/cn*100);
-          cohortGrid.innerHTML += `
-            <div class="eng-cohort-card">
-              <div class="eng-cohort-title">${c.label}</div>
-              <div class="eng-cohort-row"><span>Users</span><span class="eng-cohort-val">${cn}</span></div>
-              <div class="eng-cohort-row"><span>Avg retention span</span><span class="eng-cohort-val">${avgS}d</span></div>
-              <div class="eng-cohort-row"><span>Avg tracks</span><span class="eng-cohort-val">${avgT}</span></div>
-              <div class="eng-cohort-row"><span>Active</span><span class="eng-cohort-val" style="color:#7ec87e;">${cp(ca)}% <span class="eng-raw">(${ca})</span></span></div>
-              <div class="eng-cohort-row"><span>Fading</span><span class="eng-cohort-val" style="color:#c8a96e;">${cp(cf)}% <span class="eng-raw">(${cf})</span></span></div>
-              <div class="eng-cohort-row"><span>Inactive</span><span class="eng-cohort-val" style="color:#e05c5c;">${cp(ci)}% <span class="eng-raw">(${ci})</span></span></div>
-            </div>`;
-        });
-
-        // User table — sorted by retention span desc
-        window._engUsers = users.map(u => ({...u, status: getStatus(u), span: getSpan(u)}));
-        renderEngTable();
-
-        document.getElementById("eng-loading").style.display = "none";
-        document.getElementById("eng-content").style.display = "block";
-
-      } catch (err) {
-        document.getElementById("eng-loading").style.display = "none";
-        document.getElementById("eng-error").textContent = "Error loading engagement: " + err.message;
-        document.getElementById("eng-error").style.display = "block";
-      }
-    }
-
-    window.renderEngTable = function() {
-      const filter = document.getElementById("eng-status-filter").value;
-      const sort   = document.getElementById("eng-sort").value;
-      let rows = (_engUsers || []).slice();
-      if (filter !== "all") rows = rows.filter(r => r.status === filter);
-      if (sort === "span")        rows.sort((a,b) => b.span - a.span);
-      else if (sort === "tracks") rows.sort((a,b) => b.tracks - a.tracks);
-      else                        rows.sort((a,b) => b.fdd - a.fdd);
-
-      function fmt(d) {
-        if (!d) return "—";
-        return d.toLocaleDateString("en-US", { timeZone: "America/Los_Angeles", month: "short", day: "numeric" });
-      }
-
-      const tbody = document.getElementById("eng-tbody");
-      tbody.innerHTML = rows.map(r => {
-        const badgeClass = r.status === "active" ? "eng-badge-active" : r.status === "fading" ? "eng-badge-fading" : "eng-badge-inactive";
+    function renderTable(users) {
+      const tbody = document.getElementById("main-tbody");
+      tbody.innerHTML = users.map(u => {
+        const scaleCount = Object.keys(u.scales).length;
+        const favScale   = getFavorite(u.scales) ?? "—";
+        const favStyle   = getFavorite(u.styles) ?? "—";
+        const mins       = u.seconds > 0 ? Math.round(u.seconds / 60) : null;
         return `<tr>
-          <td class="eng-uid">${r.id.slice(0,12)}…</td>
-          <td>${fmt(r.fdd)}</td>
-          <td>${fmt(r.last)}</td>
-          <td style="font-weight:500;color:var(--accent)">${r.span}d</td>
-          <td>${r.tracks}</td>
-          <td><span class="eng-badge ${badgeClass}">${r.status}</span></td>
+          <td class="uid-cell">${u.id.slice(-4)}</td>
+          <td>${fmtDate(u.fdd)}</td>
+          <td>${fmtDate(u.lastPlayed)}</td>
+          <td class="num">${u.tracks || "—"}</td>
+          <td class="num">${mins !== null ? mins : "—"}</td>
+          <td class="num">${u.activeDays || "—"}</td>
+          <td class="num">${u.streak || "—"}</td>
+          <td class="num">${scaleCount || "—"}</td>
+          <td>${favScale}</td>
+          <td>${favStyle}</td>
         </tr>`;
       }).join("");
+    }
+
+    function showLoading(on) {
+      document.getElementById("loading-overlay").style.display = on ? "flex" : "none";
+      document.getElementById("main-content").style.opacity   = on ? "0.3" : "1";
+    }
+
+    // ── Claude's Take ────────────────────────────────────────────
+    window.requestClaudeTake = async function() {
+      const d = window._pulseData;
+      if (!d) return;
+
+      document.getElementById("claude-btn").style.display    = "none";
+      document.getElementById("claude-loading").style.display = "flex";
+      document.getElementById("claude-text").style.display   = "none";
+      document.getElementById("claude-text").textContent     = "";
+
+      const { allUsers, buckets } = d;
+
+      function weekSummary(users, label) {
+        const s = bucketStats(users);
+        const avgStreak = users.length
+          ? Math.round(users.reduce((a, u) => a + u.streak, 0) / users.length)
+          : 0;
+        const avgActiveDays = users.length
+          ? Math.round(users.reduce((a, u) => a + u.activeDays, 0) / users.length)
+          : 0;
+        return `${label}: ${s.count} users, ${s.pctPlayed}% played, avg ${s.avgTracks} tracks, avg ${s.avgMins} mins, avg streak ${avgStreak}d, avg active days ${avgActiveDays}d`;
+      }
+
+      // Build week-over-week breakdown
+      const now = d.now;
+      function weekUsers(startDaysAgo, endDaysAgo) {
+        const start = daysAgo(startDaysAgo);
+        const end   = daysAgo(endDaysAgo);
+        end.setHours(23,59,59,999);
+        return allUsers.filter(u => u.fdd >= start && u.fdd <= end);
+      }
+
+      const w1 = weekUsers(7,  0);
+      const w2 = weekUsers(14, 8);
+      const w3 = weekUsers(21, 15);
+      const w4 = weekUsers(28, 22);
+
+      const prompt = `You are analyzing engagement and growth data for FretTracks, an iOS guitar learning app. It launched on the App Store on April 21, 2026 so the user base is very early stage. The app offers 500+ backing tracks across 35 scales with a 7-day free trial; after that users pay $4.95/month. The founder reviews this dashboard daily. Give a concise, honest, trend-focused analysis in 3–4 short paragraphs of plain prose. No headers, no bullets.
+
+Focus on TRENDS and CHANGES week over week. What's improving, what's declining, what stands out as different about the most recent week compared to prior weeks? Are new users engaging more or less than older cohorts did? Is the funnel (signup → first play → sustained play) getting better or worse? What should the founder pay most attention to right now?
+
+Acquisition buckets (users whose first download falls in window):
+- Last 1 day:  ${bucketStats(buckets[1]).count} new users
+- Last 7 days: ${weekSummary(buckets[7], "7-day")}
+- Last 14 days:${weekSummary(buckets[14], "14-day")}
+- Last 28 days:${weekSummary(buckets[28], "28-day")}
+
+Week-over-week cohort breakdown (by first download week):
+- ${weekSummary(w1, "Most recent week (days 0–7)")}
+- ${weekSummary(w2, "Week 2 (days 8–14)")}
+- ${weekSummary(w3, "Week 3 (days 15–21)")}
+- ${weekSummary(w4, "Week 4 (days 22–28)")}
+
+Note: engagement stats (tracks, mins, streak, active days) reflect ALL activity to date for each user, not just activity within the window. Users with zero tracks have not played at all.`;
+
+      try {
+        const callClaude = httpsCallable(functions, "claudeTake");
+        const result = await callClaude({ messages: [{ role: "user", content: prompt }] });
+        const text   = result.data?.content?.find(b => b.type === "text")?.text ?? "No response received.";
+        document.getElementById("claude-loading").style.display = "none";
+        document.getElementById("claude-text").style.display    = "block";
+        document.getElementById("claude-text").textContent      = text;
+        document.getElementById("claude-refresh").style.display = "inline-flex";
+      } catch(err) {
+        document.getElementById("claude-loading").style.display = "none";
+        document.getElementById("claude-text").style.display    = "block";
+        document.getElementById("claude-text").textContent      = "Could not load commentary: " + err.message;
+      }
     };
 
+    window.resetClaudeTake = function() {
+      document.getElementById("claude-btn").style.display     = "flex";
+      document.getElementById("claude-loading").style.display = "none";
+      document.getElementById("claude-text").style.display    = "none";
+      document.getElementById("claude-refresh").style.display = "none";
+      document.getElementById("claude-text").textContent      = "";
+    };
   </script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #0d0d0d;
-      --surface: #161616;
-      --border: #2a2a2a;
-      --accent: #c8a96e;
-      --accent-dim: rgba(200,169,110,0.15);
-      --text: #e8e2d9;
-      --text-dim: #a09a92;
-      --text-mid: #c8c2ba;
-      --today-bg: rgba(200,169,110,0.06);
-      --bar-bg: #1e1e1e;
-      --bar-fill: #c8a96e;
-      --red: #e05c5c;
-      --green: #7ec87e;
+      --bg:         #0b0c0e;
+      --surface:    #13151a;
+      --surface2:   #1a1d24;
+      --border:     #252830;
+      --border2:    #2e3240;
+      --accent:     #c8a96e;
+      --accent-dim: rgba(200,169,110,0.12);
+      --accent-glow:rgba(200,169,110,0.06);
+      --text:       #eae4db;
+      --text-mid:   #b8b0a4;
+      --text-dim:   #9e9890;
+      --green:      #6dbe8d;
+      --red:        #e06060;
+      --blue:       #6a9fd8;
     }
 
     html, body {
@@ -318,7 +296,7 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* ── Login Screen ── */
+    /* ── Login ── */
     #login-screen {
       min-height: 100vh;
       display: flex;
@@ -326,522 +304,493 @@
       align-items: center;
       justify-content: center;
       gap: 2rem;
-      padding: 2rem;
     }
-
     .login-logo {
       font-family: 'Outfit', sans-serif;
-      font-weight: 600;
-      font-size: 2.8rem;
+      font-weight: 700;
+      font-size: 3rem;
       color: var(--accent);
-      letter-spacing: -0.03em;
+      letter-spacing: -0.04em;
     }
-
     .login-sub {
-      color: var(--text-mid);
-      font-size: 0.75rem;
-      letter-spacing: 0.15em;
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
       text-transform: uppercase;
+      color: var(--text-dim);
     }
-
     .sign-in-btn {
-      margin-top: 1rem;
       background: var(--accent);
-      color: #0d0d0d;
+      color: #0b0c0e;
       border: none;
-      padding: 0.85rem 2.5rem;
+      padding: 0.9rem 2.5rem;
       font-family: 'DM Mono', monospace;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       font-weight: 500;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
       cursor: pointer;
       transition: opacity 0.2s;
     }
-    .sign-in-btn:hover { opacity: 0.85; }
+    .sign-in-btn:hover { opacity: 0.8; }
 
-    /* ── Dashboard ── */
-    #dashboard { display: none; max-width: 640px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+    /* ── Dashboard shell ── */
+    #dashboard {
+      display: none;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 5rem;
+      position: relative;
+    }
 
+    /* ── Top bar ── */
     .top-bar {
       display: flex;
-      align-items: baseline;
+      align-items: center;
       justify-content: space-between;
+      padding-bottom: 1.5rem;
       margin-bottom: 2.5rem;
-      padding-bottom: 1.25rem;
       border-bottom: 1px solid var(--border);
     }
-
     .app-title {
       font-family: 'Outfit', sans-serif;
-      font-weight: 600;
-      font-size: 1.6rem;
+      font-weight: 700;
+      font-size: 1.5rem;
       color: var(--accent);
-      letter-spacing: -0.02em;
+      letter-spacing: -0.03em;
     }
-
     .top-right {
       display: flex;
       align-items: center;
       gap: 1.25rem;
     }
-
-    .greeting { font-size: 0.7rem; color: var(--text-mid); letter-spacing: 0.08em; }
-
+    .updated-label {
+      font-size: 0.62rem;
+      color: var(--text-dim);
+      letter-spacing: 0.06em;
+    }
     .icon-btn {
       background: none;
-      border: none;
-      cursor: pointer;
-      color: var(--text-dim);
-      font-size: 1rem;
-      padding: 0.25rem;
-      transition: color 0.2s;
-      line-height: 1;
-    }
-    .icon-btn:hover { color: var(--accent); }
-
-    /* ── Summary strip ── */
-    .summary {
-      display: flex;
-      gap: 1.5rem;
-      margin-bottom: 2rem;
-    }
-
-    .stat-box {
-      flex: 1;
-      background: var(--surface);
       border: 1px solid var(--border);
-      padding: 1rem 1.25rem;
-    }
-
-    .stat-label {
-      font-size: 0.65rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--text-mid);
-      margin-bottom: 0.4rem;
-    }
-
-    .stat-value {
-      font-size: 2rem;
-      font-weight: 500;
-      color: var(--accent);
-      line-height: 1;
-    }
-
-    .stat-sub { font-size: 0.65rem; color: var(--text-dim); margin-top: 0.3rem; }
-
-    /* ── Pulse table ── */
-    #table-wrap { display: none; }
-
-    .section-label {
-      font-size: 0.65rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--text-mid);
-      margin-bottom: 0.75rem;
-    }
-
-    table { width: 100%; border-collapse: collapse; }
-
-    tr {
-      border-bottom: 1px solid var(--border);
-      transition: background 0.15s;
-    }
-    tr:hover { background: rgba(255,255,255,0.02); }
-    tr.today { background: var(--today-bg); }
-
-    td { padding: 0.6rem 0; vertical-align: middle; }
-
-    .date-cell {
-      font-size: 0.72rem;
-      color: var(--text-mid);
-      white-space: nowrap;
-      width: 120px;
-      padding-right: 1rem;
-    }
-
-    tr.today .date-cell { color: var(--text); }
-
-    .today-badge {
-      display: inline-block;
-      font-size: 0.55rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      background: var(--accent-dim);
-      color: var(--accent);
-      padding: 0.15rem 0.4rem;
-      margin-left: 0.4rem;
-      vertical-align: middle;
-    }
-
-    .bar-cell { width: 100%; padding-right: 0.75rem; }
-
-    .bar-track {
-      background: var(--bar-bg);
-      height: 6px;
-      width: 100%;
-      overflow: hidden;
-    }
-
-    .bar-fill {
-      height: 100%;
-      background: var(--bar-fill);
-      transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    tr.today .bar-fill { background: var(--accent); }
-
-    .count-cell {
-      font-size: 0.85rem;
-      font-weight: 500;
-      color: var(--text);
-      text-align: right;
-      width: 32px;
-    }
-
-    /* ── Loading / Error ── */
-    #loading {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1rem;
-      padding: 3rem 0;
       color: var(--text-dim);
-      font-size: 0.75rem;
-      letter-spacing: 0.1em;
+      font-size: 0.85rem;
+      width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
     }
+    .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
 
+    /* ── Loading overlay ── */
+    #loading-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      pointer-events: none;
+    }
     .spinner {
-      width: 20px; height: 20px;
-      border: 2px solid var(--border);
+      width: 22px; height: 22px;
+      border: 2px solid var(--border2);
       border-top-color: var(--accent);
       border-radius: 50%;
-      animation: spin 0.8s linear infinite;
+      animation: spin 0.75s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    #error-msg {
-      display: none;
-      color: var(--red);
-      font-size: 0.75rem;
-      padding: 1rem 0;
+    #main-content { transition: opacity 0.2s; }
+    #error-msg { display: none; color: var(--red); font-size: 0.75rem; padding: 1rem 0; }
+
+    /* ── Section label ── */
+    .section-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 0.85rem;
     }
 
-    .footer {
-      margin-top: 2rem;
-      font-size: 0.65rem;
+    /* ── Acquisition cards ── */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      margin-bottom: 3rem;
+    }
+
+    .acq-card {
+      background: var(--surface);
+      padding: 1.25rem 1.25rem 1.4rem;
+      position: relative;
+    }
+
+    .acq-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--accent);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .acq-card:hover::before { opacity: 1; }
+
+    .acq-window {
+      font-size: 0.6rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
       color: var(--text-dim);
-      letter-spacing: 0.08em;
+      margin-bottom: 0.6rem;
+    }
+
+    .acq-count {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 3rem;
+      color: var(--accent);
+      line-height: 1;
+      letter-spacing: -0.04em;
+      margin-bottom: 1rem;
+    }
+
+    .acq-metrics {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      border-top: 1px solid var(--border);
+      padding-top: 0.85rem;
+    }
+
+    .acq-metric-row {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: baseline;
     }
 
-    /* ── Section divider ── */
-    .section-divider {
-      border: none;
+    .acq-metric-label {
+      font-size: 0.6rem;
+      color: var(--text-dim);
+      letter-spacing: 0.06em;
+    }
+
+    .acq-metric-val {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-mid);
+    }
+
+    .acq-metric-val.highlight { color: var(--green); }
+
+    /* ── Table section ── */
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.7rem;
+    }
+
+    thead tr {
+      border-bottom: 1px solid var(--border2);
+      background: var(--surface2);
+    }
+
+    th {
+      text-align: left;
+      font-size: 0.58rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      font-weight: 400;
+      padding: 0.65rem 0.85rem;
+      white-space: nowrap;
+    }
+
+    th.num { text-align: right; }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.12s;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--accent-glow); }
+
+    td {
+      padding: 0.6rem 0.85rem;
+      color: var(--text-mid);
+      white-space: nowrap;
+    }
+
+    td.num { text-align: right; color: var(--text); }
+    td.uid-cell { color: var(--text-dim); font-size: 0.62rem; font-style: italic; }
+
+    .table-footer {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.6rem;
+      color: var(--text-dim);
+      letter-spacing: 0.06em;
+      padding: 0.75rem 0.85rem;
       border-top: 1px solid var(--border);
-      margin: 3rem 0 2.5rem;
+      background: var(--surface);
     }
 
-    .section-title {
+    /* ── Claude's Take ── */
+    .claude-section {
+      margin-top: 3rem;
+      border-top: 1px solid var(--border);
+      padding-top: 2rem;
+    }
+
+    .claude-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .claude-title {
       font-family: 'Outfit', sans-serif;
       font-weight: 600;
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       color: var(--accent);
-      margin-bottom: 1.5rem;
       letter-spacing: -0.01em;
     }
 
-    /* ── Engagement metric cards ── */
-    .eng-metric-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 0.75rem;
-      margin-bottom: 1.75rem;
-    }
-
-    .eng-metric {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      padding: 0.85rem 1rem;
-    }
-
-    .eng-metric-label {
-      font-size: 0.6rem;
+    .claude-badge {
+      font-size: 0.55rem;
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: var(--text-mid);
-      margin-bottom: 0.35rem;
-    }
-
-    .eng-metric-value {
-      font-size: 1.5rem;
-      font-weight: 500;
+      background: var(--accent-dim);
       color: var(--accent);
-      line-height: 1;
+      padding: 0.2rem 0.55rem;
     }
 
-    .eng-raw {
-      font-size: 0.7rem;
-      font-weight: 400;
-      color: var(--text-dim);
-    }
-
-    .eng-metric-sub {
-      font-size: 0.6rem;
-      color: var(--text-mid);
-      margin-top: 0.25rem;
-    }
-
-    /* ── Cohort cards ── */
-    .eng-cohort-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-      gap: 0.75rem;
-      margin-bottom: 1.75rem;
-    }
-
-    .eng-cohort-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      padding: 0.85rem 1rem;
-    }
-
-    .eng-cohort-title {
-      font-size: 0.72rem;
-      font-weight: 500;
-      color: var(--text);
-      margin-bottom: 0.65rem;
-      letter-spacing: 0.04em;
-    }
-
-    .eng-cohort-row {
+    #claude-btn {
       display: flex;
-      justify-content: space-between;
-      font-size: 0.65rem;
-      color: var(--text-mid);
-      margin-bottom: 0.3rem;
-    }
-
-    .eng-cohort-val {
-      color: var(--text-mid);
-      font-weight: 500;
-    }
-
-    /* ── Engagement controls ── */
-    .eng-controls {
-      display: flex;
-      gap: 0.75rem;
-      margin-bottom: 0.75rem;
-      flex-wrap: wrap;
-    }
-
-    .eng-controls select {
+      align-items: center;
+      gap: 0.6rem;
       background: var(--surface);
-      border: 1px solid var(--border);
+      border: 1px solid var(--border2);
       color: var(--text-mid);
       font-family: 'DM Mono', monospace;
       font-size: 0.7rem;
-      padding: 0.4rem 0.75rem;
-      cursor: pointer;
-      outline: none;
-    }
-
-    .eng-controls select:focus { border-color: var(--accent); }
-
-    /* ── Engagement table ── */
-    #eng-table { width: 100%; border-collapse: collapse; font-size: 0.7rem; }
-    #eng-table th {
-      text-align: left;
-      font-size: 0.6rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text-mid);
-      padding: 0.5rem 0.5rem;
-      border-bottom: 1px solid var(--border);
-      font-weight: 400;
-    }
-    #eng-table td {
-      padding: 0.55rem 0.5rem;
-      border-bottom: 1px solid var(--border);
-      color: var(--text-mid);
-      vertical-align: middle;
-    }
-    #eng-table tr:last-child td { border-bottom: none; }
-    #eng-table tr:hover td { color: var(--text); }
-
-    .eng-uid { font-size: 0.62rem; color: var(--text-dim) !important; }
-
-    .eng-badge {
-      display: inline-block;
-      font-size: 0.58rem;
       letter-spacing: 0.08em;
-      text-transform: uppercase;
-      padding: 0.15rem 0.5rem;
+      padding: 0.65rem 1.25rem;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
     }
-    .eng-badge-active   { background: rgba(126,200,126,0.12); color: #7ec87e; }
-    .eng-badge-fading   { background: rgba(200,169,110,0.12); color: var(--accent); }
-    .eng-badge-inactive { background: rgba(224,92,92,0.12);   color: var(--red); }
+    #claude-btn:hover { border-color: var(--accent); color: var(--accent); }
 
-    /* ── Engagement loading/error ── */
-    #eng-loading {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1rem;
-      padding: 2rem 0;
-      color: var(--text-dim);
-      font-size: 0.75rem;
-      letter-spacing: 0.1em;
-    }
-    #eng-error {
+    #claude-loading {
       display: none;
-      color: var(--red);
-      font-size: 0.75rem;
-      padding: 1rem 0;
+      align-items: center;
+      gap: 0.75rem;
+      color: var(--text-dim);
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      font-style: italic;
     }
-    #eng-content { display: none; }
+
+    #claude-text {
+      display: none;
+      font-size: 0.78rem;
+      line-height: 1.9;
+      color: var(--text-mid);
+      white-space: pre-wrap;
+      border-left: 2px solid var(--accent-dim);
+      padding-left: 1.25rem;
+    }
+
+    #claude-refresh {
+      display: none;
+      align-items: center;
+      gap: 0.5rem;
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      margin-top: 1rem;
+      padding: 0;
+      transition: color 0.15s;
+    }
+    #claude-refresh:hover { color: var(--accent); }
+
+    /* ── Divider ── */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2.5rem 0;
+    }
+
+    @media (max-width: 700px) {
+      .cards-grid { grid-template-columns: repeat(2, 1fr); }
+    }
   </style>
 </head>
 <body>
 
-  <!-- Login -->
   <div id="login-screen">
     <div class="login-logo">FretTracks</div>
     <div class="login-sub">Pulse Dashboard</div>
     <button class="sign-in-btn" onclick="signIn()">Sign in with Google</button>
   </div>
 
-  <!-- Dashboard -->
+  <div id="loading-overlay">
+    <div class="spinner"></div>
+  </div>
+
   <div id="dashboard">
     <div class="top-bar">
       <div class="app-title">FretTracks · Pulse</div>
       <div class="top-right">
-        <span class="greeting">Hey, <span id="user-name">Jay</span></span>
-        <button class="icon-btn" onclick="refresh()" title="Refresh">↻</button>
+        <span class="updated-label" style="color:var(--accent);opacity:0.5;margin-right:0.5rem;">Apr 30 Ver</span>
+      <span class="updated-label">updated <span id="updated-time">—</span> PT</span>
+        <button class="icon-btn" onclick="refresh()" title="Refresh data">↻</button>
         <button class="icon-btn" onclick="signOut()" title="Sign out">⏻</button>
       </div>
     </div>
 
-    <!-- ── Pulse: daily new users ── -->
-    <div class="summary">
-      <div class="stat-box">
-        <div class="stat-label">14-day total</div>
-        <div class="stat-value" id="grand-total">—</div>
-        <div class="stat-sub">new users</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-label">Last updated</div>
-        <div class="stat-value" style="font-size:1.1rem;padding-top:0.45rem" id="updated-time">—</div>
-        <div class="stat-sub">Pacific time</div>
-      </div>
-    </div>
+    <div id="main-content">
+      <div id="error-msg"></div>
 
-    <div class="section-label">Daily new users · past 14 days</div>
-
-    <div id="loading">
-      <div class="spinner"></div>
-      loading
-    </div>
-    <div id="error-msg"></div>
-
-    <div id="table-wrap">
-      <table>
-        <tbody id="tbody"></tbody>
-      </table>
-      <div class="footer">
-        <span>source: firestore · users.firstDownloadDate</span>
-        <span>PST</span>
-      </div>
-    </div>
-
-    <!-- ── Engagement section ── -->
-    <hr class="section-divider">
-    <div class="section-title">Engagement</div>
-
-    <div id="eng-loading">
-      <div class="spinner"></div>
-      loading
-    </div>
-    <div id="eng-error"></div>
-
-    <div id="eng-content">
-
-      <div class="section-label">Overall snapshot · all users</div>
-      <div class="eng-metric-grid">
-        <div class="eng-metric">
-          <div class="eng-metric-label">Total users</div>
-          <div class="eng-metric-value" id="eng-total">—</div>
-          <div class="eng-metric-sub">all time</div>
+      <!-- ── Acquisition cards ── -->
+      <div class="section-label">New users · acquisition windows</div>
+      <div class="cards-grid">
+        <div class="acq-card">
+          <div class="acq-window">Today</div>
+          <div class="acq-count" id="card-count-1">—</div>
+          <div class="acq-metrics">
+            <div class="acq-metric-row">
+              <span class="acq-metric-label">% played</span>
+              <span class="acq-metric-val highlight" id="card-pct-1">—</span>
+            </div>
+            <div class="acq-metric-row">
+              <span class="acq-metric-label">avg tracks</span>
+              <span class="acq-metric-val" id="card-tracks-1">—</span>
+            </div>
+            <div class="acq-metric-row">
+              <span class="acq-metric-label">avg mins</span>
+              <span class="acq-metric-val" id="card-mins-1">—</span>
+            </div>
+          </div>
         </div>
-        <div class="eng-metric">
-          <div class="eng-metric-label">Active (last 7d)</div>
-          <div class="eng-metric-value" style="color:#7ec87e;" id="eng-active">—</div>
-          <div class="eng-metric-sub">played in last 7 days</div>
-        </div>
-        <div class="eng-metric">
-          <div class="eng-metric-label">Fading (8–14d)</div>
-          <div class="eng-metric-value" style="color:var(--accent);" id="eng-fading">—</div>
-          <div class="eng-metric-sub">8–14 days since play</div>
-        </div>
-        <div class="eng-metric">
-          <div class="eng-metric-label">Inactive (&gt;14d)</div>
-          <div class="eng-metric-value" style="color:var(--red);" id="eng-inactive">—</div>
-          <div class="eng-metric-sub">more than 14 days ago</div>
-        </div>
-        <div class="eng-metric">
-          <div class="eng-metric-label">Avg retention span</div>
-          <div class="eng-metric-value" id="eng-span">—</div>
-          <div class="eng-metric-sub">FDD → last played</div>
-        </div>
-        <div class="eng-metric">
-          <div class="eng-metric-label">Avg tracks played</div>
-          <div class="eng-metric-value" id="eng-tracks">—</div>
-          <div class="eng-metric-sub">all users</div>
-        </div>
-      </div>
 
-      <div class="section-label">Cohort view · by download week</div>
-      <div class="eng-cohort-grid" id="eng-cohort-grid"></div>
+        <div class="acq-card">
+          <div class="acq-window">Last 7 days</div>
+          <div class="acq-count" id="card-count-7">—</div>
+          <div class="acq-metrics">
+            <div class="acq-metric-row">
+              <span class="acq-metric-label">% played</span>
+              <span class="acq-metric-val highlight" id="card-pct-7">—</span>
+            </div>
+            <div class="acq-metric-row">
+              <span class="acq-metric-label">avg tracks</span>
+              <span class="acq-metric-val" id="card-tracks-7">—</span>
+            </div>
+            <div class="acq-metric-row">
+              <span class="acq-metric-label">avg mins</span>
+              <span class="acq-metric-val" id="card-mins-7">—</span>
+            </div>
+          </div>
+        </div>
 
-      <div class="section-label">User detail</div>
-      <div class="eng-controls">
-        <select id="eng-status-filter" onchange="renderEngTable()">
-          <option value="all">Status: all</option>
-          <option value="active">Active only</option>
-          <option value="fading">Fading only</option>
-          <option value="inactive">Inactive only</option>
-        </select>
-        <select id="eng-sort" onchange="renderEngTable()">
-          <option value="span">Sort: longest retention span</option>
-          <option value="tracks">Sort: most tracks</option>
-          <option value="fdd">Sort: newest first</option>
-        </select>
+        <div class="acq-card">
+          <div class="acq-window">Last 14 days</div>
+          <div class="acq-count" id="card-count-14">—</div>
+          <div class="acq-metrics">
+            <div class="acq-metric-row">
+              <span class="acq-metric-label">% played</span>
+              <span class="acq-metric-val highlight" id="card-pct-14">—</span>
+            </div>
+            <div class="acq-metric-row">
+              <span class="acq-metric-label">avg tracks</span>
+              <span class="acq-metric-val" id="card-tracks-14">—</span>
+            </div>
+            <div class="acq-metric-row">
+              <span class="acq-metric-label">avg mins</span>
+              <span class="acq-metric-val" id="card-mins-14">—</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="acq-card">
+          <div class="acq-window">Last 28 days</div>
+          <div class="acq-count" id="card-count-28">—</div>
+          <div class="acq-metrics">
+            <div class="acq-metric-row">
+              <span class="acq-metric-label">% played</span>
+              <span class="acq-metric-val highlight" id="card-pct-28">—</span>
+            </div>
+            <div class="acq-metric-row">
+              <span class="acq-metric-label">avg tracks</span>
+              <span class="acq-metric-val" id="card-tracks-28">—</span>
+            </div>
+            <div class="acq-metric-row">
+              <span class="acq-metric-label">avg mins</span>
+              <span class="acq-metric-val" id="card-mins-28">—</span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <table id="eng-table">
-        <thead>
-          <tr>
-            <th>User ID</th>
-            <th>FDD</th>
-            <th>Last played</th>
-            <th>Retention span</th>
-            <th>Tracks</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody id="eng-tbody"></tbody>
-      </table>
-
-      <div class="footer" style="margin-top:1.5rem;">
-        <span>source: firestore · users.engagement</span>
-        <span>PST</span>
+      <!-- ── Detail table ── -->
+      <div class="section-label">User detail · last 28 days · newest first</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>UID</th>
+              <th>First Download</th>
+              <th>Last Played</th>
+              <th class="num">Tracks</th>
+              <th class="num">Mins</th>
+              <th class="num">Active Days</th>
+              <th class="num">Streak</th>
+              <th class="num">Scales Explored</th>
+              <th>Fav Scale</th>
+              <th>Fav Style</th>
+            </tr>
+          </thead>
+          <tbody id="main-tbody"></tbody>
+        </table>
+        <div class="table-footer">
+          <span>firestore · users collection · 28-day window</span>
+          <span>Pacific time</span>
+        </div>
       </div>
 
-    </div><!-- /eng-content -->
+      <!-- ── Claude's Take ── -->
+      <div class="claude-section">
+        <div class="claude-header">
+          <span class="claude-title">Claude's Take</span>
+          <span class="claude-badge">trend analysis</span>
+        </div>
 
+        <button id="claude-btn" onclick="requestClaudeTake()">
+          <span>↳</span> Analyze trends
+        </button>
+
+        <div id="claude-loading">
+          <div class="spinner"></div>
+          analyzing week-over-week trends…
+        </div>
+
+        <div id="claude-text"></div>
+
+        <button id="claude-refresh" onclick="resetClaudeTake()">↺ run again</button>
+      </div>
+
+    </div><!-- /main-content -->
   </div><!-- /dashboard -->
 
 </body>
