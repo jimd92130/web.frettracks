@@ -11,9 +11,8 @@
   --brand-dark:#3A7BC8;
   --ink:#212121;
   --muted:#667085;
+  --bg:#F6F7F9;
   --surface:#FFFFFF;
-  --bg1:#EEF3FF;
-  --bg2:#FDFEFF;
   --border:#E0E0E0;
   --radius:18px;
   --shadow:0 1px 2px rgba(9,30,66,.08), 0 2px 8px rgba(9,30,66,.06);
@@ -23,16 +22,12 @@ html,body{margin:0;padding:0}
 body{
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
   color:var(--ink);
-  background:
-    radial-gradient(1200px 600px at 20% -10%, var(--bg1), transparent),
-    radial-gradient(900px 500px at 120% 10%, #EAF0FF, transparent),
-    var(--bg2);
+  background:var(--bg);
   line-height:1.7;
 }
 h1,h2,h3{color:var(--ink);letter-spacing:.2px}
 a{color:var(--brand)}
 
-/* NAV */
 /* CONTENT */
 .container{max-width:1150px;margin:0 auto;padding:28px 20px}
 .panel{
@@ -53,8 +48,7 @@ a{color:var(--brand)}
 .prose li{margin-bottom:4px}
 h2{margin-top:28px;margin-bottom:4px;font-size:18px}
 h3{margin-top:18px;margin-bottom:4px;font-size:16px;color:var(--muted)}
-
-  </style>
+</style>
 </head>
 <body>
 
@@ -64,7 +58,7 @@ h3{margin-top:18px;margin-bottom:4px;font-size:16px;color:var(--muted)}
 <div class="container">
   <div class="panel prose">
     <h1>Terms of Service</h1>
-    <div class="meta">Last Updated: August 21, 2025</div>
+    <div class="meta">Last Updated: May 10, 2026</div>
 
     <h2>1. Acceptance of Terms</h2>
     <p>By downloading, installing, or using the FretTracks mobile application ("App"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, do not use the App.</p>
@@ -82,12 +76,7 @@ h3{margin-top:18px;margin-bottom:4px;font-size:16px;color:var(--muted)}
 
     <h2>3. Subscription Terms</h2>
     <h3>3.1 Free Trial</h3>
-    <ul>
-      <li>New users may be eligible for a 30-day free trial</li>
-      <li>No payment will be charged during the trial period</li>
-      <li>You may cancel any time during the trial without charge</li>
-      <li>If you do not cancel before the trial ends, your subscription automatically converts to a paid monthly subscription</li>
-    </ul>
+    <p>From time to time we may offer a free trial period for new users. The duration of any free trial will be disclosed at the time of the offer. At the end of the trial period, continued access to premium features requires an explicit subscription purchase.</p>
 
     <h3>3.2 Monthly Subscription</h3>
     <ul>
@@ -117,7 +106,7 @@ h3{margin-top:18px;margin-bottom:4px;font-size:16px;color:var(--muted)}
     </ul>
 
     <h3>4.3 Prohibited Uses</h3>
-    <p>You may <strong>not</strong>:</p>
+    <p>You may not:</p>
     <ul>
       <li>Share, distribute, or publicly perform any content from the App</li>
       <li>Copy, download, or extract audio files, backing tracks, or other content outside the App</li>
@@ -139,7 +128,7 @@ h3{margin-top:18px;margin-bottom:4px;font-size:16px;color:var(--muted)}
     </ul>
 
     <h2>6. Privacy</h2>
-    <p>Your privacy is important to us. Please review our <a href="privacy.html">Privacy Policy</a>, which describes how we collect, use, and protect your information when you use the App. By using the App, you consent to the collection and use of your information as described in our Privacy Policy.</p>
+    <p>Your privacy is important to us. Please review our <a href="/privacy.html">Privacy Policy</a>, which describes how we collect, use, and protect your information when you use the App. By using the App, you consent to the collection and use of your information as described in our Privacy Policy.</p>
 
     <h2>7. Disclaimers and Limitation of Liability</h2>
     <h3>7.1 Disclaimers</h3>
@@ -148,8 +137,11 @@ h3{margin-top:18px;margin-bottom:4px;font-size:16px;color:var(--muted)}
     <h3>7.2 Limitation of Liability</h3>
     <p>TO THE FULLEST EXTENT PERMITTED BY LAW, WE SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS OR REVENUES, WHETHER INCURRED DIRECTLY OR INDIRECTLY, OR ANY LOSS OF DATA, USE, GOODWILL, OR OTHER INTANGIBLE LOSSES.</p>
 
+    <h3>7.3 EU and UK Consumer Rights</h3>
+    <p>Nothing in these Terms affects any statutory rights you may have as a consumer under the laws of the European Union or the United Kingdom that cannot be waived or limited by contract. If you are an EU or UK consumer, you may have rights under applicable local consumer protection laws that apply notwithstanding any other provision of these Terms.</p>
+
     <h2>8. Indemnification</h2>
-    <p>You agree to defend, indemnify, and hold harmless FretTracks and its officers, directors, employees, and agents from and against any claims, liabilities, damages, judgments, awards, losses, costs, expenses, or fees arising out of or relating to your violation of these Terms or your use of the App.</p>
+    <p>You agree to defend, indemnify, and hold harmless FretTracks Labs LLC and its officers, directors, employees, and agents from and against any claims, liabilities, damages, judgments, awards, losses, costs, expenses, or fees arising out of or relating to your violation of these Terms or your use of the App.</p>
 
     <h2>9. Termination</h2>
     <p>We may terminate or suspend your access to the App immediately, without prior notice or liability, for any reason, including without limitation if you breach these Terms. Upon termination, your right to use the App will cease immediately, and any downloaded content will no longer be accessible.</p>
@@ -159,6 +151,7 @@ h3{margin-top:18px;margin-bottom:4px;font-size:16px;color:var(--muted)}
 
     <h2>11. Governing Law and Dispute Resolution</h2>
     <p>These Terms shall be interpreted and governed by the laws of the State of California, without regard to its conflict of law provisions. Any disputes arising from these Terms or your use of the App shall be resolved through binding arbitration in San Diego County, California, in accordance with the rules of the American Arbitration Association.</p>
+    <p>If you are an EU or UK consumer, you may also be entitled to bring claims before the courts of your country of residence and may have access to alternative dispute resolution mechanisms under local law, notwithstanding the arbitration provision above.</p>
 
     <h2>12. Severability</h2>
     <p>If any provision of these Terms is found to be unenforceable or invalid, that provision will be limited or eliminated to the minimum extent necessary so that these Terms will otherwise remain in full force and effect.</p>
@@ -168,10 +161,14 @@ h3{margin-top:18px;margin-bottom:4px;font-size:16px;color:var(--muted)}
 
     <h2>14. Contact Information</h2>
     <p>If you have any questions about these Terms, please contact us at:</p>
-    <ul>
-      <li>Website: <a href="https://frettracks.com">https://frettracks.com</a></li>
-      <li>Support: <a href="https://frettracks.com/support.html">https://frettracks.com/support.html</a></li>
-    </ul>
+    <p>
+      FretTracks Labs LLC<br>
+      San Diego, CA, United States<br>
+      Email: <a href="mailto:support@frettracks.com">support@frettracks.com</a><br>
+      Website: <a href="https://frettracks.com">https://frettracks.com</a><br>
+      Support: <a href="https://frettracks.com/support.html">https://frettracks.com/support.html</a>
+    </p>
+
   </div>
 
   <site-footer></site-footer>
